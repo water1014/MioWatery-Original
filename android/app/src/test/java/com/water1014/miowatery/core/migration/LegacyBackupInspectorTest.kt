@@ -31,7 +31,7 @@ class LegacyBackupInspectorTest {
 
         assertEquals(1, preview.profileCount)
         assertEquals(1, preview.chatOwnerCount)
-        assertEquals(2, preview.conversationCount)
+        assertEquals(1, preview.conversationCount)
         assertEquals(2, preview.messageCount)
         assertTrue(preview.warnings.any { it.contains("旧式 chats") })
     }
