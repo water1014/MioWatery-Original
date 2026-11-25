@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.platform.LocalContext
@@ -16,6 +15,8 @@ import com.water1014.miowatery.core.migration.LegacyBackupPreview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,19 +32,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.Album
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
@@ -66,42 +54,42 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.launch
 
 private data class AppEntry(
     val id: String,
     val title: String,
     val subtitle: String,
-    val icon: ImageVector
+    val icon: Int
 )
 
 private val appEntries = listOf(
-    AppEntry("app", "聊天与应用", "聊天、联系人和动态", Icons.AutoMirrored.Filled.Chat),
-    AppEntry("worlds", "世界书", "设定、词条与规则", Icons.Default.Book),
-    AppEntry("personas", "联系人", "角色资料与管理", Icons.Default.FavoriteBorder),
-    AppEntry("diary", "日记", "记录日常片段", Icons.Default.Today),
-    AppEntry("music", "音乐", "曲库、歌词与播放", Icons.Default.MusicNote),
-    AppEntry("couple", "情侣空间", "关系与共同记录", Icons.Default.FavoriteBorder),
-    AppEntry("coread", "共读", "一起阅读与交流", Icons.Default.Book),
-    AppEntry("crread", "阅读", "书籍与阅读记录", Icons.Default.Book),
-    AppEntry("msgs", "讯息", "消息与会话", Icons.AutoMirrored.Filled.Chat),
-    AppEntry("wallet", "钱包", "钱包与记录", Icons.Default.Album),
-    AppEntry("mcp", "MCP", "工具与服务连接", Icons.Default.AutoAwesome),
-    AppEntry("preset", "预设", "提示词与配置预设", Icons.Default.Book),
-    AppEntry("life", "生活", "Time is Nothing", Icons.Default.Today),
-    AppEntry("iff", "IF 线", "分支剧情空间", Icons.Default.AutoAwesome),
-    AppEntry("xinji", "心迹", "互动与心情记录", Icons.Default.FavoriteBorder),
-    AppEntry("repo", "作品仓库", "浏览、上传与导入", Icons.Default.Album),
-    AppEntry("youtube", "YouTube", "视频与媒体内容", Icons.Default.Image),
-    AppEntry("offline", "线下", "线下相关内容", Icons.Default.CalendarMonth),
-    AppEntry("rolephones", "角色手机", "角色的虚构手机空间", Icons.Default.Album),
-    AppEntry("desktopcustom", "桌面美化", "壁纸、图标与组件", Icons.Default.Image),
-    AppEntry("css", "美化", "外观与样式预设", Icons.Default.Settings),
-    AppEntry("stickers", "表情包", "贴纸与表情管理", Icons.Default.Image),
-    AppEntry("settings", "设置", "模型、语音、生图与数据", Icons.Default.Settings),
-    AppEntry("backup", "数据迁移", "旧版备份只读检查", Icons.Default.FolderOpen)
+    AppEntry("app", "聊天与应用", "聊天、联系人和动态", R.drawable.mio_ic_app),
+    AppEntry("worlds", "世界书", "设定、词条与规则", R.drawable.mio_ic_worlds),
+    AppEntry("personas", "联系人", "角色资料与管理", R.drawable.mio_ic_personas),
+    AppEntry("diary", "日记", "记录日常片段", R.drawable.mio_ic_diary),
+    AppEntry("music", "音乐", "曲库、歌词与播放", R.drawable.mio_ic_music),
+    AppEntry("couple", "情侣空间", "关系与共同记录", R.drawable.mio_ic_couple),
+    AppEntry("coread", "共读", "一起阅读与交流", R.drawable.mio_ic_coread),
+    AppEntry("crread", "阅读", "书籍与阅读记录", R.drawable.mio_ic_crread),
+    AppEntry("msgs", "讯息", "消息与会话", R.drawable.mio_ic_msgs),
+    AppEntry("wallet", "钱包", "钱包与记录", R.drawable.mio_ic_wallet),
+    AppEntry("mcp", "MCP", "工具与服务连接", R.drawable.mio_ic_mcp),
+    AppEntry("preset", "预设", "提示词与配置预设", R.drawable.mio_ic_preset),
+    AppEntry("life", "生活", "Time is Nothing", R.drawable.mio_ic_life),
+    AppEntry("iff", "IF 线", "分支剧情空间", R.drawable.mio_ic_iff),
+    AppEntry("xinji", "心迹", "互动与心情记录", R.drawable.mio_ic_xinji),
+    AppEntry("repo", "作品仓库", "浏览、上传与导入", R.drawable.mio_ic_repo),
+    AppEntry("youtube", "YouTube", "视频与媒体内容", R.drawable.mio_ic_youtube),
+    AppEntry("offline", "线下", "线下相关内容", R.drawable.mio_ic_offline),
+    AppEntry("rolephones", "角色手机", "角色的虚构手机空间", R.drawable.mio_ic_rolephones),
+    AppEntry("desktopcustom", "桌面美化", "壁纸、图标与组件", R.drawable.mio_ic_desktopcustom),
+    AppEntry("css", "美化", "外观与样式预设", R.drawable.mio_ic_css),
+    AppEntry("stickers", "表情包", "贴纸与表情管理", R.drawable.mio_ic_stickers),
+    AppEntry("settings", "设置", "模型、语音、生图与数据", R.drawable.mio_ic_settings),
+    AppEntry("backup", "数据迁移", "旧版备份只读检查", R.drawable.mio_ic_backup),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,7 +126,8 @@ fun MioWateryApp() {
                             selectedPage = entry.id
                             scope.launch { drawerState.close() }
                         },
-                        modifier = Modifier.padding(horizontal = 12.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        icon = { Icon(painterResource(entry.icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
                     )
                 }
             }
@@ -331,12 +320,19 @@ private fun HomeScreen(
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Icon(
-                            entry.icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(entry.icon),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(23.dp)
+                            )
+                        }
                         Spacer(Modifier.height(16.dp))
                         Text(entry.title, style = MaterialTheme.typography.titleSmall)
                         Spacer(Modifier.height(3.dp))
