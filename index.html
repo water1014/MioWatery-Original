@@ -6453,7 +6453,7 @@ async function generateImage(prompt,opt){
  opt=opt||{};const c=opt.cfg||S.cfg,pp=opt.pid&&P(opt.pid),face=opt.noFace?'':(pp&&pp.faceLock)||'';
  if((c.imageProvider||'gpt')==='novelai'){
    if(!c.naiKey)throw new Error('请先在「生图 API」里填写 NovelAI Token / 中转站 Key');
-   const root=(c.naiBase||'https://image.novelai.net').replace(/\\/+$/,'').replace(/\\/v1$/,'');
+   const root=(c.naiBase||'https://image.novelai.net').replace(/\/+$/,'').replace(/\/v1$/,'');
    const apiMode=c.naiApiMode||'native';
    const positive=[c.naiPositive,prompt,c.naiDetail].filter(Boolean).join(', ');
    let nm=String(c.naiCustomModel||c.naiModel||'nai-diffusion-4-full');if(nm==='nai-diffusion-4-curated')nm='nai-diffusion-4-curated-preview';
@@ -6475,10 +6475,10 @@ async function generateImage(prompt,opt){
    let res,images=[];
    if(apiMode==='native'){
      res=await fetch(root+'/ai/generate-image',{method:'POST',headers,body:JSON.stringify({input:positive,model:nm,action:'generate',parameters})});
-     if(!res.ok){const tx=await res.text().catch(()=> '');throw new Error('NovelAI 原生代理返回 '+res.status+(tx?'（'+tx.replace(/\\s+/g,' ').slice(0,180)+'）':'')+'，请检查地址、Key、CORS 和接口兼容性')}
+     if(!res.ok){const tx=await res.text().catch(()=> '');throw new Error('NovelAI 原生代理返回 '+res.status+(tx?'（'+tx.replace(/\s+/g,' ').slice(0,180)+'）':'')+'，请检查地址、Key、CORS 和接口兼容性')}
      const buf=await res.arrayBuffer(),u=new Uint8Array(buf),mime=res.headers.get('content-type')||'';
      if(mime.startsWith('image/')){let bin='';for(let j=0;j<u.length;j+=0x8000)bin+=String.fromCharCode(...u.subarray(j,j+0x8000));return 'data:'+mime+';base64,'+btoa(bin)}
-     for(let i=0;i<u.length-30;i++){if(u[i]===0x50&&u[i+1]===0x4b&&u[i+2]===0x03&&u[i+3]===0x04){const nl=u[i+26]|u[i+27]<<8,el=u[i+28]|u[i+29]<<8,cs=(u[i+18]|u[i+19]<<8|u[i+20]<<16|u[i+21]<<24)>>>0,method=u[i+8]|u[i+9]<<8;const name=new TextDecoder().decode(u.slice(i+30,i+30+nl));const data=u.slice(i+30+nl+el,i+30+nl+el+cs);if(/\\.(png|jpg|jpeg|webp)$/i.test(name)){if(method===0){let bin='';for(let j=0;j<data.length;j+=0x8000)bin+=String.fromCharCode(...data.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}if(method===8&&'DecompressionStream'in window){try{const out=await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();const a=new Uint8Array(out);let bin='';for(let j=0;j<a.length;j+=0x8000)bin+=String.fromCharCode(...a.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}catch(e){}}}}}
+     for(let i=0;i<u.length-30;i++){if(u[i]===0x50&&u[i+1]===0x4b&&u[i+2]===0x03&&u[i+3]===0x04){const nl=u[i+26]|u[i+27]<<8,el=u[i+28]|u[i+29]<<8,cs=(u[i+18]|u[i+19]<<8|u[i+20]<<16|u[i+21]<<24)>>>0,method=u[i+8]|u[i+9]<<8;const name=new TextDecoder().decode(u.slice(i+30,i+30+nl));const data=u.slice(i+30+nl+el,i+30+nl+el+cs);if(/\.(png|jpg|jpeg|webp)$/i.test(name)){if(method===0){let bin='';for(let j=0;j<data.length;j+=0x8000)bin+=String.fromCharCode(...data.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}if(method===8&&'DecompressionStream'in window){try{const out=await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();const a=new Uint8Array(out);let bin='';for(let j=0;j<a.length;j+=0x8000)bin+=String.fromCharCode(...a.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}catch(e){}}}}}
      throw new Error('代理已返回，但未识别到图片。请确认返回 NovelAI 兼容的 ZIP 或 image/* 图片响应');
    }
    if(apiMode==='openai'){
@@ -6495,7 +6495,7 @@ async function generateImage(prompt,opt){
      if(faceData)content.push({type:'image_url',image_url:{url:faceData}});
      res=await fetch(root+'/v1/chat/completions',{method:'POST',headers,body:JSON.stringify({model:nm,stream:false,messages:[{role:'user',content}],novelai:{input:positive,model:nm,action:'generate',parameters},parameters})});
      const j=await res.json().catch(()=>({}));if(!res.ok)throw new Error('OpenAI 对话代理返回 '+res.status+'：'+(j.error?.message||JSON.stringify(j).slice(0,220)));
-     const raw=JSON.stringify(j),re=/(data:image\\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+)|(https?:\\/\\/[^\\s)"'<>]+?\\.(?:png|jpe?g|webp)(?:\\?[^\\s)"'<>]*)?)/gi;let m;while((m=re.exec(raw)))images.push(m[1]||m[2]);
+     const raw=JSON.stringify(j),re=/(data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+)|(https?:\/\/[^\s)"'<>]+?\.(?:png|jpe?g|webp)(?:\?[^\s)"'<>]*)?)/gi;let m;while((m=re.exec(raw)))images.push(m[1]||m[2]);
      images=[...new Set(images)];if(!images.length)throw new Error('对话代理响应中未找到图片链接或 Base64 图片数据');
      return images[0];
    }
