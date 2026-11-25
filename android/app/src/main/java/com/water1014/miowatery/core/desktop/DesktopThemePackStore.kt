@@ -3,19 +3,33 @@ package com.water1014.miowatery.core.desktop
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 
 object DesktopThemePackStore {
-    private const val PREFS = "miowatery_desktop_customization"
-    private const val KEY_PACK = "current_native_pack"
+    private const val FILE_NAME = "desktop-theme-pack.json"
+    private const val MAX_STORED_BYTES = 32 * 1024 * 1024
 
-    fun load(context: Context): String? =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_PACK, null)
+    fun load(context: Context): String? {
+        val file = File(context.filesDir, FILE_NAME)
+        if (!file.isFile || file.length() > MAX_STORED_BYTES) return null
+        return runCatching { file.readText(Charsets.UTF_8) }.getOrNull()
+    }
 
     fun save(context: Context, json: String) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY_PACK, json)
-            .apply()
+        require(json.toByteArray(Charsets.UTF_8).size <= MAX_STORED_BYTES) {
+            "美化包超过原生版 32 MB 的安全保存上限"
+        }
+        val target = File(context.filesDir, FILE_NAME)
+        val temp = File(context.filesDir, "$FILE_NAME.tmp")
+        temp.writeText(json, Charsets.UTF_8)
+        if (target.exists() && !target.delete()) {
+            temp.delete()
+            throw IllegalStateException("无法替换旧的桌面美化配置")
+        }
+        if (!temp.renameTo(target)) {
+            temp.delete()
+            throw IllegalStateException("保存桌面美化配置失败")
+        }
     }
 
     fun serialize(preview: DesktopThemePackPreview): String {
