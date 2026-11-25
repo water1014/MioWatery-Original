@@ -108,3 +108,20 @@ data class MessageAppEntryEntity(
     val author: String,
     val createdAt: Long
 )
+@Entity(
+    tableName = "memory_entries",
+    indices = [Index("profileId"), Index("personaId"), Index("updatedAt")]
+)
+data class MemoryEntryEntity(
+    @PrimaryKey val id: String,
+    val profileId: String,
+    /** null means shared memory for the whole profile */
+    val personaId: String?,
+    val title: String,
+    val content: String,
+    val category: String,
+    val isPinned: Boolean,
+    val isLocked: Boolean,
+    val createdAt: Long,
+    val updatedAt: Long
+)
