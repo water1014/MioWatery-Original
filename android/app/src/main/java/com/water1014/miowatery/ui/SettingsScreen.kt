@@ -50,19 +50,15 @@ fun SettingsScreen(
     var model by remember { mutableStateOf("") }
     var apiKey by remember { mutableStateOf("") }
     var headers by remember { mutableStateOf("") }
-    var initialized by remember { mutableStateOf(false) }
     var saving by remember { mutableStateOf(false) }
     var savedMessage by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(saved) {
-        if (!initialized) {
-            baseUrl = saved.baseUrl
-            model = saved.model
-            apiKey = saved.apiKey
-            headers = saved.customHeadersJson
-            initialized = true
-        }
+        baseUrl = saved.baseUrl
+        model = saved.model
+        apiKey = saved.apiKey
+        headers = saved.customHeadersJson
     }
 
     Column(
@@ -145,7 +141,7 @@ fun SettingsScreen(
                             }
                         }
                     },
-                    enabled = !saving && !baseUrl.isBlank() && !model.isBlank()
+                    enabled = !saving
                 ) {
                     Text(if (saving) "正在保存…" else "保存 API 设置")
                 }
