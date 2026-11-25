@@ -62,6 +62,18 @@ interface MioDao {
     @Query("DELETE FROM diary_entries WHERE id = :entryId AND isLocked = 0")
     suspend fun deleteDiaryEntry(entryId: String): Int
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertMessageAppEntry(entry: MessageAppEntryEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertMessageAppEntries(entries: List<MessageAppEntryEntity>)
+
+    @Query("SELECT * FROM message_app_entries WHERE profileId = :profileId AND personaId = :personaId ORDER BY createdAt DESC")
+    fun observeMessageAppEntries(profileId: String, personaId: String): Flow<List<MessageAppEntryEntity>>
+
+    @Query("DELETE FROM message_app_entries WHERE id = :entryId AND profileId = :profileId")
+    suspend fun deleteMessageAppEntry(entryId: String, profileId: String): Int
+
     @Query("SELECT COUNT(*) FROM messages")
     suspend fun messageCount(): Int
 }
