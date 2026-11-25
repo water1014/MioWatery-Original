@@ -153,3 +153,14 @@ Visual parity is still a work in progress across the entire app. The upstream gl
 - These settings are keyed by the stable conversation ID, so they do not bleed between different chats/personas.
 - Memory injection now includes all manually maintained traditional memories and only the latest eight generated note entries, matching the upstream intent more closely.
 - Automatic summary scheduling, summary interval, old-note compression, vector memory/embeddings, and import/export are still not implemented. No non-functional toggles are presented for them.
+
+
+## Automatic per-chat memory notes (2026-11-25)
+
+- Added an opt-in automatic summary switch for each conversation.
+- Added a configurable trigger interval of 4–500 newly exchanged messages (default 20).
+- After a successful assistant reply, the app reads the persisted conversation history and generates a memory note when the threshold is reached.
+- The generated note records its source message range and is saved to the existing Room memory table; the last summarized message count is tracked per conversation in local preferences.
+- The same per-chat custom summary instructions are applied to automatic summaries.
+- Summary generation is best-effort: a summary API failure does not invalidate or block the already-saved chat reply, and the threshold is retried on a later successful reply.
+- The feature is opt-in and disabled by default. It uses the currently configured chat model/API and may incur an additional API request when triggered.
