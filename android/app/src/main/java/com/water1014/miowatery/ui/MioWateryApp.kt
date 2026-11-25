@@ -218,7 +218,7 @@ fun MioWateryApp() {
                     modifier = Modifier.padding(innerPadding)
                 )
             } else if (selectedPage == "worlds") {
-                WorldbookScreen(modifier = Modifier.padding(innerPadding))
+                WorldbookScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "desktopcustom") {
                 DesktopThemePackScreen(
                     onBack = { selectedPage = "home" },
