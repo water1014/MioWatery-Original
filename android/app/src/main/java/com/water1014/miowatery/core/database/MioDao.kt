@@ -6,6 +6,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+data class RecentMessagePreview(
+    val conversationTitle: String,
+    val role: String,
+    val content: String,
+    val timestamp: Long?
+)
+
 @Dao
 interface MioDao {
     @Query("SELECT * FROM profiles ORDER BY updatedAt DESC")
@@ -73,6 +80,9 @@ interface MioDao {
 
     @Query("DELETE FROM message_app_entries WHERE id = :entryId AND profileId = :profileId")
     suspend fun deleteMessageAppEntry(entryId: String, profileId: String): Int
+
+    @Query("SELECT c.title AS conversationTitle, m.role AS role, m.content AS content, m.timestamp AS timestamp FROM messages AS m INNER JOIN conversations AS c ON c.id = m.conversationId ORDER BY COALESCE(m.timestamp, c.updatedAt) DESC, m.position DESC LIMIT 3")
+    fun observeRecentMessagePreviews(): Flow<List<RecentMessagePreview>>
 
     @Query("SELECT COUNT(*) FROM messages")
     suspend fun messageCount(): Int
