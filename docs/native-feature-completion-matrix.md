@@ -18,7 +18,7 @@ This matrix distinguishes a working native feature from a navigation placeholder
 | Worldbook | Partial | CRUD, global/persona scope, trigger keywords and prompt injection exist. Full legacy schema parity, book-level management/import/export and advanced activation rules remain. |
 | Desktop customization | Partial | Safe theme-pack import/preview/apply/export exists. Exact placement and full built-in widget compatibility remain. |
 | Backup / migration | Partial | JSON/ZIP preview and confirmed import for selected core records exist. Full data-type coverage, round-trip export and upgrade preservation verification remain. |
-| Diary | Placeholder | Local CRUD, date grouping, search, annotations/favorites/lock and export. |
+| Diary | Partial (first native implementation) | Local CRUD, date sorting, mood tags, favorites, lock/unlock and delete confirmation are implemented with Room persistence. Search, annotations, image attachments, export and calendar integration remain. |
 | Music | Placeholder | Library, local media import, background playback, queue, playback controls and notification controls. |
 | Couple space | Placeholder | Relationship timeline, shared records and configurable relationship start date. |
 | Co-reading | Placeholder | Books, reading progress, notes and shared reading sessions. |
