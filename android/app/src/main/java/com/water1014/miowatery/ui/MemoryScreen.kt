@@ -85,7 +85,7 @@ fun MemoryScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("‹", Modifier.clickable { onBack }.padding(end = 12.dp), fontSize = 30.sp, color = Color(0xFF20242A))
+            Text("‹", Modifier.clickable { onBack() }.padding(end = 12.dp), fontSize = 30.sp, color = Color(0xFF20242A))
             Column(Modifier.weight(1f)) {
                 Text("记忆", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF171A1F))
                 Text("保存重要的事，让它们在聊天中继续生效", fontSize = 11.sp, color = Color(0xFF858C96))
