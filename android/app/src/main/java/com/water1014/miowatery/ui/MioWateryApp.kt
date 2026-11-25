@@ -451,6 +451,7 @@ private fun HomeScreen(
     var imessage4 by remember { mutableStateOf(homePrefs.getString("imessage_4", "好，晚安。") ?: "") }
     val musicPrefs = remember(context) { context.getSharedPreferences("mio_music_player", Context.MODE_PRIVATE) }
     var musicTitle by remember { mutableStateOf(musicPrefs.getString("track_name", "尚未选择歌曲") ?: "尚未选择歌曲") }
+    var musicCover by remember { mutableStateOf(musicPrefs.getString("cover_uri", null)) }
     var musicPlaying by remember { mutableStateOf(musicPrefs.getBoolean("is_playing", false)) }
     var lyricLine1 by remember { mutableStateOf(musicPrefs.getString("lyric_1", "") ?: "") }
     var lyricLine2 by remember { mutableStateOf(musicPrefs.getString("lyric_2", "") ?: "") }
@@ -587,11 +588,11 @@ private fun HomeScreen(
                         if (page == 2) {
                             HomePanel("音乐", Modifier.fillMaxWidth().padding(top = 8.dp)) {
                                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                    Box(Modifier.size(62.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { Text("♫", color = ink, fontSize = 28.sp) }
+                                    Box(Modifier.size(62.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { if (!musicCover.isNullOrBlank()) AsyncImage(model = musicCover, contentDescription = "音乐封面", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) else Text("♫", color = ink, fontSize = 28.sp) }
                                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                                        Text("播放中", color = sub, style = MaterialTheme.typography.labelSmall)
-                                        Text("未在播放", color = ink, style = MaterialTheme.typography.titleSmall)
-                                        Text("打开音乐资料库", color = sub, style = MaterialTheme.typography.bodySmall)
+                                        Text(if (musicPlaying) "正在播放" else "音乐播放器", color = sub, style = MaterialTheme.typography.labelSmall)
+                                        Text(musicTitle, color = ink, style = MaterialTheme.typography.titleSmall)
+                                        Text(if (musicPlaying) "轻触进入播放控制" else "选择本机音乐开始播放", color = sub, style = MaterialTheme.typography.bodySmall)
                                     }
                                     androidx.compose.material3.TextButton(onClick = { onOpen("music") }) { Text("打开") }
                                 }
@@ -611,8 +612,8 @@ private fun HomeScreen(
                                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                     Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { Text("♫", color = ink, fontSize = 26.sp) }
                                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                                        Text("未在播放", color = sub, style = MaterialTheme.typography.labelSmall)
-                                        Text("音乐歌词组件", color = ink, style = MaterialTheme.typography.titleSmall)
+                                        Text(if (musicPlaying) "正在播放" else "未在播放", color = sub, style = MaterialTheme.typography.labelSmall)
+                                        Text(musicTitle, color = ink, style = MaterialTheme.typography.titleSmall)
                                     }
                                     androidx.compose.material3.TextButton(onClick = { onOpen("music") }) { Text("音乐") }
                                 }
