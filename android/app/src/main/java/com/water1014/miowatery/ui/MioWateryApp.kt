@@ -671,6 +671,12 @@ private fun HomeScreen(
                     Column(
                         Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 8.dp)
                     ) {
+                        // The deployed MioWatery desktop's third page starts with a full-width calendar.
+                        // Keep this above the page's app shortcuts, matching the current Pages version.
+                        if (page == 2) {
+                            CalendarHomeCard(ink, sub)
+                            Spacer(Modifier.height(14.dp))
+                        }
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(4),
                             modifier = Modifier.fillMaxWidth().height(if (page == 3) 270.dp else 154.dp),
