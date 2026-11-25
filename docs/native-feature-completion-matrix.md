@@ -169,7 +169,7 @@ Visual parity is still a work in progress across the entire app. The upstream gl
 ## Old memory compression and daily recall (2026-11-25)
 
 - The memory screen offers compression once at least three generated notes are older than the latest eight.
-- Compression combines any prior merged note with the older notes, asks the configured chat model to produce an early-memory summary, writes the replacement first, and only then deletes the replaced source notes.
+- Compression combines any prior merged note with the older notes, asks the configured chat model to produce an early-memory summary, then atomically writes the replacement and deletes the replaced source notes in one Room transaction.
 - The latest eight ordinary notes remain untouched and continue to be injected normally.
 - Older notes, including a merged early-memory note, are not bulk-injected. One older note is selected deterministically per day and supplied as a clearly labeled, dated recollection so the model does not present it as a recent event.
 - If the compression request fails or returns empty content, source notes remain intact.
