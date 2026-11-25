@@ -52,8 +52,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 private const val MUSIC_PREFS = "mio_music_player"
-private data class RecentMusicTrack(val uri: String, val name: String, val artist: String, val coverUri: String?)
-private fun readRecentMusicTracks(context: android.content.Context): List<RecentMusicTrack> {
+data class RecentMusicTrack(val uri: String, val name: String, val artist: String, val coverUri: String?)
+fun readRecentMusicTracks(context: android.content.Context): List<RecentMusicTrack> {
     val raw = context.getSharedPreferences(MUSIC_PREFS, android.content.Context.MODE_PRIVATE).getString("recent_tracks", "[]") ?: "[]"
     return runCatching {
         val array = JSONArray(raw)
