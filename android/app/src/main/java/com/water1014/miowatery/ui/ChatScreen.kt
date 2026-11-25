@@ -76,6 +76,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
 import org.json.JSONObject
 
 // Native chat entry point: persona title and configured opening line are shown before the first message.
@@ -193,11 +198,6 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 rawLegacyJson = "{}"
             )
             dao.insertMessages(listOf(userMessage))
-            if (imageToSend != null) {
-                errorText = "图片已保存到本机聊天记录。当前版本尚未接通视觉模型传图。"
-                sending = false
-                return@launch
-            }
             val existingConversation = dao.getConversation(conversationId)
             val originalCreatedAt = existingConversation?.createdAt ?: now
             dao.upsertConversation(
@@ -265,9 +265,34 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 val recentMessages = (messages.map { it } + userMessage).let { all ->
                     if (configuredContextCount > 0) all.takeLast(configuredContextCount) else all
                 }
-                val history = buildList {
-                    if (systemPrompt.isNotBlank()) add(ChatMessagePayload.text("system", systemPrompt))
-                    addAll(recentMessages.map { ChatMessagePayload.text(it.role, it.content) })
+                val history = withContext(Dispatchers.IO) {
+                    buildList {
+                        if (systemPrompt.isNotBlank()) add(ChatMessagePayload.text("system", systemPrompt))
+                        recentMessages.forEach { message ->
+                            val attachmentUri = runCatching {
+                                JSONObject(message.attachmentJson ?: "{}")
+                                    .optString("uri")
+                                    .takeIf { it.isNotBlank() }
+                            }.getOrNull()
+                            if (attachmentUri == null) {
+                                add(ChatMessagePayload.text(message.role, message.content))
+                            } else {
+                                val dataUrl = try {
+                                    encodeChatImage(context, android.net.Uri.parse(attachmentUri))
+                                } catch (failure: Exception) {
+                                    if (message.id == userMessage.id) {
+                                        throw IOException("图片读取失败，请重新选择图片后发送。", failure)
+                                    }
+                                    null
+                                }
+                                if (dataUrl != null) {
+                                    add(ChatMessagePayload.image(message.role, message.content, dataUrl))
+                                } else {
+                                    add(ChatMessagePayload.text(message.role, message.content))
+                                }
+                            }
+                        }
+                    }
                 }
                 val result = withContext(Dispatchers.IO) {
                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
@@ -766,3 +791,38 @@ private fun nativeSafeId(value: String): String =
         .replace(Regex("[^a-z0-9_-]"), "_")
         .take(64)
         .ifBlank { "item" }
+
+
+private fun encodeChatImage(context: android.content.Context, uri: android.net.Uri): String {
+    val resolver = context.contentResolver
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    resolver.openInputStream(uri)?.use { input ->
+        BitmapFactory.decodeStream(input, null, bounds)
+    } ?: throw IOException("无法打开图片文件")
+    if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IOException("图片格式无法识别")
+
+    var sampleSize = 1
+    val longestSide = maxOf(bounds.outWidth, bounds.outHeight)
+    while (longestSide / sampleSize > 1600) sampleSize *= 2
+    val options = BitmapFactory.Options().apply {
+        inSampleSize = sampleSize
+        inPreferredConfig = Bitmap.Config.ARGB_8888
+    }
+    val bitmap = resolver.openInputStream(uri)?.use { input ->
+        BitmapFactory.decodeStream(input, null, options)
+    } ?: throw IOException("图片解码失败")
+
+    val output = ByteArrayOutputStream()
+    try {
+        if (!bitmap.compress(Bitmap.CompressFormat.JPEG, 82, output)) {
+            throw IOException("图片压缩失败")
+        }
+    } finally {
+        bitmap.recycle()
+    }
+    val bytes = output.toByteArray()
+    if (bytes.size > 5 * 1024 * 1024) {
+        throw IOException("图片压缩后仍超过 5 MB，请选择较小的图片")
+    }
+    return "data:image/jpeg;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP)
+}
