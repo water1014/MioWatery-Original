@@ -540,6 +540,32 @@ private fun HomeScreen(
                             }
                         }
                         if (page == 1) {
+                            HomePanel("Recent Searches", Modifier.fillMaxWidth().padding(top = 8.dp).clickable { editSearches = true }) {
+                                listOf(recent1, recent2, recent3).filter { it.isNotBlank() }.forEach { term ->
+                                    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Text("⌕", color = sub, fontSize = 18.sp)
+                                        Text(term, Modifier.padding(start = 9.dp), color = ink, style = MaterialTheme.typography.bodySmall)
+                                    }
+                                }
+                                if (listOf(recent1, recent2, recent3).all { it.isBlank() }) Text("点击编辑搜索记录", color = sub, style = MaterialTheme.typography.bodySmall)
+                                Text("编辑记录", color = sub, style = MaterialTheme.typography.labelSmall, modifier = Modifier.align(Alignment.End))
+                            }
+                            HomePanel("文案与照片", Modifier.fillMaxWidth().clickable { editQuote = true }) {
+                                Text(quoteLine1, color = ink, style = MaterialTheme.typography.titleSmall)
+                                if (quoteLine2.isNotBlank()) Text(quoteLine2, color = sub, style = MaterialTheme.typography.bodySmall)
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                                    listOf(quoteImage1, quoteImage2, quoteImage3).forEachIndexed { index, image ->
+                                        Box(Modifier.weight(1f).height(86.dp).background(panel, RoundedCornerShape(12.dp)).clickable {
+                                            imageSlot = index + 1
+                                            desktopImagePicker.launch(arrayOf("image/*"))
+                                        }, contentAlignment = Alignment.Center) {
+                                            if (image.isNotBlank()) AsyncImage(model = image, contentDescription = "文案照片", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                            else Text("＋", color = sub, fontSize = 22.sp)
+                                        }
+                                    }
+                                }
+                                Text("点击卡片编辑文案，点击照片添加图片", color = sub, style = MaterialTheme.typography.labelSmall)
+                            }
                             nativeWidgets.forEach { widget ->
                                 HomePanel(widget.title.ifBlank { "桌面组件" }, Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
                                     when (widget.kind) {
