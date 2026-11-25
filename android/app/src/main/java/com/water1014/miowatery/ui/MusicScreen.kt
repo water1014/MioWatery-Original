@@ -72,12 +72,29 @@ private fun saveRecentMusicTracks(context: android.content.Context, tracks: List
     }
     context.getSharedPreferences(MUSIC_PREFS, android.content.Context.MODE_PRIVATE).edit().putString("recent_tracks", array.toString()).apply()
 }
-private fun readMusicArtist(context: android.content.Context, uri: Uri): String {
+private data class MusicMetadata(val title: String?, val artist: String, val embeddedCover: ByteArray?)
+
+private fun readMusicMetadata(context: android.content.Context, uri: Uri): MusicMetadata {
     val retriever = MediaMetadataRetriever()
     return try {
         retriever.setDataSource(context, uri)
-        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.takeIf { it.isNotBlank() } ?: "未知艺人"
-    } catch (_: Exception) { "未知艺人" } finally { runCatching { retriever.release() } }
+        MusicMetadata(
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)?.takeIf { it.isNotBlank() },
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?.takeIf { it.isNotBlank() } ?: "未知艺人",
+            retriever.embeddedPicture
+        )
+    } catch (_: Exception) {
+        MusicMetadata(null, "未知艺人", null)
+    } finally { runCatching { retriever.release() } }
+}
+
+private fun saveEmbeddedMusicCover(context: android.content.Context, bytes: ByteArray?): String? {
+    if (bytes == null || bytes.isEmpty()) return null
+    return runCatching {
+        val file = java.io.File(context.cacheDir, "music_cover_${bytes.contentHashCode()}.jpg")
+        file.writeBytes(bytes)
+        android.net.Uri.fromFile(file).toString()
+    }.getOrNull()
 }
 
 @Composable
@@ -110,11 +127,14 @@ fun MusicScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         if (uri != null) {
             runCatching { context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
             trackUri = uri.toString()
-            trackName = context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+            val displayName = context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) cursor.getString(0) else null
             } ?: uri.lastPathSegment ?: "本地音乐"
-            artistName = readMusicArtist(context, uri)
-            prefs.edit().putString("artist_name", artistName).apply()
+            val metadata = readMusicMetadata(context, uri)
+            trackName = metadata.title ?: displayName.substringBeforeLast('.', displayName)
+            artistName = metadata.artist
+            coverUri = saveEmbeddedMusicCover(context, metadata.embeddedCover) ?: coverUri
+            prefs.edit().putString("artist_name", artistName).putString("cover_uri", coverUri).apply()
             val chosen = RecentMusicTrack(uri.toString(), trackName, artistName, coverUri)
             recentTracks = (listOf(chosen) + recentTracks).distinctBy { it.uri }.take(3)
             saveRecentMusicTracks(context, recentTracks)
