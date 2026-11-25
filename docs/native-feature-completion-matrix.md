@@ -6,7 +6,7 @@ Reference repositories:
 - Upstream: https://github.com/water649/MioWatery
 - User fork: https://github.com/water1014/MioWatery
 
-This matrix distinguishes a working native feature from a navigation placeholder. A visible app icon or route is not counted as implemented.
+This matrix distinguishes a working native feature from a navigation placeholder. A visible app icon or route is not counted as implemented. The target is a faithful native recreation of MioWatery's own Mio small-phone structure. Do not add unrelated apps or duplicate shortcuts. Upstream feature groups and names take precedence over this implementation's earlier guesses.
 
 ## Current implementation audit
 
@@ -18,7 +18,7 @@ This matrix distinguishes a working native feature from a navigation placeholder
 | Worldbook | Partial | CRUD, global/persona scope, trigger keywords and prompt injection exist. Full legacy schema parity, book-level management/import/export and advanced activation rules remain. |
 | Desktop customization | Partial | Safe theme-pack import/preview/apply/export exists. Exact placement and full built-in widget compatibility remain. |
 | Backup / migration | Partial | JSON/ZIP preview and confirmed import for selected core records exist. Full data-type coverage, round-trip export and upgrade preservation verification remain. |
-| Diary | Partial (first native implementation) | Local CRUD, date sorting, mood tags, favorites, lock/unlock and delete confirmation are implemented with Room persistence. Search, annotations, image attachments, export and calendar integration remain. |
+| Diary | Partial (first native implementation) | Local create/edit/delete, date sorting and Room persistence. Search, annotations, image attachments, export and calendar integration remain. Keep the diary scope aligned with upstream; do not invent mood/favorite/lock features. |
 | Music | Placeholder | Library, local media import, background playback, queue, playback controls and notification controls. |
 | Couple space | Placeholder | Relationship timeline, shared records and configurable relationship start date. |
 | Co-reading | Placeholder | Books, reading progress, notes and shared reading sessions. |
@@ -67,3 +67,12 @@ Implement each remaining app against upstream behavior and data schema, preservi
 ## Definition of done
 
 A feature is complete only when its primary actions work, data persists after process restart, empty/loading/error states are handled, navigation is correct, accessibility labels exist for important controls, and automated tests/build pass. A placeholder route does not satisfy this definition.
+
+
+## Source-fidelity cleanup (2026-11-25)
+
+- Removed unverified extra app shortcuts from the native app grid: Wallet, MCP, Presets, Life, IF line, Xinji, Repository, YouTube, Offline and Stickers. They must not reappear unless the upstream MioWatery source confirms them.
+- Chat and Messages are distinct upstream concepts; they must not silently route to the same chat-detail screen. Implement their correct separate behaviors rather than deleting a legitimate source app.
+- Backup remains available during migration work, but should ultimately live in the original Settings/Data flow if that is where the upstream UI places it.
+- Desktop customization and general appearance must be checked against the upstream "Look" area before deciding whether they are separate apps or one feature.
+- The current native home still contains provisional cards, page labels and generic desktop widgets. These are not accepted as final parity. Replace them with the original Mio small-phone desktop structure and wording after a source-by-source UI audit.
