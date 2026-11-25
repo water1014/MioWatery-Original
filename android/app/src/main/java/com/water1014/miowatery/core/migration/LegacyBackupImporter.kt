@@ -13,6 +13,9 @@ import com.water1014.miowatery.core.database.PersonaEntity
 import com.water1014.miowatery.core.database.ProfileEntity
 import com.water1014.miowatery.core.database.WorldbookEntryEntity
 import java.io.File
+import java.io.InputStream
+import java.io.ByteArrayOutputStream
+import java.util.zip.ZipInputStream
 import java.util.Locale
 
 data class LegacyImportResult(
@@ -26,6 +29,47 @@ data class LegacyImportResult(
 
 object LegacyBackupImporter {
     private const val TARGET_PROFILE_ID = "default"
+
+    fun readJson(input: InputStream, fileName: String): String {
+        if (!fileName.lowercase(Locale.ROOT).endsWith(".zip")) {
+            val bytes = input.use { stream ->
+                val output = ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val count = stream.read(buffer)
+                    if (count < 0) break
+                    if (output.size() + count > 100 * 1024 * 1024) {
+                        throw IllegalArgumentException("备份超过 100 MB 安全读取上限")
+                    }
+                    output.write(buffer, 0, count)
+                }
+                output.toByteArray()
+            }
+            return bytes.toString(Charsets.UTF_8)
+        }
+        return ZipInputStream(input).use { zip ->
+            var selected: ByteArray? = null
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                if (!entry.isDirectory && entry.name.endsWith(".json", ignoreCase = true)) {
+                    val output = ByteArrayOutputStream()
+                    val buffer = ByteArray(8192)
+                    while (true) {
+                        val count = zip.read(buffer)
+                        if (count < 0) break
+                        if (output.size() + count > 100 * 1024 * 1024) {
+                            throw IllegalArgumentException("备份 JSON 超过 100 MB 安全读取上限")
+                        }
+                        output.write(buffer, 0, count)
+                    }
+                    val bytes = output.toByteArray()
+                    if (selected == null || entry.name.endsWith("xiaoshouji-backup.json")) selected = bytes
+                }
+                zip.closeEntry()
+            }
+            (selected ?: throw IllegalArgumentException("ZIP 备份中没有找到 JSON 文件")).toString(Charsets.UTF_8)
+        }
+    }
 
     suspend fun importJson(context: Context, jsonText: String, database: MioDatabase): LegacyImportResult {
         require(jsonText.isNotBlank()) { "备份内容为空" }
