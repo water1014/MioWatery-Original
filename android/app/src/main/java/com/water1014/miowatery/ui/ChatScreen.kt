@@ -209,6 +209,15 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         memoryNotes.take(8).forEach { append("· ").append(it.text.take(600)).append("\n") }
                         append("\n")
                     }
+                    val olderMemoryNotes = activeMemories.filter { it.type == "note" }.drop(8)
+                    if (olderMemoryNotes.isNotEmpty()) {
+                        val recallIndex = ((System.currentTimeMillis() / 86400000L) % olderMemoryNotes.size).toInt()
+                        val recalled = olderMemoryNotes[recallIndex]
+                        val recalledDate = java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.getDefault())
+                            .format(java.util.Date(recalled.createdAt))
+                        append("【今天偶然想起的旧事】这是较早的聊天记忆，不要当成刚刚发生；只有话题相关时才自然提及：\n")
+                        append("记于 ").append(recalledDate).append("：").append(recalled.text.take(300)).append("\n\n")
+                    }
                     afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                 }.trim()
                 val memoryPrefs = context.getSharedPreferences("mio_memory_settings", android.content.Context.MODE_PRIVATE)
