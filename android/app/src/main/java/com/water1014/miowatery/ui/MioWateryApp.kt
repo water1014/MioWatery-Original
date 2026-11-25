@@ -149,7 +149,7 @@ fun MioWateryApp() {
     ) {
         Scaffold(
             topBar = {
-                if (selectedPage != "home") TopAppBar(
+                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs") TopAppBar(
                     title = {
                         Column {
                             Text(selectedEntry?.title ?: "MioWatery")
@@ -186,6 +186,8 @@ fun MioWateryApp() {
                     modifier = Modifier.padding(innerPadding),
                     onOpen = { selectedPage = it }
                 )
+            } else if (selectedPage == "app" || selectedPage == "msgs") {
+                ChatScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {
