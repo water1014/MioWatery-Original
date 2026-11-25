@@ -175,7 +175,7 @@ fun MioWateryApp() {
                 if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas" && selectedPage != "worlds" && selectedPage != "music" && selectedPage != "memory" && selectedPage != "chatmemory") TopAppBar(
                     title = {
                         Column {
-                            Text(selectedEntry?.title ?: "MioWatery")
+                            Text(selectedEntry?.title ?: if (selectedPage == "backup") "备份与旧版数据迁移" else "MioWatery")
                             if (selectedPage == "home") {
                                 Text(
                                     "原生版 · 初始框架",
@@ -243,6 +243,11 @@ fun MioWateryApp() {
                 DiaryScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "chatmemory") {
                 MemoryScreen(onBack = { selectedPage = "app" }, conversationId = selectedConversationId, modifier = Modifier.padding(innerPadding))
+            } else if (selectedPage == "settings") {
+                SettingsScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    onOpenBackup = { selectedPage = "backup" }
+                )
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {
