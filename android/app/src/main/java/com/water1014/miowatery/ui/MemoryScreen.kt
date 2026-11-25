@@ -83,7 +83,7 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
     var summaryInstruction by remember(conversationId) { mutableStateOf(memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty()) }
     var settingsSaved by remember { mutableStateOf(false) }
     var autoSummaryEnabled by remember(conversationId) { mutableStateOf(memoryPrefs.getBoolean("auto_summary_$conversationId", false)) }
-    var autoSummaryInterval by remember(conversationId) { mutableStateOf(memoryPrefs.getInt("auto_summary_interval_$conversationId", 20).toString()) }
+    var autoSummaryInterval by remember(conversationId) { mutableStateOf(memoryPrefs.getInt("auto_summary_interval_$conversationId", 200).toString()) }
 
     val traditionalEntries = entries.filter { it.type == "traditional" }
     val noteEntries = entries.filter { it.type != "traditional" }
@@ -212,7 +212,7 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
                             Text("自动生成记忆纸条", color = ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                            Text("达到指定新消息数量后，自动整理一次聊天记忆", color = secondaryText, fontSize = 11.sp)
+                            Text("达到指定消息数量后，自动整理一次聊天记忆", color = secondaryText, fontSize = 11.sp)
                         }
                         Checkbox(checked = autoSummaryEnabled, onCheckedChange = { autoSummaryEnabled = it })
                     }
@@ -220,7 +220,7 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                         value = autoSummaryInterval,
                         onValueChange = { autoSummaryInterval = it.filter(Char::isDigit).take(4) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("每累计多少条新消息总结一次") },
+                        label = { Text("总结间隔（20–2000 条）") },
                         singleLine = true,
                         enabled = autoSummaryEnabled
                     )
@@ -253,7 +253,7 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                             .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(18.dp))
                             .clickable {
                                 val count = contextCount.toIntOrNull()?.coerceIn(1, 1000) ?: 0
-                                val interval = autoSummaryInterval.toIntOrNull()?.coerceIn(4, 500) ?: 20
+                                val interval = autoSummaryInterval.toIntOrNull()?.coerceIn(20, 2000) ?: 200
                                 autoSummaryInterval = interval.toString()
                                 memoryPrefs.edit()
                                     .putInt("context_count_$conversationId", count)
