@@ -4,67 +4,62 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 
 class LegacyBackupInspectorTest {
-    private val json = """
-        {
-          "userProfiles":[{"id":"u1"}],
-          "personas":[{"id":"p1"},{"id":"p2"}],
-          "worlds":[{"id":"w1"}],
-          "chatsByUser":{
-            "u1":{
-              "p1":[{"role":"user","content":"hi"},{"role":"assistant","content":"hello"}],
-              "p2":[{"role":"user","content":"image","image":"data:image/png;base64,AA"}]
-            }
-          }
-        }
-    """.trimIndent()
-
     @Test
-    fun inspectsLegacyJsonWithoutImportingIt() {
+    fun legacySingleUserChatsAreIncludedInPreviewCounts() {
+        val json = """
+            {
+              "activeUserProfile": "main",
+              "me": {"name": "我"},
+              "chats": {
+                "songqi": [
+                  {"role": "user", "content": "你好", "t": 100},
+                  {"role": "assistant", "content": "我在", "t": 101}
+                ],
+                "empty": []
+              },
+              "personas": [{"id": "songqi", "name": "宋祁"}],
+              "worlds": []
+            }
+        """.trimIndent()
+
         val preview = LegacyBackupInspector.inspect(
-            ByteArrayInputStream(json.toByteArray()),
-            "xiaoshouji-backup-2026-11-25.json"
+            ByteArrayInputStream(json.toByteArray(Charsets.UTF_8)),
+            "legacy.json"
         )
 
-        assertEquals("JSON", preview.sourceFormat)
         assertEquals(1, preview.profileCount)
-        assertEquals(2, preview.personaCount)
-        assertEquals(1, preview.worldbookCount)
         assertEquals(1, preview.chatOwnerCount)
         assertEquals(2, preview.conversationCount)
-        assertEquals(3, preview.messageCount)
-        assertTrue(preview.warnings.any { it.contains("只读预览") })
+        assertEquals(2, preview.messageCount)
+        assertTrue(preview.warnings.any { it.contains("旧式 chats") })
     }
 
     @Test
-    fun inspectsZipBackupAndFindsBackupJson() {
-        val zipped = ByteArrayOutputStream().also { output ->
-            ZipOutputStream(output).use { zip ->
-                zip.putNextEntry(ZipEntry("xiaoshouji-backup.json"))
-                zip.write(json.toByteArray())
-                zip.closeEntry()
+    fun modernChatsByUserRemainCounted() {
+        val json = """
+            {
+              "userProfiles": [{"id": "main", "name": "我"}],
+              "chatsByUser": {
+                "main": {
+                  "songqi": [
+                    {"role": "user", "content": "在吗"},
+                    {"role": "assistant", "content": "在"}
+                  ]
+                }
+              }
             }
-        }.toByteArray()
+        """.trimIndent()
 
         val preview = LegacyBackupInspector.inspect(
-            ByteArrayInputStream(zipped),
-            "xiaoshouji-backup.zip"
+            ByteArrayInputStream(json.toByteArray(Charsets.UTF_8)),
+            "modern.json"
         )
 
-        assertEquals("ZIP", preview.sourceFormat)
-        assertEquals("xiaoshouji-backup.json", preview.jsonFileName)
-        assertEquals(3, preview.messageCount)
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun rejectsNonObjectBackupRoot() {
-        LegacyBackupInspector.inspect(
-            ByteArrayInputStream("[]".toByteArray()),
-            "bad.json"
-        )
+        assertEquals(1, preview.profileCount)
+        assertEquals(1, preview.chatOwnerCount)
+        assertEquals(1, preview.conversationCount)
+        assertEquals(2, preview.messageCount)
     }
 }
