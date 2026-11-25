@@ -131,7 +131,8 @@ object LegacyBackupImporter {
             val contacts = world.array("contacts")?.mapNotNull { it.asStringOrNull() }.orEmpty()
             val targets: List<String?> = if (scope == "contact" && contacts.isNotEmpty()) {
                 contacts.mapNotNull { contactId ->
-                    personaMap.entries.firstOrNull { it.key.second == contactId }?.value
+                    personaMap[activeSourceProfile to contactId]
+                        ?: personaMap.entries.firstOrNull { it.key.second == contactId }?.value
                 }.distinct().map { it as String? }
             } else listOf(null)
             targets.forEachIndexed { targetIndex, personaId ->
@@ -157,13 +158,13 @@ object LegacyBackupImporter {
             if (oldChats != null) add(activeSourceProfile.ifBlank { "default" }, oldChats)
         }
 
-        chatOwners.entrySet().forEach { ownerEntry ->
+        chatOwners.entrySet().forEach ownerLoop@ { ownerEntry ->
             val sourceProfileId = ownerEntry.key
-            val chats = ownerEntry.value.takeIf { it.isJsonObject }?.asJsonObject ?: return@forEach
-            chats.entrySet().forEach { chatEntry ->
+            val chats = ownerEntry.value.takeIf { it.isJsonObject }?.asJsonObject ?: return@ownerLoop
+            chats.entrySet().forEach chatLoop@ { chatEntry ->
                 val sourcePersonaId = chatEntry.key
-                val messages = chatEntry.value.takeIf { it.isJsonArray }?.asJsonArray ?: return@forEach
-                if (messages.size() == 0) return@forEach
+                val messages = chatEntry.value.takeIf { it.isJsonArray }?.asJsonArray ?: return@chatLoop
+                if (messages.size() == 0) return@chatLoop
                 val nativePersonaId = personaMap[sourceProfileId to sourcePersonaId]
                     ?: personaMap.entries.firstOrNull { it.key.second == sourcePersonaId }?.value
                     ?: ("legacy-" + safeId(sourceProfileId) + "-" + safeId(sourcePersonaId))
@@ -218,7 +219,10 @@ object LegacyBackupImporter {
         database.withTransaction {
             profileEntities.forEach { dao.upsertProfile(it) }
             dao.upsertPersonas(personaEntities.distinctBy { it.personaId })
-            conversationRows.forEach { dao.upsertConversation(it) }
+            conversationRows.forEach { conversation ->
+                dao.upsertConversation(conversation)
+                dao.clearMessages(conversation.id)
+            }
             if (messageRows.isNotEmpty()) dao.insertMessages(messageRows)
             if (worldbookRows.isNotEmpty()) dao.upsertWorldbookEntries(worldbookRows)
         }
