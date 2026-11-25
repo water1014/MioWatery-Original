@@ -86,6 +86,7 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var newCategoryName by remember { mutableStateOf("") }
     var categoryPersonaId by remember { mutableStateOf<String?>(null) }
     var showCategoryPersonaMenu by remember { mutableStateOf(false) }
+    var showBookCategoryMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         if (dao.getWorldbookEntry("bi-love") == null) {
@@ -334,10 +335,10 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = { globalOnly = true; searchText = "" }) {
+            TextButton(onClick = { globalOnly = true; searchText = ""; selectedCategory = null }) {
                 Text(if (globalOnly) "● 全局世界书" else "全局世界书", color = Color(0xFF111111))
             }
-            TextButton(onClick = { globalOnly = false; searchText = "" }) {
+            TextButton(onClick = { globalOnly = false; searchText = ""; selectedCategory = null }) {
                 Text(if (!globalOnly) "● 局部世界书" else "局部世界书", color = Color(0xFF111111))
             }
             Spacer(Modifier.weight(1f))
@@ -432,7 +433,26 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         }
                         if (personas.isEmpty()) Text("请先创建联系人，再添加专属世界书词条。", color = Color(0xFFB45309), fontSize = 11.sp)
                     }
-                    OutlinedTextField(bookId, { bookId = it }, label = { Text("分类 / 书籍名称") }, singleLine = true)
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(
+                            value = bookId,
+                            onValueChange = { bookId = it },
+                            modifier = Modifier.weight(1f),
+                            label = { Text("分类 / 书籍名称") },
+                            singleLine = true
+                        )
+                        Box {
+                            TextButton(onClick = { showBookCategoryMenu = true }) { Text("选择") }
+                            DropdownMenu(expanded = showBookCategoryMenu, onDismissRequest = { showBookCategoryMenu = false }) {
+                                categories.filter { it.personaId == (if (globalOnly) null else entryPersonaId) }.forEach { category ->
+                                    DropdownMenuItem(text = { Text(category.name) }, onClick = {
+                                        bookId = category.name
+                                        showBookCategoryMenu = false
+                                    })
+                                }
+                            }
+                        }
+                    }
                     OutlinedTextField(title, { title = it }, label = { Text("词条标题") }, singleLine = true)
                     OutlinedTextField(keys, { keys = it }, label = { Text("触发关键词（逗号分隔）") }, singleLine = true)
                     OutlinedTextField(body, { body = it }, label = { Text("内容") }, minLines = 4, maxLines = 7)
