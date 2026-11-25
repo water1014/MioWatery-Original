@@ -66,6 +66,7 @@ import kotlinx.coroutines.withContext
 import java.util.UUID
 import org.json.JSONObject
 
+// Native chat entry point: persona title and configured opening line are shown before the first message.
 private const val CHAT_PROFILE_ID = "default"
 @Composable
 fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modifier = Modifier) {
