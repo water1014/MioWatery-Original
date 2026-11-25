@@ -173,3 +173,10 @@ Visual parity is still a work in progress across the entire app. The upstream gl
 - The latest eight ordinary notes remain untouched and continue to be injected normally.
 - Older notes, including a merged early-memory note, are not bulk-injected. One older note is selected deterministically per day and supplied as a clearly labeled, dated recollection so the model does not present it as a recent event.
 - If the compression request fails or returns empty content, source notes remain intact.
+
+
+## Chat screen parity adjustments (2026-11-25)
+
+- Reduced message-list vertical spacing to the upstream 4 dp rhythm and aligned list insets to 14 dp horizontal / 12 dp vertical.
+- Added the upstream first-message-in-group top separation while retaining grouped bubble corner treatment.
+- Remaining parity work includes exact toolbar actions, profile/avatar handling, search UI, attachments, and full interaction coverage.
