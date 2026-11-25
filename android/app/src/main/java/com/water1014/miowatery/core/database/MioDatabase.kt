@@ -12,9 +12,10 @@ import androidx.room.RoomDatabase
         ConversationEntity::class,
         MessageEntity::class,
         WorldbookEntryEntity::class,
-        DiaryEntryEntity::class
+        DiaryEntryEntity::class,
+        MessageAppEntryEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class MioDatabase : RoomDatabase() {
