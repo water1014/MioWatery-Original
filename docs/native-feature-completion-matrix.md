@@ -151,16 +151,25 @@ Visual parity is still a work in progress across the entire app. The upstream gl
 - Added a per-conversation context message limit (1–1000, blank means full history), persisted locally and applied to the actual chat request.
 - Added per-conversation custom memory-summary instructions, persisted locally and appended to the summary-generation system prompt.
 - These settings are keyed by the stable conversation ID, so they do not bleed between different chats/personas.
-- Memory injection now includes all manually maintained traditional memories and only the latest eight generated note entries, matching the upstream intent more closely.
-- Automatic summary scheduling, summary interval, old-note compression, vector memory/embeddings, and import/export are still not implemented. No non-functional toggles are presented for them.
+- Memory injection includes all manually maintained traditional memories and the latest eight generated note entries; older notes can be recalled one per day when relevant.
+- Automatic summary scheduling and safe old-note compression are implemented. Vector memory/embeddings and traditional-memory import/export remain unimplemented.
 
 
 ## Automatic per-chat memory notes (2026-11-25)
 
 - Added an opt-in automatic summary switch for each conversation.
-- Added a configurable trigger interval of 4–500 newly exchanged messages (default 20).
+- Added a configurable trigger interval of 20–2000 newly exchanged messages (default 200), matching the upstream range.
 - After a successful assistant reply, the app reads the persisted conversation history and generates a memory note when the threshold is reached.
 - The generated note records its source message range and is saved to the existing Room memory table; the last summarized message count is tracked per conversation in local preferences.
 - The same per-chat custom summary instructions are applied to automatic summaries.
 - Summary generation is best-effort: a summary API failure does not invalidate or block the already-saved chat reply, and the threshold is retried on a later successful reply.
 - The feature is opt-in and disabled by default. It uses the currently configured chat model/API and may incur an additional API request when triggered.
+
+
+## Old memory compression and daily recall (2026-11-25)
+
+- The memory screen offers compression once at least three generated notes are older than the latest eight.
+- Compression combines any prior merged note with the older notes, asks the configured chat model to produce an early-memory summary, writes the replacement first, and only then deletes the replaced source notes.
+- The latest eight ordinary notes remain untouched and continue to be injected normally.
+- Older notes, including a merged early-memory note, are not bulk-injected. One older note is selected deterministically per day and supplied as a clearly labeled, dated recollection so the model does not present it as a recent event.
+- If the compression request fails or returns empty content, source notes remain intact.
