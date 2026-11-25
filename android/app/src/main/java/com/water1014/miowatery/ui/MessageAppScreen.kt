@@ -75,10 +75,6 @@ fun MessageAppScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var error by remember { mutableStateOf<String?>(null) }
     var choosePersona by remember { mutableStateOf(false) }
 
-    fun request(messages: List<ChatMessagePayload>, conversationId: String): String {
-        return ""
-    }
-
     fun sendAction() {
         if (busy) return
         val persona = selectedPersona
