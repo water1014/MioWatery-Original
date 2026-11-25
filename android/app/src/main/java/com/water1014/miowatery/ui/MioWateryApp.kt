@@ -228,6 +228,8 @@ fun MioWateryApp() {
                     onApplied = { json -> desktopPackJson = json; selectedPage = "home" },
                     modifier = Modifier.padding(innerPadding)
                 )
+            } else if (selectedPage == "diary") {
+                DiaryScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {
