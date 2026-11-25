@@ -1680,23 +1680,24 @@ button.feed-follow-plus{padding:0;cursor:pointer}
 .gc-cap{background:#FEFFF7!important;border-color:#FEFFF7!important}
 .gc-body{background:#FEFFF7!important;border-color:#FEFFF7!important}
 
-/* API custom headers: integrated advanced settings panel */
-.api-header-panel{margin:16px 0 18px;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--p)}
-.api-header-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+/* API 自定义请求头：收进主卡片的设置分组，减少套卡片的突兀感 */
+.api-header-panel{margin:18px 0 16px;padding:14px 0 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+.api-header-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 9px}
 .api-header-title{font-size:14px;font-weight:650;letter-spacing:.01em;color:var(--ink)}
-.api-header-subtitle{margin-top:2px;font-size:11px;color:var(--sub);line-height:1.5}
-.api-header-tag{flex:none;padding:4px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-size:10px;color:var(--sub);letter-spacing:.04em}
-.api-header-panel textarea#c-headers{display:block;width:100%;min-height:100px;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;outline:none;transition:border-color .18s,box-shadow .18s}
-.api-header-panel textarea#c-headers:focus{border-color:var(--sub);box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 7%,transparent)}
-.api-header-hint{display:flex;align-items:flex-start;gap:7px;margin:10px 1px 12px;font-size:11px;line-height:1.65;color:var(--sub)}
+.api-header-subtitle{margin-top:3px;font-size:11px;color:var(--sub);line-height:1.5}
+.api-header-tag{flex:none;padding:3px 8px;border-radius:7px;background:var(--p);border:1px solid var(--line);font-size:10px;color:var(--sub);letter-spacing:.04em}
+.api-header-panel textarea#c-headers{display:block;box-sizing:border-box;width:100%;min-height:88px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--p);color:var(--ink);font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;outline:none;transition:border-color .18s,box-shadow .18s}
+.api-header-panel textarea#c-headers:focus{border-color:var(--sub);box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 6%,transparent)}
+.api-header-hint{display:flex;align-items:flex-start;gap:7px;margin:9px 1px 10px;font-size:11px;line-height:1.6;color:var(--sub)}
 .api-header-hint-dot{width:6px;height:6px;margin-top:5px;border-radius:50%;background:#30a46c;flex:none}
-.api-header-hint code{padding:1px 4px;border-radius:4px;background:var(--bg);font:10px ui-monospace,monospace;color:var(--ink)}
-.api-header-fill{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:12px;font-weight:550;text-align:left;transition:background .15s,border-color .15s}
+.api-header-hint code{padding:1px 4px;border-radius:4px;background:var(--p);font:10px ui-monospace,monospace;color:var(--ink)}
+.api-header-fill{display:inline-flex;align-items:center;gap:7px;width:auto;max-width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--sub);font-size:11px;font-weight:550;text-align:left;transition:background .15s,border-color .15s}
 .api-header-fill:active{background:var(--p);border-color:var(--sub)}
-.api-header-fill>span:first-child{color:var(--sub);font-size:15px}
-.api-header-arrow{margin-left:auto;font-size:19px;color:var(--sub);line-height:1}
-[data-theme=dark] .api-header-panel{background:#171719;border-color:#303034}
+.api-header-fill>span:first-child{color:var(--sub);font-size:13px}
+.api-header-arrow{margin-left:2px;font-size:17px;color:var(--sub);line-height:1}
+[data-theme=dark] .api-header-panel{background:transparent;border-color:var(--line)}
 [data-theme=dark] .api-header-tag,[data-theme=dark] .api-header-panel textarea#c-headers,[data-theme=dark] .api-header-fill{background:#202023;border-color:#38383d}
+@media(max-width:380px){.api-header-panel{margin-top:15px}.api-header-fill{width:100%;justify-content:flex-start}}
 </style>
 <style id="ucss"></style>
 
