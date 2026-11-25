@@ -141,7 +141,7 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
                 Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll).padding(horizontal=3.dp)){Text(item.second,fontSize=fontSize.sp,lineHeight=(fontSize*1.75).sp,color=Color(0xFF303744))}
                 LinearProgressIndicator(progress={(active?.progress?:0)/100f},modifier=Modifier.fillMaxWidth().padding(top=8.dp))
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){
-                    TextButton(enabled=chapter>0,onClick={chapter--;updateProgress(chapter);scroll.scrollToTop()}){Text("上一章")}
+                    TextButton(enabled=chapter>0,onClick={chapter--;updateProgress(chapter)}){Text("上一章")}
                     Text((chapter+1).toString()+" / "+chapters.size,color=Color.Gray,fontSize=12.sp)
                     TextButton(enabled=chapter<chapters.lastIndex,onClick={chapter++;updateProgress(chapter);scroll.scrollToTop()}){Text("下一章")}
                 }
