@@ -13,9 +13,10 @@ import androidx.room.RoomDatabase
         MessageEntity::class,
         WorldbookEntryEntity::class,
         DiaryEntryEntity::class,
-        MessageAppEntryEntity::class
+        MessageAppEntryEntity::class,
+        MemoryEntryEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 abstract class MioDatabase : RoomDatabase() {
@@ -63,6 +64,28 @@ abstract class MioDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : androidx.room.migration.Migration(3, 4) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS memory_entries (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        profileId TEXT NOT NULL,
+                        personaId TEXT,
+                        title TEXT NOT NULL,
+                        content TEXT NOT NULL,
+                        category TEXT NOT NULL,
+                        isPinned INTEGER NOT NULL,
+                        isLocked INTEGER NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )""".trimIndent()
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_profileId ON memory_entries(profileId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_personaId ON memory_entries(personaId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_updatedAt ON memory_entries(updatedAt)")
+            }
+        }
+
         @Volatile private var instance: MioDatabase? = null
 
         fun getInstance(context: Context): MioDatabase =
@@ -71,7 +94,7 @@ abstract class MioDatabase : RoomDatabase() {
                     context.applicationContext,
                     MioDatabase::class.java,
                     "miowatery-native.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
             }
     }
 }
