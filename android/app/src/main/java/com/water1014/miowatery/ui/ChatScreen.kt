@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,6 +55,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import com.water1014.miowatery.core.database.ConversationEntity
 import com.water1014.miowatery.core.database.MessageEntity
 import com.water1014.miowatery.core.database.MemoryEntryEntity
@@ -80,6 +83,7 @@ private const val CHAT_PROFILE_ID = "default"
 @Composable
 fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaId: String = "default", modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val personas by dao.observePersonas(CHAT_PROFILE_ID).collectAsState(initial = emptyList())
@@ -115,6 +119,9 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
     var errorText by remember { mutableStateOf<String?>(null) }
     var showSettings by remember { mutableStateOf(false) }
     var showAttachmentMenu by remember { mutableStateOf(false) }
+    var showMoreMenu by remember { mutableStateOf(false) }
+    var showClearConfirm by remember { mutableStateOf(false) }
+    var selectedMessage by remember { mutableStateOf<MessageEntity?>(null) }
     var attachedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
     val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -153,19 +160,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
     }
     LaunchedEffect(showSettings) {
-        if (showAttachmentMenu) {
-        AlertDialog(
-            onDismissRequest = { showAttachmentMenu = false },
-            title = { Text("添加内容") },
-            text = { Text("选择一张图片添加到当前聊天。图片会保存在本机聊天记录中。") },
-            confirmButton = {
-                TextButton(onClick = { showAttachmentMenu = false; imagePicker.launch(arrayOf("image/*")) }) { Text("选择图片") }
-            },
-            dismissButton = { TextButton(onClick = { showAttachmentMenu = false }) { Text("取消") } }
-        )
-    }
-
-    if (showSettings) {
+        if (showSettings) {
             editBaseUrl = apiConfig.baseUrl
             editModel = apiConfig.model
             editApiKey = apiConfig.apiKey
@@ -437,8 +432,8 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     fontSize = 22.sp
                 )
                 Text(
-                    "设置",
-                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showSettings = true }.padding(horizontal = 8.dp, vertical = 7.dp),
+                    "⋯",
+                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showMoreMenu = true }.padding(horizontal = 8.dp, vertical = 7.dp),
                     color = Color(0xFF0F1419),
                     fontSize = 12.sp
                 )
@@ -500,7 +495,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 }
                 itemsIndexed(visibleMessages, key = { _, message -> message.id }) { index, message ->
                     val firstInGroup = index == 0 || visibleMessages[index - 1].role != message.role
-                    ChatMessageBubble(message, firstInGroup, persona?.avatar)
+                    ChatMessageBubble(message, firstInGroup, persona?.avatar) { selectedMessage = it }
                 }
                 if (sending) {
                     item {
@@ -573,6 +568,78 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
         }
     }
 
+    if (showAttachmentMenu) {
+        AlertDialog(
+            onDismissRequest = { showAttachmentMenu = false },
+            title = { Text("添加内容") },
+            text = { Text("选择一张图片添加到当前聊天。图片会保存在本机聊天记录中。") },
+            confirmButton = {
+                TextButton(onClick = { showAttachmentMenu = false; imagePicker.launch(arrayOf("image/*")) }) { Text("选择图片") }
+            },
+            dismissButton = { TextButton(onClick = { showAttachmentMenu = false }) { Text("取消") } }
+        )
+    }
+
+    if (showMoreMenu) {
+        AlertDialog(
+            onDismissRequest = { showMoreMenu = false },
+            title = { Text("聊天操作") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = { showMoreMenu = false; showSettings = true }) { Text("聊天设置与 API") }
+                    TextButton(onClick = { showMoreMenu = false; onOpenMemory(conversationId) }) { Text("记忆管理") }
+                    TextButton(onClick = { showMoreMenu = false; showClearConfirm = true }) { Text("清空当前对话", color = Color(0xFFD93636)) }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showMoreMenu = false }) { Text("完成") } }
+        )
+    }
+
+    if (showClearConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearConfirm = false },
+            title = { Text("清空当前对话？") },
+            text = { Text("这会删除当前角色的全部聊天消息，无法撤销。记忆和世界书不会被删除。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch {
+                        if (sending) sendJob?.cancel()
+                        sending = false
+                        sendJob = null
+                        streamingContent = ""
+                        streamingReasoning = ""
+                        dao.clearMessages(conversationId)
+                        showClearConfirm = false
+                    }
+                }) { Text("清空", color = Color(0xFFD93636)) }
+            },
+            dismissButton = { TextButton(onClick = { showClearConfirm = false }) { Text("取消") } }
+        )
+    }
+
+    selectedMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { selectedMessage = null },
+            title = { Text("消息操作") },
+            text = { Text(if (message.content.isBlank()) "图片消息" else message.content.take(240)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    clipboard.setText(AnnotatedString(message.content))
+                    selectedMessage = null
+                }) { Text("复制") }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = {
+                        scope.launch { dao.deleteMessage(message.id, conversationId) }
+                        selectedMessage = null
+                    }) { Text("删除", color = Color(0xFFD93636)) }
+                    TextButton(onClick = { selectedMessage = null }) { Text("取消") }
+                }
+            }
+        )
+    }
+
     if (showSettings) {
         AlertDialog(
             onDismissRequest = { showSettings = false },
@@ -615,7 +682,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 }
 
 @Composable
-private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, personaAvatar: String?) {
+private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, personaAvatar: String?, onMessageLongPress: (MessageEntity) -> Unit) {
     var showReasoning by remember(message.id) { mutableStateOf(false) }
     val fromUser = message.role == "user"
     val avatar = @Composable {
@@ -652,6 +719,7 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
             modifier = Modifier.widthIn(max = 270.dp)
                 .clip(bubbleShape)
                 .background(if (fromUser) Color(0xFF111111) else Color(0xFFECEEF0))
+                .combinedClickable(onClick = {}, onLongClick = { onMessageLongPress(message) })
                 .padding(horizontal = 11.dp, vertical = 7.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
