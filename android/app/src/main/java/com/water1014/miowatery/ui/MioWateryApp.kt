@@ -6,6 +6,7 @@ import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import org.json.JSONObject
 import com.water1014.miowatery.core.desktop.DesktopThemePackStore
+import com.water1014.miowatery.core.desktop.DesktopThemePackInspector
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -406,6 +407,11 @@ private fun HomeScreen(
                 ?.takeIf { !it.isNullOrBlank() && it != "null" }
         }.getOrNull()
     }
+    val nativeWidgets = remember(desktopPackJson) {
+        runCatching {
+            desktopPackJson?.let { DesktopThemePackInspector.inspect(it).widgets }.orEmpty()
+        }.getOrDefault(emptyList())
+    }
     val pager = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
     var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
@@ -453,6 +459,20 @@ private fun HomeScreen(
                         Spacer(Modifier.height(10.dp))
                         Text("还没有最近聊天", color = sub, style = MaterialTheme.typography.bodySmall)
                     }
+                    if (nativeWidgets.isNotEmpty()) {
+                        Text("桌面组件", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        nativeWidgets.forEach { widget ->
+                            HomePanel(widget.title.ifBlank { "桌面组件" }, Modifier.fillMaxWidth()) {
+                                when (widget.kind) {
+                                    "clock" -> Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 34.sp, fontWeight = FontWeight.Light)
+                                    "text" -> Text(widget.text.orEmpty(), color = sub, style = MaterialTheme.typography.bodyMedium)
+                                    "image" -> widget.image?.let { image ->
+                                        AsyncImage(model = image, contentDescription = widget.title, modifier = Modifier.fillMaxWidth().height(160.dp), contentScale = ContentScale.Crop)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 1 -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).padding(horizontal = 8.dp).padding(top = 18.dp)) {
                     Text("应用", Modifier.padding(start = 10.dp, bottom = 10.dp), color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
@@ -470,7 +490,7 @@ private fun HomeScreen(
                         HomePanel("快捷入口", Modifier.weight(1f).height(120.dp)) { Text("联系人 · 世界书", color = ink, style = MaterialTheme.typography.bodyMedium); Text("角色与设定", color = sub, style = MaterialTheme.typography.labelSmall) }
                     }
                     Text("常用应用", color = ink, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { listOf("app", "personas", "worlds", "diary").forEach { id -> val entry = appEntries.first { it.id == id }; Column(Modifier.weight(1f).clickable { onOpen(id) }, horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(40.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(22.dp)) }; Spacer(Modifier.height(6.dp)); Text(entry.title, color = sub, fontSize = 10.sp, textAlign = TextAlign.Center) } } }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { listOf("app", "personas", "worlds", "diary").forEach { id -> val entry = appEntries.first { it.id == id }; Column(Modifier.weight(1f).clickable { onOpen(id) }, horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(40.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 22.dp) }; Spacer(Modifier.height(6.dp)); Text(entry.title, color = sub, fontSize = 10.sp, textAlign = TextAlign.Center) } } }
                 }
             }
         }
