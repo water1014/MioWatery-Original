@@ -36,7 +36,8 @@ Upstream changes since the common ancestor of the web fork:
 - Supported native clock/text/image widgets render on the home page; imported wallpaper and app icons also render there.
 - Worldbook now has an explicit back action, supports selecting the target contact for persona-scoped entries, and merges edited fields into the original raw JSON so unknown legacy metadata survives.
 - Persona avatar picker attempts to retain read permission so selected images remain available after process restart.
-- Not yet ported: exact desktop drag/drop placement and the full hidden built-in widget map. Placement/hidden metadata is preserved in the pack, but current native home layout does not yet reproduce the web grid positions.
+- Imported hidden IDs are now applied to matching native app-grid entries, dock entries, and native widgets. Unknown/unsupported IDs are retained but have no native counterpart to hide.
+- Not yet ported: exact desktop drag/drop placement and the full built-in widget map. Placement metadata is preserved in the pack, but current native home layout does not yet reproduce the web grid positions.
 - Do not execute imported HTML, CSS or JavaScript. Native custom widgets use only explicitly supported declarative types with bounded fields.
 - The upstream CSS specificity fix is a behavior requirement, not code to copy: native widget visibility must be derived from one authoritative state so hidden widgets cannot reappear from layout recomposition.
 
