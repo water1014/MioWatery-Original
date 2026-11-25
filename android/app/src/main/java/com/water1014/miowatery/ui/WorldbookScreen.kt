@@ -49,7 +49,7 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val scope = rememberCoroutineScope()
-    val entries by dao.observeWorldbookEntries(WORLDBOOK_PROFILE_ID, "default").collectAsState(initial = emptyList())
+    val entries by dao.observeAllWorldbookEntries(WORLDBOOK_PROFILE_ID).collectAsState(initial = emptyList())
     var editing by remember { mutableStateOf<WorldbookEntryEntity?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var bookId by remember { mutableStateOf("默认分类") }
@@ -63,6 +63,7 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
 
     fun openEditor(item: WorldbookEntryEntity?) {
         editing = item
+        globalOnly = item?.personaId == null
         bookId = item?.bookId ?: "默认分类"
         title = item?.title.orEmpty()
         body = item?.content.orEmpty()
