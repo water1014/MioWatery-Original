@@ -61,13 +61,21 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
         if(uri!=null){
             busy=true;importError=null
             runCatching{
-                val raw=ctx.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use{it.readText()} ?: throw IllegalStateException("无法读取文件")
-                val text=raw.removePrefix("\uFEFF").replace("\u0000","").trim()
-                if(text.isBlank()) throw IllegalStateException("文件中没有可读取的文字")
-                val name=uri.lastPathSegment?.substringAfterLast('/')?.substringBeforeLast('.')?.takeIf{it.isNotBlank()}?:"未命名书籍"
+                val displayName=ctx.contentResolver.query(uri,arrayOf(android.provider.OpenableColumns.DISPLAY_NAME),null,null,null)?.use{cursor->if(cursor.moveToFirst())cursor.getString(0) else null} ?: uri.lastPathSegment?.substringAfterLast('/') ?: "未命名书籍"
+                val isEpub=ctx.contentResolver.getType(uri)=="application/epub+zip" || displayName.endsWith(".epub",true)
+                val name=displayName.substringBeforeLast('.',displayName).ifBlank{"未命名书籍"}
                 val id=System.currentTimeMillis().toString()
-                val file="coread_"+id+".txt"
-                File(ctx.filesDir,file).writeText(text,Charsets.UTF_8)
+                val file="coread_"+id+if(isEpub)".epub" else ".txt"
+                val destination=File(ctx.filesDir,file)
+                if(isEpub){
+                    val input=ctx.contentResolver.openInputStream(uri) ?: throw IllegalStateException("无法读取 EPUB 文件")
+                    input.use{source->destination.outputStream().use{target->source.copyTo(target)}}
+                }else{
+                    val raw=ctx.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use{it.readText()} ?: throw IllegalStateException("无法读取文件")
+                    val text=raw.removePrefix("\uFEFF").replace("\u0000","").trim()
+                    if(text.isBlank()) throw IllegalStateException("文件中没有可读取的文字")
+                    destination.writeText(text,Charsets.UTF_8)
+                }
                 persist(listOf(CoreadBook(id,name,file,0,0))+books)
             }.onFailure{importError=it.message?:"导入失败"}
             busy=false
@@ -81,8 +89,8 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
             if(b==null){selected=null;busy=false}
             else{
                 active=b
-                val raw=runCatching{File(ctx.filesDir,b.file).readText(Charsets.UTF_8)}.getOrElse{importError="书籍文件读取失败";""}
-                chapters=splitCoreadText(raw)
+                val localFile=File(ctx.filesDir,b.file)
+                chapters=runCatching{if(b.file.endsWith(".epub",true))parseCoreadEpub(localFile) else splitCoreadText(localFile.readText(Charsets.UTF_8))}.getOrElse{importError=it.message?:"书籍文件读取失败";emptyList()}
                 chapter=b.chapter.coerceIn(0,(chapters.size-1).coerceAtLeast(0))
                 busy=false
             }
@@ -95,7 +103,7 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){
             TextButton(onClick={if(selected!=null)selected=null else onBack()}){Text("‹ 返回")}
             Text(if(selected==null)"共读" else active?.title?:"正在打开",Modifier.weight(1f),fontSize=19.sp,fontWeight=FontWeight.SemiBold,maxLines=1)
-            if(selected==null) TextButton(onClick={picker.launch(arrayOf("text/plain","text/markdown","text/html","application/xhtml+xml"))}){Text("导入")}
+            if(selected==null) TextButton(onClick={picker.launch(arrayOf("text/plain","text/markdown","text/html","application/xhtml+xml","application/epub+zip"))}){Text("导入")}
             else TextButton(onClick={fontSize=if(fontSize>=24)16 else fontSize+2;prefs.edit().putInt("font",fontSize).apply()}){Text("Aa")}
         }
         if(selected==null){
@@ -113,7 +121,7 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
                     Column(Modifier.fillMaxWidth().padding(22.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)){
                         Text("还没有加入书籍",fontSize=17.sp,fontWeight=FontWeight.Medium)
                         Text("目前支持导入 TXT、Markdown 和 HTML 文本。",color=Color.Gray,fontSize=12.sp)
-                        Button(onClick={picker.launch(arrayOf("text/plain","text/markdown","text/html","application/xhtml+xml"))}){Text("导入一本书")}
+                        Button(onClick={picker.launch(arrayOf("text/plain","text/markdown","text/html","application/xhtml+xml","application/epub+zip"))}){Text("导入一本书")}
                     }
                 }
                 books.forEach{b->
