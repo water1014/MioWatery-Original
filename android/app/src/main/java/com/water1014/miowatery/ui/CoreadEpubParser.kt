@@ -41,9 +41,9 @@ internal fun parseCoreadEpub(file: File): List<Pair<String, String>> {
 }
 
 private fun epubPlainText(html: String): String = html
-    .replace(Regex("""<(script|style|head)[^>]*>.*?</\\1>""", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)), " ")
-    .replace(Regex("""<br\\s*/?>|</(p|div|h[1-6]|li|section|article)>""", RegexOption.IGNORE_CASE), "\n")
+    .replace(Regex("""<(script|style|head)[^>]*>.*?</\1>""", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)), " ")
+    .replace(Regex("""<br\s*/?>|</(p|div|h[1-6]|li|section|article)>""", RegexOption.IGNORE_CASE), "\n")
     .replace(Regex("""<[^>]+>"""), " ")
     .replace("&nbsp;", " ").replace("&amp;", "&").replace("&lt;", "<")
     .replace("&gt;", ">").replace("&quot;", "\"").replace("&#39;", "'")
-    .replace(Regex("""[ \\t]+"""), " ").replace(Regex(""" *\\n *"""), "\n").trim()
+    .replace(Regex("""[ \t]+"""), " ").replace(Regex(""" *\n *"""), "\n").trim()
