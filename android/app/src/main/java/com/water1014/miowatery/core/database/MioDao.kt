@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 data class RecentMessagePreview(
@@ -77,6 +78,15 @@ interface MioDao {
 
     @Query("DELETE FROM memory_entries WHERE id = :id AND conversationId = :conversationId")
     suspend fun deleteMemoryEntry(id: String, conversationId: String): Int
+
+    @Query("DELETE FROM memory_entries WHERE conversationId = :conversationId AND id IN (:ids)")
+    suspend fun deleteMemoryEntries(ids: List<String>, conversationId: String)
+
+    @Transaction
+    suspend fun replaceCompressedMemoryNotes(entry: MemoryEntryEntity, sourceIds: List<String>, conversationId: String) {
+        upsertMemoryEntry(entry)
+        if (sourceIds.isNotEmpty()) deleteMemoryEntries(sourceIds, conversationId)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertDiaryEntry(entry: DiaryEntryEntity)
