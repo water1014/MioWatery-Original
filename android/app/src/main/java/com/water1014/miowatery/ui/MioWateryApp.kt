@@ -153,7 +153,7 @@ fun MioWateryApp() {
     ) {
         Scaffold(
             topBar = {
-                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas") TopAppBar(
+                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas" && selectedPage != "worlds") TopAppBar(
                     title = {
                         Column {
                             Text(selectedEntry?.title ?: "MioWatery")
@@ -206,6 +206,8 @@ fun MioWateryApp() {
                     personaId = selectedPersonaId,
                     modifier = Modifier.padding(innerPadding)
                 )
+            } else if (selectedPage == "worlds") {
+                WorldbookScreen(modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {
