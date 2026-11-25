@@ -2,6 +2,10 @@ package com.water1014.miowatery.ui
 
 import com.water1014.miowatery.R
 
+import coil3.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import org.json.JSONObject
+import com.water1014.miowatery.core.desktop.DesktopThemePackStore
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
@@ -112,6 +116,8 @@ private val appEntries = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MioWateryApp() {
+    val context = LocalContext.current
+    var desktopPackJson by remember { mutableStateOf(DesktopThemePackStore.load(context)) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showSplash by remember { mutableStateOf(true) }
@@ -191,6 +197,7 @@ fun MioWateryApp() {
             if (selectedPage == "home") {
                 HomeScreen(
                     modifier = Modifier.padding(innerPadding),
+                    desktopPackJson = desktopPackJson,
                     onOpen = { selectedPage = it }
                 )
             } else if (selectedPage == "personas") {
@@ -211,6 +218,12 @@ fun MioWateryApp() {
                 )
             } else if (selectedPage == "worlds") {
                 WorldbookScreen(modifier = Modifier.padding(innerPadding))
+            } else if (selectedPage == "desktopcustom") {
+                DesktopThemePackScreen(
+                    onBack = { selectedPage = "home" },
+                    onApplied = { json -> desktopPackJson = json; selectedPage = "home" },
+                    modifier = Modifier.padding(innerPadding)
+                )
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {
@@ -373,7 +386,26 @@ private fun queryBackupName(context: Context, uri: Uri): String {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) {
+private fun HomeScreen(
+    modifier: Modifier = Modifier,
+    desktopPackJson: String? = null,
+    onOpen: (String) -> Unit
+) {
+    val desktopOverrides = remember(desktopPackJson) {
+        runCatching {
+            val desktop = JSONObject(desktopPackJson ?: "{}").optJSONObject("desktop")
+            val iconsJson = desktop?.optJSONObject("icons") ?: JSONObject()
+            buildMap {
+                iconsJson.keys().forEach { key -> put(key, iconsJson.optString(key)) }
+            }
+        }.getOrDefault(emptyMap())
+    }
+    val desktopWallpaper = remember(desktopPackJson) {
+        runCatching {
+            JSONObject(desktopPackJson ?: "{}").optJSONObject("desktop")?.optString("wallpaper")
+                ?.takeIf { !it.isNullOrBlank() && it != "null" }
+        }.getOrNull()
+    }
     val pager = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
     var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
@@ -382,7 +414,19 @@ private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) 
     val sub = Color(0xFF6B7480)
     val panel = Color(0xFFF3F4F5)
     val dock = listOf("app", "worlds", "personas", "settings").map { id -> appEntries.first { it.id == id } }
-    Column(modifier.fillMaxSize().background(Color.White), horizontalAlignment = Alignment.CenterHorizontally) {
+    Box(modifier.fillMaxSize()) {
+        desktopWallpaper?.let { image ->
+            AsyncImage(
+                model = image,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+        Column(
+            Modifier.fillMaxSize().background(if (desktopWallpaper == null) Color.White else Color.White.copy(alpha = 0.82f)),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         HorizontalPager(state = pager, modifier = Modifier.fillMaxWidth().weight(1f), beyondViewportPageCount = 1) { page ->
             when (page) {
                 0 -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 18.dp).padding(top = 20.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -414,7 +458,7 @@ private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) 
                     Text("应用", Modifier.padding(start = 10.dp, bottom = 10.dp), color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                     LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
                         items(appEntries) { entry -> Column(Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(29.dp)) }
+                            Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 29.dp) }
                             Spacer(Modifier.height(7.dp)); Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
                         } }
                     }
@@ -432,8 +476,29 @@ private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) 
         }
         Row(Modifier.fillMaxWidth().height(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { repeat(3) { index -> Box(Modifier.padding(horizontal = 5.dp).size(if (pager.currentPage == index) 7.dp else 5.dp).background(if (pager.currentPage == index) ink else Color(0xFFD5D8DC), CircleShape).clickable { scope.launch { pager.animateScrollToPage(index) } }) } }
         Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 5.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
-            dock.forEach { entry -> Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(54.dp).background(panel, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(24.dp)) }; Spacer(Modifier.height(5.dp)); Text(if (entry.id == "app") "聊天" else if (entry.id == "personas") "联系人设定" else entry.title, color = ink, fontSize = 11.sp) } }
+            dock.forEach { entry -> Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(54.dp).background(panel, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 24.dp) }; Spacer(Modifier.height(5.dp)); Text(if (entry.id == "app") "聊天" else if (entry.id == "personas") "联系人设定" else entry.title, color = ink, fontSize = 11.sp) } }
         }
+        }
+    }
+}
+
+@Composable
+private fun AppEntryIcon(entry: AppEntry, overrides: Map<String, String>, size: androidx.compose.ui.unit.Dp) {
+    val customImage = overrides[entry.id]
+    if (customImage != null) {
+        AsyncImage(
+            model = customImage,
+            contentDescription = entry.title,
+            modifier = Modifier.size(size),
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Icon(
+            painter = painterResource(entry.icon),
+            contentDescription = entry.title,
+            tint = Color(0xFF0F1419),
+            modifier = Modifier.size(size)
+        )
     }
 }
 
