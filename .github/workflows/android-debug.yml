@@ -4,10 +4,23 @@ on:
   push:
     branches:
       - native-android
+    paths:
+      - "android/**"
+      - ".github/workflows/android-debug.yml"
+  pull_request:
+    branches:
+      - native-android
+    paths:
+      - "android/**"
+      - ".github/workflows/android-debug.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: native-android-build
+  cancel-in-progress: true
 
 jobs:
   build:
