@@ -87,21 +87,29 @@ private data class AppEntry(
     val icon: Int
 )
 
+// Desktop shortcuts mirror the original Mio small-phone pages.
+// The four fixed dock entries are also present here for route lookup, but are not repeated in page grids.
 private val appEntries = listOf(
-    AppEntry("app", "聊天与应用", "聊天、联系人和动态", R.drawable.mio_ic_app),
-    AppEntry("worlds", "世界书", "设定、词条与规则", R.drawable.mio_ic_worlds),
-    AppEntry("personas", "联系人", "角色资料与管理", R.drawable.mio_ic_personas),
-    AppEntry("diary", "日记", "记录日常片段", R.drawable.mio_ic_diary),
-    AppEntry("music", "音乐", "曲库、歌词与播放", R.drawable.mio_ic_music),
+    AppEntry("app", "聊天", "聊天与角色对话", R.drawable.mio_ic_app),
+    AppEntry("worlds", "世界书", "世界设定与条目", R.drawable.mio_ic_worlds),
+    AppEntry("personas", "联系人设定", "联系人与角色资料", R.drawable.mio_ic_personas),
+    AppEntry("diary", "日记", "日记记录", R.drawable.mio_ic_diary),
+    AppEntry("rolephones", "iPhone", "角色手机", R.drawable.mio_ic_rolephones),
+    AppEntry("desktopcustom", "桌面美化", "桌面壁纸、图标与组件", R.drawable.mio_ic_desktopcustom),
+    AppEntry("music", "音乐", "音乐播放与资料库", R.drawable.mio_ic_music),
     AppEntry("couple", "情侣空间", "关系与共同记录", R.drawable.mio_ic_couple),
-    AppEntry("coread", "共读", "一起阅读与交流", R.drawable.mio_ic_coread),
-    AppEntry("crread", "阅读", "书籍与阅读记录", R.drawable.mio_ic_crread),
-    AppEntry("msgs", "讯息", "消息与会话", R.drawable.mio_ic_msgs),
-    AppEntry("rolephones", "角色手机", "角色的虚构手机空间", R.drawable.mio_ic_rolephones),
-    AppEntry("desktopcustom", "桌面美化", "壁纸、图标与组件", R.drawable.mio_ic_desktopcustom),
-    AppEntry("css", "美化", "外观与样式预设", R.drawable.mio_ic_css),
-    AppEntry("settings", "设置", "模型、语音、生图与数据", R.drawable.mio_ic_settings),
-    AppEntry("backup", "数据迁移", "旧版备份只读检查", R.drawable.mio_ic_backup),
+    AppEntry("coread", "共读", "共同阅读", R.drawable.mio_ic_coread),
+    AppEntry("offline", "线下", "线下相关内容", R.drawable.mio_ic_offline),
+    AppEntry("msgs", "讯息", "独立消息应用", R.drawable.mio_ic_msgs),
+    AppEntry("wallet", "钱包", "钱包与收支记录", R.drawable.mio_ic_wallet),
+    AppEntry("mcp", "MCP", "服务与工具连接", R.drawable.mio_ic_mcp),
+    AppEntry("preset", "预设", "提示词与配置预设", R.drawable.mio_ic_preset),
+    AppEntry("life", "生活", "生活模拟", R.drawable.mio_ic_life),
+    AppEntry("iff", "IF线", "分支剧情", R.drawable.mio_ic_iff),
+    AppEntry("xinji", "心迹", "心迹互动", R.drawable.mio_ic_xinji),
+    AppEntry("repo", "仓库", "作品仓库", R.drawable.mio_ic_repo),
+    AppEntry("youtube", "YouTube", "视频与媒体", R.drawable.mio_ic_youtube),
+    AppEntry("settings", "设置", "应用设置", R.drawable.mio_ic_settings),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -204,12 +212,14 @@ fun MioWateryApp() {
                     },
                     modifier = Modifier.padding(innerPadding)
                 )
-            } else if (selectedPage == "app" || selectedPage == "msgs") {
+            } else if (selectedPage == "app") {
                 ChatScreen(
                     onBack = { selectedPage = chatReturnPage },
                     personaId = selectedPersonaId,
                     modifier = Modifier.padding(innerPadding)
                 )
+            } else if (selectedPage == "msgs") {
+                FeaturePlaceholder(title = "讯息", modifier = Modifier.padding(innerPadding), onBack = { selectedPage = "home" })
             } else if (selectedPage == "worlds") {
                 WorldbookScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "desktopcustom") {
@@ -419,7 +429,7 @@ private fun HomeScreen(
                 .orEmpty().filterNot { it.id in hiddenDesktopIds }
         }.getOrDefault(emptyList())
     }
-    val pager = rememberPagerState(pageCount = { 3 })
+    val pager = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
     var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
     LaunchedEffect(Unit) { while (true) { now = java.time.LocalDateTime.now(); kotlinx.coroutines.delay(15_000) } }
@@ -481,27 +491,37 @@ private fun HomeScreen(
                         }
                     }
                 }
-                1 -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).padding(horizontal = 8.dp).padding(top = 18.dp)) {
-                    Text("应用", Modifier.padding(start = 10.dp, bottom = 10.dp), color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                        items(appEntries.filterNot { it.id in hiddenDesktopIds }) { entry -> Column(Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 29.dp) }
-                            Spacer(Modifier.height(7.dp)); Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
-                        } }
+                else -> {
+                    val pageApps = when (page) {
+                        1 -> listOf("diary", "rolephones", "desktopcustom", "music")
+                        2 -> listOf("couple", "coread", "offline", "msgs")
+                        else -> listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube")
                     }
-                }
-                else -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 18.dp).padding(top = 18.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    CalendarHomeCard(ink, sub)
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        HomePanel("聊天预览", Modifier.weight(1f).height(120.dp)) { Text("开始一段对话", color = ink, style = MaterialTheme.typography.bodyMedium); Text("点此进入聊天", color = sub, style = MaterialTheme.typography.labelSmall) }
-                        HomePanel("快捷入口", Modifier.weight(1f).height(120.dp)) { Text("联系人 · 世界书", color = ink, style = MaterialTheme.typography.bodyMedium); Text("角色与设定", color = sub, style = MaterialTheme.typography.labelSmall) }
+                    val visibleApps = pageApps.filterNot { it in hiddenDesktopIds }.mapNotNull { id -> appEntries.firstOrNull { it.id == id } }
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(4),
+                        modifier = Modifier.fillMaxSize().widthIn(max = 560.dp).padding(horizontal = 8.dp),
+                        contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 28.dp, bottom = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(26.dp)
+                    ) {
+                        items(visibleApps) { entry ->
+                            Column(
+                                Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+                                    AppEntryIcon(entry, desktopOverrides, 29.dp)
+                                }
+                                Spacer(Modifier.height(7.dp))
+                                Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
+                            }
+                        }
                     }
-                    Text("常用应用", color = ink, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { listOf("app", "personas", "worlds", "diary").forEach { id -> val entry = appEntries.first { it.id == id }; Column(Modifier.weight(1f).clickable { onOpen(id) }, horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(40.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 22.dp) }; Spacer(Modifier.height(6.dp)); Text(entry.title, color = sub, fontSize = 10.sp, textAlign = TextAlign.Center) } } }
                 }
             }
         }
-        Row(Modifier.fillMaxWidth().height(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { repeat(3) { index -> Box(Modifier.padding(horizontal = 5.dp).size(if (pager.currentPage == index) 7.dp else 5.dp).background(if (pager.currentPage == index) ink else Color(0xFFD5D8DC), CircleShape).clickable { scope.launch { pager.animateScrollToPage(index) } }) } }
+        Row(Modifier.fillMaxWidth().height(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { repeat(4) { index -> Box(Modifier.padding(horizontal = 5.dp).size(if (pager.currentPage == index) 7.dp else 5.dp).background(if (pager.currentPage == index) ink else Color(0xFFD5D8DC), CircleShape).clickable { scope.launch { pager.animateScrollToPage(index) } }) } }
         Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 5.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
             dock.forEach { entry -> Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(54.dp).background(panel, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 24.dp) }; Spacer(Modifier.height(5.dp)); Text(if (entry.id == "app") "聊天" else if (entry.id == "personas") "联系人设定" else entry.title, color = ink, fontSize = 11.sp) } }
         }
