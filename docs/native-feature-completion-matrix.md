@@ -86,6 +86,7 @@ The first desktop page is the clock / weather / recent-message widget page. Nati
 
 - `app` and `msgs` are distinct upstream routes. Native `app` opens chat; `msgs` now has its own route and is explicitly not redirected to ChatScreen. The message inbox itself is still a placeholder.
 - The native desktop app grids now use the upstream page grouping and no longer display the invented generic "应用" title, calendar page, or "常用应用" shortcut card.
+- Theme-pack widgets are no longer rendered as extra cards on the first clock/weather page; they are placed below the original first app-grid page, pending exact positional mapping from the source desktop layout.
 - The four fixed dock entries are excluded from the three app-grid pages to avoid duplicate icons.
 - The original source also contains CSS beautification, stickers management and data backup as internal/settings/chat workflows. They should not be promoted to invented desktop shortcuts without evidence.
 - Backup remains available during migration work and should ultimately be placed under the original Settings/Data flow.
