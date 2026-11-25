@@ -61,7 +61,22 @@ jobs:
 
       - name: Compile debug APK
         working-directory: android
-        run: gradle --no-daemon --stacktrace testDebugUnitTest assembleDebug
+        shell: bash
+        run: |
+          set -o pipefail
+          for attempt in 1 2 3; do
+            gradle --no-daemon --stacktrace testDebugUnitTest assembleDebug 2>&1 | tee build.log
+            status=${PIPESTATUS[0]}
+            if [ "$status" -eq 0 ]; then
+              exit 0
+            fi
+            if ! grep -Eqi "Received status code 429|HTTP 5[0-9][0-9]|Could not GET" build.log; then
+              exit "$status"
+            fi
+            echo "Dependency repository throttled or unavailable; retry $attempt/3"
+            sleep $((attempt * 20))
+          done
+          exit 1
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
