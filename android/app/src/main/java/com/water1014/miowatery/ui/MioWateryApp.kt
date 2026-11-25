@@ -17,6 +17,14 @@ import com.water1014.miowatery.core.migration.LegacyBackupPreview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.background
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -251,38 +259,115 @@ private fun queryBackupName(context: Context, uri: Uri): String {
     return name ?: uri.lastPathSegment ?: "backup.json"
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) {
+    val pager = rememberPagerState(pageCount = { 3 })
+    val scope = rememberCoroutineScope()
     var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
     LaunchedEffect(Unit) {
-        while (true) { now = java.time.LocalDateTime.now(); delay(30_000) }
+        while (true) { now = java.time.LocalDateTime.now(); kotlinx.coroutines.delay(15_000) }
     }
-    val time = now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
-    val date = now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE))
-    val dock = listOf(
-        appEntries.first { it.id == "app" },
-        appEntries.first { it.id == "worlds" },
-        appEntries.first { it.id == "personas" },
-        appEntries.first { it.id == "settings" }
-    )
-    Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(horizontal = 18.dp)) {
-        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
-            Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 20.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
-                Text(time, style = MaterialTheme.typography.displayLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Light, letterSpacing = (-2).sp), color = MaterialTheme.colorScheme.onBackground)
-                Text(date, Modifier.padding(bottom = 7.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            androidx.compose.foundation.lazy.grid.LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth().height(290.dp), userScrollEnabled = false, horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                item { HomePanel("便签", Modifier.height(140.dp)) { Text("点这里写便签", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
-                item { HomePanel("天气", Modifier.height(140.dp)) { Text("设置城市", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("--°", style = MaterialTheme.typography.headlineLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Light)); Text("天气信息将在接入后显示", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
-                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) { HomePanel("Messages", Modifier.fillMaxWidth().height(130.dp), "See all") { Text("还没有最近聊天", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+    val ink = Color(0xFF0F1419)
+    val sub = Color(0xFF6B7480)
+    val panel = Color(0xFFF3F4F5)
+    val dock = listOf("app", "worlds", "personas", "settings").map { id -> appEntries.first { it.id == id } }
+    Column(modifier.fillMaxSize().background(Color.White), horizontalAlignment = Alignment.CenterHorizontally) {
+        HorizontalPager(state = pager, modifier = Modifier.fillMaxWidth().weight(1f), beyondViewportPageCount = 1) { page ->
+            when (page) {
+                0 -> Column(
+                    Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState())
+                        .padding(horizontal = 18.dp).padding(top = 20.dp, bottom = 14.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 2.dp)) {
+                        Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink,
+                            fontSize = 60.sp, fontWeight = FontWeight.Light, letterSpacing = (-2).sp)
+                        Text(now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE)),
+                            color = sub, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                        HomePanel("天气", Modifier.weight(1f).height(154.dp)) {
+                            Text("--°", color = ink, fontSize = 34.sp, fontWeight = FontWeight.Light)
+                            Text("天气信息", color = sub, style = MaterialTheme.typography.labelSmall)
+                        }
+                        HomePanel("照片", Modifier.weight(1f).height(154.dp)) {
+                            Box(Modifier.fillMaxWidth().weight(1f).background(Color(0xFFE7E9EB), RoundedCornerShape(14.dp)),
+                                contentAlignment = Alignment.Center) {
+                                Text("留住此刻", color = sub, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                    HomePanel("最近消息", Modifier.fillMaxWidth().height(132.dp), "查看全部") {
+                        Text("还没有最近聊天", color = sub, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                1 -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).padding(horizontal = 8.dp).padding(top = 18.dp)) {
+                    Text("应用", Modifier.padding(start = 10.dp, bottom = 10.dp), color = ink,
+                        style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(4), modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 20.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(24.dp)
+                    ) {
+                        items(appEntries) { entry ->
+                            Column(Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(Modifier.size(58.dp).background(
+                                    brush = androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFF8F8F8), Color(0xFFE9EAEC))),
+                                    shape = RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+                                    Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(29.dp))
+                                }
+                                Spacer(Modifier.height(7.dp))
+                                Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
+                            }
+                        }
+                    }
+                }
+                else -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState())
+                    .padding(horizontal = 18.dp).padding(top = 18.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    CalendarHomeCard(ink, sub)
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        HomePanel("聊天预览", Modifier.weight(1f).height(120.dp)) {
+                            Text("开始一段对话", color = ink, style = MaterialTheme.typography.bodyMedium)
+                            Text("点此进入聊天", color = sub, style = MaterialTheme.typography.labelSmall)
+                        }
+                        HomePanel("快捷入口", Modifier.weight(1f).height(120.dp)) {
+                            Text("联系人 · 世界书", color = ink, style = MaterialTheme.typography.bodyMedium)
+                            Text("角色与设定", color = sub, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                    Text("常用应用", color = ink, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        listOf("app", "personas", "worlds", "diary").forEach { id ->
+                            val entry = appEntries.first { it.id == id }
+                            Column(Modifier.weight(1f).clickable { onOpen(id) }, horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(Modifier.size(40.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
+                                    Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(22.dp))
+                                }
+                                Spacer(Modifier.height(6.dp))
+                                Text(entry.title, color = sub, fontSize = 10.sp, textAlign = TextAlign.Center)
+                            }
+                        }
+                    }
+                }
             }
         }
-        Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().height(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            repeat(3) { index ->
+                Box(Modifier.padding(horizontal = 5.dp).size(if (pager.currentPage == index) 7.dp else 5.dp)
+                    .background(if (pager.currentPage == index) ink else Color(0xFFD5D8DC), CircleShape)
+                    .clickable { scope.launch { pager.animateScrollToPage(index) } })
+            }
+        }
+        Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 5.dp, bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
             dock.forEach { entry ->
-                Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(54.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp)) }
-                    Spacer(Modifier.height(5.dp))
-                    Text(if (entry.id == "personas") "联系人设定" else entry.title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
+                Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.size(42.dp).background(panel, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                        Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(23.dp))
+                    }
                 }
             }
         }
@@ -290,16 +375,40 @@ private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) 
 }
 
 @Composable
-private fun HomePanel(title: String, modifier: Modifier = Modifier, trailing: String? = null, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(22.dp)).padding(16.dp)) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
-            if (trailing != null) Text(trailing, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun CalendarHomeCard(ink: Color, sub: Color) {
+    val today = java.time.LocalDate.now()
+    val firstDayOffset = today.withDayOfMonth(1).dayOfWeek.value % 7
+    val monthDays = today.lengthOfMonth()
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
+        Column(Modifier.padding(horizontal = 14.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(11.dp)) {
+            Text(today.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", java.util.Locale.getDefault())),
+                color = ink, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth()) {
+                listOf("日", "一", "二", "三", "四", "五", "六").forEach {
+                    Text(it, Modifier.weight(1f), color = sub, fontSize = 11.sp, textAlign = TextAlign.Center)
+                }
+            }
+            for (week in 0..5) {
+                Row(Modifier.fillMaxWidth()) {
+                    for (column in 0..6) {
+                        val day = week * 7 + column - firstDayOffset + 1
+                        Box(Modifier.weight(1f).aspectRatio(1f), contentAlignment = Alignment.Center) {
+                            if (day in 1..monthDays) {
+                                Box(Modifier.size(30.dp).then(if (day == today.dayOfMonth) Modifier.background(ink, CircleShape) else Modifier),
+                                    contentAlignment = Alignment.Center) {
+                                    Text(day.toString(), color = if (day == today.dayOfMonth) Color.White else ink, fontSize = 12.sp)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        Spacer(Modifier.height(12.dp))
-        content()
     }
 }
+
 @Composable
 private fun FeaturePlaceholder(
     title: String,
