@@ -123,3 +123,17 @@ data class MemoryEntryEntity(
     val rangeEnd: Int?,
     val isMerged: Boolean
 )
+
+
+@Entity(
+    tableName = "worldbook_categories",
+    indices = [Index("profileId"), Index("personaId"), Index("name")]
+)
+data class WorldbookCategoryEntity(
+    @PrimaryKey val id: String,
+    val profileId: String,
+    val personaId: String?,
+    val name: String,
+    val createdAt: Long,
+    val updatedAt: Long
+)
