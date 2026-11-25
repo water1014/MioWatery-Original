@@ -3,7 +3,6 @@ package com.water1014.miowatery.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,11 +30,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import com.water1014.miowatery.core.database.MemoryEntryEntity
 import com.water1014.miowatery.core.database.MioDatabase
 import com.water1014.miowatery.core.network.ApiConfigStore
@@ -45,22 +47,16 @@ import com.water1014.miowatery.core.network.ChatCompletionRequest
 import com.water1014.miowatery.core.network.ChatMessagePayload
 import com.water1014.miowatery.core.network.DataStoreApiSessionStore
 import com.water1014.miowatery.core.network.SavedApiConfig
-import com.water1014.miowatery.core.database.MessageEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
 @Composable
-fun MemoryScreen(
-    onBack: () -> Unit,
-    conversationId: String,
-    modifier: Modifier = Modifier
-) {
+fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val scope = rememberCoroutineScope()
@@ -68,6 +64,7 @@ fun MemoryScreen(
     val messages by dao.observeMessages(conversationId).collectAsState(initial = emptyList())
     val configStore = remember { ApiConfigStore(context) }
     val apiConfig by configStore.config.collectAsState(initial = SavedApiConfig())
+
     var rangeStart by remember { mutableStateOf("1") }
     var rangeEnd by remember { mutableStateOf("") }
     var generating by remember { mutableStateOf(false) }
@@ -75,15 +72,37 @@ fun MemoryScreen(
     var search by remember { mutableStateOf("") }
     var editing by remember { mutableStateOf<MemoryEntryEntity?>(null) }
     var showEditor by remember { mutableStateOf(false) }
-    var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var type by remember { mutableStateOf("traditional") }
+    var expandedEntryId by remember { mutableStateOf<String?>(null) }
+    var pendingDelete by remember { mutableStateOf<MemoryEntryEntity?>(null) }
+    var traditionalExpanded by remember { mutableStateOf(false) }
 
+    val traditionalEntries = entries.filter { it.type == "traditional" }
+    val noteEntries = entries.filter { it.type != "traditional" }
+    val filteredNotes = noteEntries.filter { search.isBlank() || it.text.contains(search, true) }
+    val filteredTraditional = traditionalEntries.filter { search.isBlank() || it.text.contains(search, true) }
+    val groupBackground = MaterialTheme.colorScheme.surface
+    val ink = MaterialTheme.colorScheme.onSurface
+    val secondaryText = MaterialTheme.colorScheme.onSurfaceVariant
+
+    fun startNew(kind: String) {
+        editing = null
+        content = ""
+        type = kind
+        showEditor = true
+    }
+    fun startEdit(entry: MemoryEntryEntity) {
+        editing = entry
+        content = entry.text
+        type = entry.type
+        showEditor = true
+    }
     fun generateSummary() {
         if (generating) return
         val start = (rangeStart.toIntOrNull() ?: 1).coerceAtLeast(1)
         val end = (rangeEnd.toIntOrNull() ?: messages.size).coerceAtMost(messages.size)
-        if (end < start || messages.isEmpty()) {
+        if (messages.isEmpty() || start > messages.size || end < start) {
             generationError = "请选择有效的聊天消息范围"
             return
         }
@@ -135,7 +154,7 @@ fun MemoryScreen(
                     )
                 )
                 rangeStart = "1"
-                rangeEnd = messages.size.toString()
+                rangeEnd = ""
             } catch (failure: Exception) {
                 generationError = failure.message ?: "记忆总结失败"
             } finally {
@@ -144,90 +163,113 @@ fun MemoryScreen(
         }
     }
 
-    fun startNew(kind: String) {
-        editing = null
-        title = ""
-        content = ""
-        type = kind
-        showEditor = true
-    }
-    fun startEdit(entry: MemoryEntryEntity) {
-        editing = entry
-        title = entry.text.lineSequence().firstOrNull()?.take(48).orEmpty()
-        content = entry.text
-        type = entry.type
-        showEditor = true
-    }
-
-    Column(
-        modifier = modifier.fillMaxSize().background(Color(0xFFF7F8FA)).padding(horizontal = 18.dp, vertical = 12.dp),
+    LazyColumn(
+        modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 28.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("‹", Modifier.clickable { onBack() }.padding(end = 12.dp), fontSize = 30.sp, color = Color(0xFF20242A))
-            Column(Modifier.weight(1f)) {
-                Text("记忆管理", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF171A1F))
-                Text("只属于当前聊天的记忆，不会串到其他角色", fontSize = 11.sp, color = Color(0xFF858C96))
-            }
-        }
-        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-            Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("生成聊天记忆", color = Color(0xFF20242A), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-                Text("选择消息范围，AI 会整理成之后聊天可参考的纸条", color = Color(0xFF858C96), fontSize = 10.sp)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(rangeStart, { rangeStart = it }, modifier = Modifier.weight(1f), label = { Text("起始消息") }, singleLine = true)
-                    OutlinedTextField(rangeEnd, { rangeEnd = it }, modifier = Modifier.weight(1f), label = { Text("结束消息") }, placeholder = { Text(messages.size.toString()) }, singleLine = true)
-                }
-                Text("当前聊天共 ${messages.size} 条消息", color = Color(0xFF9AA1AA), fontSize = 10.sp)
-                Text(if (generating) "正在整理记忆…" else "生成纸条", Modifier.fillMaxWidth().background(Color(0xFF171A1F), RoundedCornerShape(12.dp)).clickable(enabled = !generating) { generateSummary() }.padding(vertical = 11.dp), color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center, fontSize = 12.sp)
-                generationError?.let { Text(it, color = Color(0xFFB45C5C), fontSize = 10.sp) }
-            }
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Card(Modifier.weight(1f).clickable { startNew("traditional") }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                Column(Modifier.padding(13.dp)) {
-                    Text("＋ 手动记忆", fontWeight = FontWeight.SemiBold, color = Color(0xFF20242A), fontSize = 13.sp)
-                    Text("每次聊天都会注入", color = Color(0xFF858C96), fontSize = 10.sp)
-                }
-            }
-            Card(Modifier.weight(1f).clickable { startNew("note") }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                Column(Modifier.padding(13.dp)) {
-                    Text("＋ 总结纸条", fontWeight = FontWeight.SemiBold, color = Color(0xFF20242A), fontSize = 13.sp)
-                    Text("聊天中的长期信息", color = Color(0xFF858C96), fontSize = 10.sp)
+        item {
+            Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("‹", Modifier.clickable { onBack() }.padding(end = 16.dp), fontSize = 30.sp, color = ink)
+                Column(Modifier.weight(1f)) {
+                    Text("记忆管理", fontSize = 21.sp, fontWeight = FontWeight.SemiBold, color = ink)
+                    Text("当前聊天的长期记忆", fontSize = 12.sp, color = secondaryText)
                 }
             }
         }
-        OutlinedTextField(value = search, onValueChange = { search = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, placeholder = { Text("搜索记忆") }, shape = RoundedCornerShape(14.dp))
-        val filtered = entries.filter { search.isBlank() || it.text.contains(search, true) }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("共 ${entries.size} 条", color = Color(0xFF858C96), fontSize = 11.sp)
-            Text("手动记忆 ${entries.count { it.type == "traditional" }} · 纸条 ${entries.count { it.type == "note" }}", color = Color(0xFF858C96), fontSize = 11.sp)
-        }
-        if (filtered.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(if (search.isBlank()) "还没有记忆纸条" else "没有找到相关记忆", color = Color(0xFF6F7782), fontSize = 15.sp)
-                    Spacer(Modifier.height(8.dp))
-                    Text("可以手动保存重要设定，也可以整理聊天中的共同经历", color = Color(0xFFA0A6AE), fontSize = 11.sp)
+        item {
+            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = groupBackground)) {
+                Column(Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 8.dp)) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        StatCell(entries.size.toString(), "纸条", Modifier.weight(1f))
+                        StatCell(traditionalEntries.size.toString(), "传统记忆", Modifier.weight(1f))
+                        StatCell("0", "向量记忆", Modifier.weight(1f))
+                    }
+                    Row(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("●", color = MaterialTheme.colorScheme.primary, fontSize = 9.sp)
+                        Text(" 传统模式", color = ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.weight(1f))
+                        Text("手动记忆与最近 8 张纸条会参与回复", color = secondaryText, fontSize = 10.sp, textAlign = TextAlign.End)
+                    }
                 }
             }
+        }
+        item { SectionLabel("手动生成纸条") }
+        item {
+            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = groupBackground)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("选择要整理的聊天消息范围", color = secondaryText, fontSize = 12.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(rangeStart, { rangeStart = it.filter(Char::isDigit) }, Modifier.weight(1f), label = { Text("起始序号") }, singleLine = true)
+                        Text("至", color = secondaryText)
+                        OutlinedTextField(rangeEnd, { rangeEnd = it.filter(Char::isDigit) }, Modifier.weight(1f), label = { Text("结束序号") }, placeholder = { Text(messages.size.toString()) }, singleLine = true)
+                    }
+                    Text("当前聊天共 ${messages.size} 条消息", color = secondaryText, fontSize = 11.sp)
+                    Text(
+                        if (generating) "正在生成…" else "生成纸条",
+                        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primary, RoundedCornerShape(18.dp))
+                            .clickable(enabled = !generating) { generateSummary() }.padding(vertical = 10.dp),
+                        color = MaterialTheme.colorScheme.onPrimary, textAlign = TextAlign.Center, fontSize = 14.sp, fontWeight = FontWeight.SemiBold
+                    )
+                    generationError?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp) }
+                }
+            }
+        }
+        item { SectionLabel("纸条（${noteEntries.size}）") }
+        item {
+            OutlinedTextField(search, { search = it }, Modifier.fillMaxWidth(), singleLine = true, placeholder = { Text("搜索记忆") }, shape = RoundedCornerShape(12.dp))
+        }
+        if (filteredNotes.isEmpty()) {
+            item { EmptyMemoryHint(if (search.isBlank()) "还没有纸条。选好消息范围后生成，或手动添加。" else "没有找到相关纸条") }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(filtered, key = { it.id }) { entry ->
-                    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(17.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
-                        Column(Modifier.fillMaxWidth().padding(15.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Text(if (entry.type == "traditional") "手动记忆" else if (entry.isMerged) "早期记忆" else "总结纸条", Modifier.weight(1f), color = Color(0xFF737C87), fontSize = 10.sp)
-                                Text(SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date(entry.createdAt)), color = Color(0xFF9AA1AA), fontSize = 10.sp)
+            items(filteredNotes, key = { it.id }) { entry ->
+                MemoryNoteCard(
+                    entry, expandedEntryId == entry.id,
+                    { expandedEntryId = if (expandedEntryId == entry.id) null else entry.id },
+                    { startEdit(entry) }, { pendingDelete = entry },
+                    SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date(entry.createdAt)),
+                    groupBackground, ink, secondaryText
+                )
+            }
+        }
+        item {
+            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = groupBackground)) {
+                Column {
+                    Row(Modifier.fillMaxWidth().clickable { traditionalExpanded = !traditionalExpanded }.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("传统记忆", color = ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                            Text("手动保存的人设、关系和长期约定", color = secondaryText, fontSize = 11.sp)
+                        }
+                        Text("${traditionalEntries.size}", color = secondaryText, fontSize = 14.sp)
+                        Text(if (traditionalExpanded) "⌄" else "›", color = secondaryText, fontSize = 20.sp)
+                    }
+                    if (traditionalExpanded) {
+                        Column(Modifier.padding(start = 14.dp, end = 14.dp, bottom = 12.dp)) {
+                            if (filteredTraditional.isEmpty()) {
+                                EmptyMemoryHint(if (search.isBlank()) "还没有手动记忆" else "没有找到相关记忆")
+                            } else {
+                                filteredTraditional.forEach { entry ->
+                                    Column(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text(entry.text, color = ink, fontSize = 14.sp, lineHeight = 21.sp)
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                                            Text("编辑", Modifier.clickable { startEdit(entry) }.padding(8.dp), color = secondaryText, fontSize = 12.sp)
+                                            Text("删除", Modifier.clickable { pendingDelete = entry }.padding(8.dp), color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
+                                        }
+                                    }
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
+                                }
                             }
-                            Text(entry.text, color = Color(0xFF343B44), fontSize = 13.sp, lineHeight = 19.sp)
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                                Text("编辑", Modifier.clickable { startEdit(entry) }.padding(horizontal = 8.dp, vertical = 4.dp), color = Color(0xFF303741), fontSize = 11.sp)
-                                Text("删除", Modifier.clickable { scope.launch { dao.deleteMemoryEntry(entry.id, conversationId) } }.padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp), color = Color(0xFFB45C5C), fontSize = 11.sp)
-                            }
+                            TextButton(onClick = { startNew("traditional") }) { Text("＋ 添加手动记忆") }
                         }
                     }
                 }
+            }
+        }
+        item {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                TextButton(onClick = { startNew("note") }) { Text("＋ 添加总结纸条") }
+                Spacer(Modifier.weight(1f))
+                Text("记忆仅属于当前聊天", Modifier.padding(top = 10.dp), color = secondaryText, fontSize = 10.sp)
             }
         }
     }
@@ -237,9 +279,7 @@ fun MemoryScreen(
             onDismissRequest = { showEditor = false },
             title = { Text(if (editing == null) if (type == "traditional") "添加手动记忆" else "添加总结纸条" else "编辑记忆") },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(content, { content = it }, label = { Text("记忆内容") }, minLines = 4)
-                }
+                OutlinedTextField(content, { content = it }, label = { Text("记忆内容") }, minLines = 4, maxLines = 8)
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -264,5 +304,74 @@ fun MemoryScreen(
             },
             dismissButton = { TextButton(onClick = { showEditor = false }) { Text("取消") } }
         )
+    }
+    pendingDelete?.let { entry ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("删除这条记忆？") },
+            text = { Text("删除后不会再注入当前聊天的上下文。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch { dao.deleteMemoryEntry(entry.id, conversationId) }
+                    pendingDelete = null
+                }) { Text("删除", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text("取消") } }
+        )
+    }
+}
+
+@Composable
+private fun StatCell(value: String, label: String, modifier: Modifier = Modifier) {
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontSize = 27.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+        Spacer(Modifier.height(4.dp))
+        Text(label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun SectionLabel(label: String) {
+    Text(label, Modifier.padding(start = 2.dp, top = 4.dp), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+}
+
+@Composable
+private fun EmptyMemoryHint(text: String) {
+    Text(text, Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 20.dp), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, textAlign = TextAlign.Center)
+}
+
+@Composable
+private fun MemoryNoteCard(
+    entry: MemoryEntryEntity,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    dateLabel: String,
+    groupBackground: Color,
+    ink: Color,
+    secondaryText: Color
+) {
+    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(15.dp), colors = CardDefaults.cardColors(containerColor = groupBackground)) {
+        Column(Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(horizontal = 14.dp, vertical = 12.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(if (entry.isMerged) "早期记忆" else "总结纸条", color = ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.weight(1f))
+                    if (entry.rangeStart != null) Text("消息 ${entry.rangeStart}–${entry.rangeEnd}", color = secondaryText, fontSize = 10.sp)
+                    Text("  $dateLabel", color = secondaryText, fontSize = 10.sp)
+                    Text(if (expanded) "⌄" else "›", color = secondaryText, fontSize = 18.sp)
+                }
+                Text(entry.text.lineSequence().firstOrNull()?.take(100).orEmpty(), Modifier.padding(top = 7.dp), color = secondaryText, fontSize = 12.sp, maxLines = if (expanded) 4 else 2)
+            }
+            if (expanded) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
+                Text(entry.text, Modifier.fillMaxWidth().padding(14.dp), color = ink, fontSize = 13.sp, lineHeight = 20.sp)
+                Row(Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 8.dp), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDelete) { Text("删除", color = MaterialTheme.colorScheme.error) }
+                    TextButton(onClick = onEdit) { Text("编辑") }
+                }
+            }
+        }
     }
 }
