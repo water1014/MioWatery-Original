@@ -78,6 +78,9 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
     val personaPrompt = remember(persona?.rawLegacyJson) {
         runCatching { JSONObject(persona?.rawLegacyJson ?: "{}").optString("prompt") }.getOrDefault("")
     }
+    val personaGreeting = remember(persona?.rawLegacyJson) {
+        runCatching { JSONObject(persona?.rawLegacyJson ?: "{}").optString("greet").trim() }.getOrDefault("")
+    }
     val messages by dao.observeMessages(conversationId).collectAsState(initial = emptyList())
     val configStore = remember { ApiConfigStore(context) }
     val apiConfig by configStore.config.collectAsState(initial = SavedApiConfig())
@@ -239,7 +242,7 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text("聊天", color = Color(0xFF0F1419), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(persona?.name?.takeIf { it.isNotBlank() } ?: "聊天", color = Color(0xFF0F1419), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
                 Text(
                     if (apiConfig.model.isBlank()) "尚未配置模型" else apiConfig.model,
                     color = Color(0xFF8A929B),
@@ -267,10 +270,15 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                     contentAlignment = Alignment.Center
                 ) { Text("M", color = Color(0xFF0F1419), fontSize = 27.sp, fontWeight = FontWeight.Light) }
                 Spacer(Modifier.height(18.dp))
-                Text("开始一段对话", color = Color(0xFF0F1419), fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Text(
+                    if (personaGreeting.isNotBlank()) persona?.name ?: "开场白" else "开始一段对话",
+                    color = Color(0xFF0F1419), fontSize = 18.sp, fontWeight = FontWeight.SemiBold
+                )
                 Spacer(Modifier.height(7.dp))
                 Text(
-                    if (apiConfig.model.isBlank()) "先配置兼容 OpenAI 的 API，再发送第一条消息。" else "发送消息，开启你们的故事。",
+                    personaGreeting.ifBlank {
+                        if (apiConfig.model.isBlank()) "先配置兼容 OpenAI 的 API，再发送第一条消息。" else "发送消息，开启你们的故事。"
+                    },
                     color = Color(0xFF7B848E), fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 20.sp
                 )
                 if (apiConfig.model.isBlank()) {
