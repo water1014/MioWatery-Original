@@ -158,6 +158,15 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     screenMessage = "没有识别到可导入的世界书词条"
                 } else {
                     dao.upsertWorldbookEntries(imported)
+                    val importedCategories = imported
+                        .map { it.personaId to it.bookId }
+                        .distinct()
+                        .filterNot { (owner, name) -> categories.any { it.personaId == owner && it.name == name } }
+                        .map { (owner, name) ->
+                            val now = System.currentTimeMillis()
+                            WorldbookCategoryEntity(UUID.randomUUID().toString(), WORLDBOOK_PROFILE_ID, owner, name, now, now)
+                        }
+                    if (importedCategories.isNotEmpty()) dao.upsertWorldbookCategories(importedCategories)
                     screenMessage = "已导入 ${imported.size} 条词条"
                 }
             } catch (failure: Exception) {
@@ -457,13 +466,26 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         .put("scope", if (globalOnly) "global" else "contact")
                         .toString()
                     scope.launch {
+                        val targetCategory = bookId.trim().ifBlank { "默认分类" }
+                        if (categories.none { it.personaId == (if (globalOnly) null else entryPersonaId) && it.name == targetCategory }) {
+                            dao.upsertWorldbookCategory(
+                                WorldbookCategoryEntity(
+                                    id = UUID.randomUUID().toString(),
+                                    profileId = WORLDBOOK_PROFILE_ID,
+                                    personaId = if (globalOnly) null else entryPersonaId,
+                                    name = targetCategory,
+                                    createdAt = now,
+                                    updatedAt = now
+                                )
+                            )
+                        }
                         dao.upsertWorldbookEntries(
                             listOf(
                                 WorldbookEntryEntity(
                                     id = old?.id ?: UUID.randomUUID().toString(),
                                     profileId = WORLDBOOK_PROFILE_ID,
                                     personaId = if (globalOnly) null else entryPersonaId,
-                                    bookId = bookId.trim().ifBlank { "默认分类" },
+                                    bookId = targetCategory,
                                     title = title.trim().ifBlank { "未命名词条" },
                                     content = body,
                                     enabled = enabled,
