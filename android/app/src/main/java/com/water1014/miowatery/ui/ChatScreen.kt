@@ -77,6 +77,7 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val personas by dao.observePersonas(CHAT_PROFILE_ID).collectAsState(initial = emptyList())
     val persona = personas.firstOrNull { it.personaId == personaId }
+    val worldbookEntries by dao.observeWorldbookEntries(CHAT_PROFILE_ID, personaId).collectAsState(initial = emptyList())
     val personaPrompt = remember(persona?.rawLegacyJson) {
         runCatching { JSONObject(persona?.rawLegacyJson ?: "{}").optString("prompt") }.getOrDefault("")
     }
@@ -163,8 +164,30 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                 return@launch
             }
             try {
+                val activeWorldbook = worldbookEntries.filter { entry ->
+                    if (!entry.enabled) return@filter false
+                    val raw = runCatching { JSONObject(entry.rawLegacyJson) }.getOrNull()
+                    val trigger = raw?.optString("trigger", "global") ?: "global"
+                    if (trigger != "keyword") true
+                    else {
+                        val keys = raw?.optString("keys").orEmpty()
+                            .split(",", "，", "、", ";", "；")
+                            .map { it.trim() }
+                            .filter { it.isNotEmpty() }
+                        keys.any { text.contains(it, ignoreCase = true) }
+                    }
+                }
+                val beforeWorldbook = activeWorldbook.filter {
+                    runCatching { JSONObject(it.rawLegacyJson).optString("position", "after") }.getOrDefault("after") == "before"
+                }
+                val afterWorldbook = activeWorldbook - beforeWorldbook.toSet()
+                val systemPrompt = buildString {
+                    beforeWorldbook.forEach { append("【世界书：").append(it.title).append("】\\n").append(it.content).append("\\n\\n") }
+                    if (personaPrompt.isNotBlank()) append(personaPrompt).append("\\n\\n")
+                    afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\\n").append(it.content).append("\\n\\n") }
+                }.trim()
                 val history = buildList {
-                    if (personaPrompt.isNotBlank()) add(ChatMessagePayload.text("system", personaPrompt))
+                    if (systemPrompt.isNotBlank()) add(ChatMessagePayload.text("system", systemPrompt))
                     addAll((messages.map { it } + userMessage).map { ChatMessagePayload.text(it.role, it.content) })
                 }
                 val result = withContext(Dispatchers.IO) {
