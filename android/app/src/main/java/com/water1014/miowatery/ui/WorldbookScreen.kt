@@ -18,6 +18,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -45,11 +47,12 @@ import java.util.UUID
 private const val WORLDBOOK_PROFILE_ID = "default"
 
 @Composable
-fun WorldbookScreen(modifier: Modifier = Modifier) {
+fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val scope = rememberCoroutineScope()
     val entries by dao.observeAllWorldbookEntries(WORLDBOOK_PROFILE_ID).collectAsState(initial = emptyList())
+    val personas by dao.observePersonas(WORLDBOOK_PROFILE_ID).collectAsState(initial = emptyList())
     var editing by remember { mutableStateOf<WorldbookEntryEntity?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var bookId by remember { mutableStateOf("默认分类") }
@@ -61,11 +64,14 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
     var position by remember { mutableStateOf("after") }
     var globalOnly by remember { mutableStateOf(true) }
     var entryPersonaId by remember { mutableStateOf<String?>(null) }
+    var showPersonaMenu by remember { mutableStateOf(false) }
+    var editorError by remember { mutableStateOf<String?>(null) }
 
     fun openEditor(item: WorldbookEntryEntity?) {
         editing = item
-        entryPersonaId = item?.personaId
-        globalOnly = item?.personaId == null
+        entryPersonaId = item?.personaId ?: personas.firstOrNull()?.personaId
+        globalOnly = item?.let { it.personaId == null } ?: globalOnly
+        editorError = null
         bookId = item?.bookId ?: "默认分类"
         title = item?.title.orEmpty()
         body = item?.content.orEmpty()
@@ -79,6 +85,7 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
 
     Column(modifier.fillMaxSize().background(Color.White).padding(horizontal = 18.dp)) {
         Row(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("‹", Modifier.clickable(onClick = onBack).padding(end = 14.dp), color = Color(0xFF111111), fontSize = 28.sp)
             Column(Modifier.weight(1f)) {
                 Text("世界书", color = Color(0xFF111111), fontSize = 21.sp, fontWeight = FontWeight.SemiBold)
                 Text("故事背景、人物关系与规则设定", color = Color(0xFF8A929B), fontSize = 11.sp)
@@ -127,10 +134,27 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
             title = { Text(if (editing == null) "新建世界书" else "编辑世界书") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (!globalOnly) {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(onClick = { showPersonaMenu = true }) {
+                                Text("所属联系人：${personas.firstOrNull { it.personaId == entryPersonaId }?.name ?: "请选择"}")
+                            }
+                            DropdownMenu(expanded = showPersonaMenu, onDismissRequest = { showPersonaMenu = false }) {
+                                personas.forEach { persona ->
+                                    DropdownMenuItem(
+                                        text = { Text(persona.name) },
+                                        onClick = { entryPersonaId = persona.personaId; showPersonaMenu = false }
+                                    )
+                                }
+                            }
+                        }
+                        if (personas.isEmpty()) Text("请先创建联系人，再添加专属世界书词条。", color = Color(0xFFB45309), fontSize = 11.sp)
+                    }
                     OutlinedTextField(bookId, { bookId = it }, label = { Text("分类 / 书籍名称") }, singleLine = true)
                     OutlinedTextField(title, { title = it }, label = { Text("词条标题") }, singleLine = true)
                     OutlinedTextField(keys, { keys = it }, label = { Text("触发关键词（逗号分隔）") }, singleLine = true)
                     OutlinedTextField(body, { body = it }, label = { Text("内容") }, minLines = 4, maxLines = 7)
+                    editorError?.let { Text(it, color = Color(0xFFB45309), fontSize = 11.sp) }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text("启用词条", Modifier.weight(1f), color = Color(0xFF111111), fontSize = 13.sp)
                         Switch(checked = enabled, onCheckedChange = { enabled = it })
@@ -147,9 +171,13 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
             },
             confirmButton = {
                 TextButton(onClick = {
+                    if (!globalOnly && entryPersonaId == null) {
+                        editorError = "请先创建联系人，再保存专属词条。"
+                        return@TextButton
+                    }
                     val old = editing
                     val now = System.currentTimeMillis()
-                    val raw = JSONObject()
+                    val raw = runCatching { JSONObject(old?.rawLegacyJson ?: "{}") }.getOrElse { JSONObject() }
                         .put("keys", keys.trim())
                         .put("trigger", trigger)
                         .put("position", position)
@@ -161,7 +189,7 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
                                 WorldbookEntryEntity(
                                     id = old?.id ?: UUID.randomUUID().toString(),
                                     profileId = WORLDBOOK_PROFILE_ID,
-                                    personaId = if (globalOnly) null else (entryPersonaId ?: "default"),
+                                    personaId = if (globalOnly) null else entryPersonaId,
                                     bookId = bookId.trim().ifBlank { "默认分类" },
                                     title = title.trim().ifBlank { "未命名词条" },
                                     content = body,
