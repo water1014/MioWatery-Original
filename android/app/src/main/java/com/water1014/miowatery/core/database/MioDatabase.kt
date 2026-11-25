@@ -14,7 +14,8 @@ import androidx.room.RoomDatabase
         WorldbookEntryEntity::class,
         DiaryEntryEntity::class,
         MessageAppEntryEntity::class,
-        MemoryEntryEntity::class
+        MemoryEntryEntity::class,
+        WorldbookCategoryEntity::class
     ],
     version = 5,
     exportSchema = true
