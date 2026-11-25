@@ -7,6 +7,8 @@
     <application
         android:allowBackup="false"
         android:label="MioWatery"
+        android:icon="@drawable/miowatery_app_icon"
+        android:roundIcon="@drawable/miowatery_app_icon"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity
