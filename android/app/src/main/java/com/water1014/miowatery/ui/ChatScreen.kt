@@ -182,9 +182,9 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                 }
                 val afterWorldbook = activeWorldbook - beforeWorldbook.toSet()
                 val systemPrompt = buildString {
-                    beforeWorldbook.forEach { append("【世界书：").append(it.title).append("】\\n").append(it.content).append("\\n\\n") }
-                    if (personaPrompt.isNotBlank()) append(personaPrompt).append("\\n\\n")
-                    afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\\n").append(it.content).append("\\n\\n") }
+                    beforeWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
+                    if (personaPrompt.isNotBlank()) append(personaPrompt).append("\n\n")
+                    afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                 }.trim()
                 val history = buildList {
                     if (systemPrompt.isNotBlank()) add(ChatMessagePayload.text("system", systemPrompt))
