@@ -53,6 +53,30 @@ interface MioDao {
     suspend fun clearMessages(conversationId: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertWorldbookCategory(category: WorldbookCategoryEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertWorldbookCategories(categories: List<WorldbookCategoryEntity>)
+
+    @Query("SELECT * FROM worldbook_categories WHERE profileId = :profileId AND (personaId IS NULL OR personaId = :personaId) ORDER BY name COLLATE NOCASE")
+    fun observeWorldbookCategories(profileId: String, personaId: String): Flow<List<WorldbookCategoryEntity>>
+
+    @Query("SELECT * FROM worldbook_categories WHERE profileId = :profileId ORDER BY name COLLATE NOCASE")
+    fun observeAllWorldbookCategories(profileId: String): Flow<List<WorldbookCategoryEntity>>
+
+    @Query("SELECT * FROM worldbook_categories WHERE id = :id LIMIT 1")
+    suspend fun getWorldbookCategory(id: String): WorldbookCategoryEntity?
+
+    @Query("SELECT * FROM worldbook_entries WHERE id = :id LIMIT 1")
+    suspend fun getWorldbookEntry(id: String): WorldbookEntryEntity?
+
+    @Query("UPDATE worldbook_entries SET bookId = '默认分类', updatedAt = :now WHERE profileId = :profileId AND bookId = :name AND ((personaId IS NULL AND :personaId IS NULL) OR personaId = :personaId)")
+    suspend fun moveCategoryEntriesToDefault(profileId: String, personaId: String?, name: String, now: Long)
+
+    @Query("DELETE FROM worldbook_categories WHERE id = :id")
+    suspend fun deleteWorldbookCategory(id: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWorldbookEntries(entries: List<WorldbookEntryEntity>)
 
     @Query("DELETE FROM worldbook_entries WHERE id = :entryId")
