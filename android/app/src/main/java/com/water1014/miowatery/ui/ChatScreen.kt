@@ -210,9 +210,14 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     }
                     afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                 }.trim()
+                val memoryPrefs = context.getSharedPreferences("mio_memory_settings", android.content.Context.MODE_PRIVATE)
+                val configuredContextCount = memoryPrefs.getInt("context_count_$conversationId", 0)
+                val recentMessages = (messages.map { it } + userMessage).let { all ->
+                    if (configuredContextCount > 0) all.takeLast(configuredContextCount) else all
+                }
                 val history = buildList {
                     if (systemPrompt.isNotBlank()) add(ChatMessagePayload.text("system", systemPrompt))
-                    addAll((messages.map { it } + userMessage).map { ChatMessagePayload.text(it.role, it.content) })
+                    addAll(recentMessages.map { ChatMessagePayload.text(it.role, it.content) })
                 }
                 val result = withContext(Dispatchers.IO) {
                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
