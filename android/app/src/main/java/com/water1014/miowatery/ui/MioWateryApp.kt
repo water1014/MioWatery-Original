@@ -10,6 +10,7 @@ import com.water1014.miowatery.core.desktop.DesktopThemePackInspector
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.rememberScrollState
@@ -135,6 +136,19 @@ fun MioWateryApp() {
     var selectedConversationId by remember { mutableStateOf("native-chat-default") }
     var chatReturnPage by remember { mutableStateOf("home") }
     val selectedEntry = appEntries.firstOrNull { it.id == selectedPage }
+
+    BackHandler(enabled = drawerState.isOpen || selectedPage != "home") {
+        if (drawerState.isOpen) {
+            scope.launch { drawerState.close() }
+        } else {
+            selectedPage = when (selectedPage) {
+                "chatmemory" -> "app"
+                "backup" -> "settings"
+                "app" -> chatReturnPage
+                else -> "home"
+            }
+        }
+    }
 
     Box(Modifier.fillMaxSize()) {
     ModalNavigationDrawer(
