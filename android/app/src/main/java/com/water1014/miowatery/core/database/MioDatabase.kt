@@ -41,6 +41,27 @@ abstract class MioDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : androidx.room.migration.Migration(2, 3) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS message_app_entries (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        profileId TEXT NOT NULL,
+                        personaId TEXT NOT NULL,
+                        kind TEXT NOT NULL,
+                        text TEXT NOT NULL,
+                        reply TEXT NOT NULL,
+                        author TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL
+                    )""".trimIndent()
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_message_app_entries_profileId ON message_app_entries(profileId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_message_app_entries_personaId ON message_app_entries(personaId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_message_app_entries_kind ON message_app_entries(kind)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_message_app_entries_createdAt ON message_app_entries(createdAt)")
+            }
+        }
+
         @Volatile private var instance: MioDatabase? = null
 
         fun getInstance(context: Context): MioDatabase =
@@ -49,7 +70,7 @@ abstract class MioDatabase : RoomDatabase() {
                     context.applicationContext,
                     MioDatabase::class.java,
                     "miowatery-native.db"
-                ).addMigrations(MIGRATION_1_2).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build().also { instance = it }
             }
     }
 }
