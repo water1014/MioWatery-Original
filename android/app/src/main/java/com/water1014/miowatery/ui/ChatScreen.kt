@@ -64,7 +64,9 @@ import com.water1014.miowatery.core.network.ChatCompletionRequest
 import com.water1014.miowatery.core.network.ChatMessagePayload
 import com.water1014.miowatery.core.network.DataStoreApiSessionStore
 import com.water1014.miowatery.core.network.SavedApiConfig
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -102,6 +104,11 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 
     var draft by remember { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
+    var streamingContent by remember { mutableStateOf("") }
+    var streamingReasoning by remember { mutableStateOf("") }
+    var sendJob by remember { mutableStateOf<Job?>(null) }
+    var searchOpen by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf<String?>(null) }
     var showSettings by remember { mutableStateOf(false) }
     var editBaseUrl by remember { mutableStateOf("") }
@@ -109,6 +116,10 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
     var editApiKey by remember { mutableStateOf("") }
     var editHeaders by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
+    val visibleMessages = remember(messages, searchOpen, searchQuery) {
+        if (searchOpen && searchQuery.isNotBlank()) messages.filter { it.content.contains(searchQuery, ignoreCase = true) }
+        else messages
+    }
 
     LaunchedEffect(conversationId, persona) {
         if (persona != null && dao.getConversation(conversationId) == null) {
@@ -143,7 +154,9 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
         draft = ""
         errorText = null
         sending = true
-        scope.launch {
+        streamingContent = ""
+        streamingReasoning = ""
+        sendJob = scope.launch {
             val now = System.currentTimeMillis()
             val userMessage = MessageEntity(
                 id = UUID.randomUUID().toString(),
@@ -243,8 +256,14 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         ChatCompletionRequest(
                             model = apiConfig.model,
                             messages = history,
-                            stream = false
-                        )
+                            stream = true
+                        ),
+                        onDelta = { delta ->
+                            scope.launch(Dispatchers.Main.immediate) {
+                                streamingContent += delta.content
+                                streamingReasoning += delta.reasoning
+                            }
+                        }
                     )
                 }
                 val reply = result.content.trim()
@@ -335,10 +354,15 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         }
                     }
                 }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (failure: Exception) {
                 errorText = failure.message ?: "请求失败，请检查网络与 API 配置。"
             } finally {
                 sending = false
+                sendJob = null
+                streamingContent = ""
+                streamingReasoning = ""
             }
         }
     }
@@ -370,14 +394,37 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     maxLines = 1
                 )
             }
-            Text(
-                "设置",
-                modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showSettings = true }.padding(horizontal = 8.dp, vertical = 7.dp),
-                color = Color(0xFF0F1419),
-                fontSize = 12.sp
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "⌕",
+                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable {
+                        searchOpen = !searchOpen
+                        if (!searchOpen) searchQuery = ""
+                    }.padding(horizontal = 9.dp, vertical = 7.dp),
+                    color = Color(0xFF0F1419),
+                    fontSize = 22.sp
+                )
+                Text(
+                    "设置",
+                    modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showSettings = true }.padding(horizontal = 8.dp, vertical = 7.dp),
+                    color = Color(0xFF0F1419),
+                    fontSize = 12.sp
+                )
+            }
         }
         Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFEAECEE)))
+        if (searchOpen) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    placeholder = { Text("搜索当前聊天") }
+                )
+                TextButton(onClick = { searchOpen = false; searchQuery = "" }) { Text("关闭") }
+            }
+        }
 
         if (messages.isEmpty()) {
             Column(
@@ -416,15 +463,18 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 item {
                     Text("今天", modifier = Modifier.fillMaxWidth(), color = Color(0xFF9AA1A9), fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
-                itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
-                    val firstInGroup = index == 0 || messages[index - 1].role != message.role
+                if (visibleMessages.isEmpty()) {
+                    item { Text("没有找到匹配的消息", modifier = Modifier.fillMaxWidth().padding(28.dp), color = Color(0xFF8A929B), fontSize = 12.sp, textAlign = TextAlign.Center) }
+                }
+                itemsIndexed(visibleMessages, key = { _, message -> message.id }) { index, message ->
+                    val firstInGroup = index == 0 || visibleMessages[index - 1].role != message.role
                     ChatMessageBubble(message, firstInGroup, persona?.avatar)
                 }
                 if (sending) {
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             CircularProgressIndicator(Modifier.size(15.dp), strokeWidth = 2.dp, color = Color(0xFF737B84))
-                            Text("正在回复…", color = Color(0xFF8A929B), fontSize = 11.sp)
+                            Text(streamingContent.ifBlank { "正在回复…" }, color = Color(0xFF8A929B), fontSize = 12.sp, lineHeight = 18.sp)
                         }
                     }
                 }
@@ -462,10 +512,18 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 Spacer(Modifier.width(8.dp))
                 Box(
                     modifier = Modifier.size(34.dp).clip(CircleShape)
-                        .background(if (draft.isBlank() || sending) Color(0xFFD9DDE1) else Color(0xFF111111))
-                        .clickable(enabled = draft.isNotBlank() && !sending) { sendMessage() },
+                        .background(if (sending) Color(0xFF111111) else if (draft.isBlank()) Color(0xFFD9DDE1) else Color(0xFF111111))
+                        .clickable(enabled = sending || draft.isNotBlank()) {
+                            if (sending) {
+                                sendJob?.cancel()
+                                sendJob = null
+                                sending = false
+                                streamingContent = ""
+                                streamingReasoning = ""
+                            } else sendMessage()
+                        },
                     contentAlignment = Alignment.Center
-                ) { Text(if (sending) "…" else "↑", color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Medium) }
+                ) { Text(if (sending) "■" else "↑", color = Color.White, fontSize = if (sending) 13.sp else 19.sp, fontWeight = FontWeight.Medium) }
             }
             Text(
                 "消息保存在本机 · API 密钥由 Android Keystore 加密",
