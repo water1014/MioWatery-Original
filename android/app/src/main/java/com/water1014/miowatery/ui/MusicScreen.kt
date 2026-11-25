@@ -5,6 +5,7 @@ import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -116,7 +117,7 @@ fun MusicScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
     Column(modifier.fillMaxSize().background(Color(0xFFF7F7F8)).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("‹", Modifier.clip(RoundedCornerShape(18.dp)).padding(horizontal = 10.dp, vertical = 2.dp), fontSize = 28.sp, color = Color(0xFF171719))
+            Text("‹", Modifier.clip(RoundedCornerShape(18.dp)).clickable(onClick = onBack).padding(horizontal = 10.dp, vertical = 2.dp), fontSize = 28.sp, color = Color(0xFF171719))
             Text("音乐", Modifier.weight(1f), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF171719))
             TextButton(onClick = onBack) { Text("返回") }
         }
