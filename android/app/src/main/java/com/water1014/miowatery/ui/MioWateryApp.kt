@@ -739,6 +739,66 @@ private fun HomeScreen(
                                 }
                             }
                         }
+                        if (page == 2) {
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(top = 14.dp).clickable { editIMessage = true },
+                                shape = RoundedCornerShape(22.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 11.dp)) {
+                                    Row(
+                                        Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Box(Modifier.size(30.dp).background(Color(0xFFE9EAF0), CircleShape), contentAlignment = Alignment.Center) {
+                                            Text("♡", color = Color(0xFF6B7480), fontSize = 17.sp)
+                                        }
+                                        Column(Modifier.weight(1f)) {
+                                            Text(imessageTitle, color = Color(0xFF171719), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                            Text(imessageSubtitle, color = Color(0xFF8B8B90), fontSize = 9.sp)
+                                        }
+                                        Text("•••", color = Color(0xFF8B8B90), fontSize = 12.sp)
+                                    }
+                                    Divider(color = Color(0xFFEAECEE), thickness = 0.7.dp)
+                                    listOf(imessage1, imessage2, imessage3, imessage4).forEachIndexed { index, message ->
+                                        if (message.isNotBlank()) {
+                                            Row(
+                                                Modifier.fillMaxWidth().padding(top = 7.dp),
+                                                horizontalArrangement = if (index % 2 == 0) Arrangement.Start else Arrangement.End
+                                            ) {
+                                                Box(
+                                                    Modifier.widthIn(max = 190.dp)
+                                                        .background(
+                                                            if (index % 2 == 0) Color(0xFFECEEF0) else Color(0xFF111111),
+                                                            RoundedCornerShape(13.dp)
+                                                        )
+                                                        .padding(horizontal = 10.dp, vertical = 7.dp)
+                                                ) {
+                                                    Text(
+                                                        message,
+                                                        color = if (index % 2 == 0) Color(0xFF171719) else Color.White,
+                                                        fontSize = 10.sp,
+                                                        lineHeight = 14.sp
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Row(
+                                        Modifier.fillMaxWidth().padding(top = 11.dp)
+                                            .background(Color(0xFFF3F4F5), RoundedCornerShape(18.dp))
+                                            .padding(horizontal = 10.dp, vertical = 7.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text("+", color = Color(0xFF8B8B90), fontSize = 16.sp)
+                                        Text("iMessage", Modifier.weight(1f).padding(start = 8.dp), color = Color(0xFF8B8B90), fontSize = 10.sp)
+                                        Text("↑", color = Color(0xFF8B8B90), fontSize = 13.sp)
+                                    }
+                                }
+                            }
+                        }
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(4),
                             modifier = Modifier.fillMaxWidth().height(if (page == 3) 270.dp else 154.dp),
