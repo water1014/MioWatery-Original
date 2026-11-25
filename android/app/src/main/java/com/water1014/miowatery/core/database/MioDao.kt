@@ -45,6 +45,9 @@ interface MioDao {
     @Query("SELECT * FROM messages WHERE conversationId = :conversationId ORDER BY position ASC")
     fun observeMessages(conversationId: String): Flow<List<MessageEntity>>
 
+    @Query("SELECT * FROM messages WHERE conversationId = :conversationId ORDER BY position ASC")
+    suspend fun getMessagesForConversation(conversationId: String): List<MessageEntity>
+
     @Query("DELETE FROM messages WHERE conversationId = :conversationId")
     suspend fun clearMessages(conversationId: String)
 
