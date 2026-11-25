@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -81,6 +82,8 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
     var contextCount by remember(conversationId) { mutableStateOf(memoryPrefs.getInt("context_count_$conversationId", 0).takeIf { it > 0 }?.toString().orEmpty()) }
     var summaryInstruction by remember(conversationId) { mutableStateOf(memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty()) }
     var settingsSaved by remember { mutableStateOf(false) }
+    var autoSummaryEnabled by remember(conversationId) { mutableStateOf(memoryPrefs.getBoolean("auto_summary_$conversationId", false)) }
+    var autoSummaryInterval by remember(conversationId) { mutableStateOf(memoryPrefs.getInt("auto_summary_interval_$conversationId", 20).toString()) }
 
     val traditionalEntries = entries.filter { it.type == "traditional" }
     val noteEntries = entries.filter { it.type != "traditional" }
@@ -206,6 +209,21 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
         item {
             Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = groupBackground)) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text("自动生成记忆纸条", color = ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                            Text("达到指定新消息数量后，自动整理一次聊天记忆", color = secondaryText, fontSize = 11.sp)
+                        }
+                        Checkbox(checked = autoSummaryEnabled, onCheckedChange = { autoSummaryEnabled = it })
+                    }
+                    OutlinedTextField(
+                        value = autoSummaryInterval,
+                        onValueChange = { autoSummaryInterval = it.filter(Char::isDigit).take(4) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("每累计多少条新消息总结一次") },
+                        singleLine = true,
+                        enabled = autoSummaryEnabled
+                    )
                     Text("上下文读取条数", color = ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Text("每次发送给 AI 的最近聊天消息数。留空则使用全部聊天记录。", color = secondaryText, fontSize = 11.sp)
                     OutlinedTextField(
@@ -235,9 +253,13 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                             .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(18.dp))
                             .clickable {
                                 val count = contextCount.toIntOrNull()?.coerceIn(1, 1000) ?: 0
+                                val interval = autoSummaryInterval.toIntOrNull()?.coerceIn(4, 500) ?: 20
+                                autoSummaryInterval = interval.toString()
                                 memoryPrefs.edit()
                                     .putInt("context_count_$conversationId", count)
                                     .putString("summary_instruction_$conversationId", summaryInstruction.trim())
+                                    .putBoolean("auto_summary_$conversationId", autoSummaryEnabled)
+                                    .putInt("auto_summary_interval_$conversationId", interval)
                                     .apply()
                                 settingsSaved = true
                             }
