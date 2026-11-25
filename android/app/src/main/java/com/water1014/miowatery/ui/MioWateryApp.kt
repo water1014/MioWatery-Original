@@ -14,6 +14,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.platform.LocalContext
@@ -81,6 +84,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 private data class AppEntry(
     val id: String,
@@ -394,6 +399,47 @@ private fun queryBackupName(context: Context, uri: Uri): String {
     return name ?: uri.lastPathSegment ?: "backup.json"
 }
 
+private suspend fun fetchHomeWeather(city: String): Pair<String, String> = withContext(Dispatchers.IO) {
+    val client = OkHttpClient()
+    val encodedCity = java.net.URLEncoder.encode(city, "UTF-8")
+    val geoRequest = Request.Builder()
+        .url("https://geocoding-api.open-meteo.com/v1/search?name=$encodedCity&count=1&language=zh&format=json")
+        .build()
+    val geoBody = client.newCall(geoRequest).execute().use { response ->
+        if (!response.isSuccessful) error("城市查询失败（HTTP ${response.code}）")
+        response.body?.string() ?: error("城市查询没有返回内容")
+    }
+    val result = JSONObject(geoBody).optJSONArray("results")?.optJSONObject(0)
+        ?: error("没有找到这个城市，请检查名称")
+    val latitude = result.getDouble("latitude")
+    val longitude = result.getDouble("longitude")
+    val displayName = result.optString("name", city)
+    val forecastRequest = Request.Builder()
+        .url("https://api.open-meteo.com/v1/forecast?latitude=$latitude&longitude=$longitude&current=temperature_2m,weather_code&timezone=auto")
+        .build()
+    val forecastBody = client.newCall(forecastRequest).execute().use { response ->
+        if (!response.isSuccessful) error("天气请求失败（HTTP ${response.code}）")
+        response.body?.string() ?: error("天气服务没有返回内容")
+    }
+    val current = JSONObject(forecastBody).optJSONObject("current") ?: error("天气数据格式不正确")
+    val temp = current.optDouble("temperature_2m", Double.NaN)
+    val code = current.optInt("weather_code", -1)
+    val description = when (code) {
+        0 -> "晴"
+        1, 2 -> "少云"
+        3 -> "阴"
+        45, 48 -> "雾"
+        51, 53, 55, 56, 57 -> "毛毛雨"
+        61, 63, 65, 66, 67 -> "雨"
+        71, 73, 75, 77 -> "降雪"
+        80, 81, 82 -> "阵雨"
+        85, 86 -> "阵雪"
+        95, 96, 99 -> "雷雨"
+        else -> "天气未知"
+    }
+    "${if (temp.isNaN()) "--" else temp.toInt().toString()}°C" to "$displayName · $description"
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HomeScreen(
@@ -439,6 +485,32 @@ private fun HomeScreen(
     val pager = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
     val homePrefs = remember(context) { context.getSharedPreferences("mio_home_widgets", Context.MODE_PRIVATE) }
+    var weatherCity by remember { mutableStateOf(homePrefs.getString("weather_city", "") ?: "") }
+    var weatherTemperature by remember { mutableStateOf("--°") }
+    var weatherDescription by remember { mutableStateOf("尚未设置城市") }
+    var weatherLoading by remember { mutableStateOf(false) }
+    var weatherError by remember { mutableStateOf<String?>(null) }
+    var editWeatherCity by remember { mutableStateOf(false) }
+    var weatherCityDraft by remember { mutableStateOf(weatherCity) }
+    LaunchedEffect(weatherCity) {
+        if (weatherCity.isBlank()) {
+            weatherTemperature = "--°"
+            weatherDescription = "尚未设置城市"
+            return@LaunchedEffect
+        }
+        weatherLoading = true
+        weatherError = null
+        try {
+            val result = fetchHomeWeather(weatherCity)
+            weatherTemperature = result.first
+            weatherDescription = result.second
+        } catch (failure: Exception) {
+            weatherError = failure.message ?: "天气获取失败"
+            weatherDescription = "暂时无法获取天气"
+        } finally {
+            weatherLoading = false
+        }
+    }
     var memoImage by remember { mutableStateOf(homePrefs.getString("memo_image", null)) }
     val memoImagePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -485,6 +557,29 @@ private fun HomeScreen(
     }
     var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
     LaunchedEffect(Unit) { while (true) { now = java.time.LocalDateTime.now(); kotlinx.coroutines.delay(15_000) } }
+    if (editWeatherCity) {
+        AlertDialog(
+            onDismissRequest = { editWeatherCity = false },
+            title = { Text("设置天气城市") },
+            text = {
+                OutlinedTextField(
+                    value = weatherCityDraft,
+                    onValueChange = { weatherCityDraft = it },
+                    label = { Text("城市名称") },
+                    placeholder = { Text("例如：南京、Milan") },
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    weatherCity = weatherCityDraft.trim()
+                    homePrefs.edit().putString("weather_city", weatherCity).apply()
+                    editWeatherCity = false
+                }) { Text("保存") }
+            },
+            dismissButton = { TextButton(onClick = { editWeatherCity = false }) { Text("取消") } }
+        )
+    }
     val ink = Color(0xFF0F1419)
     val sub = Color(0xFF6B7480)
     val panel = Color(0xFFF3F4F5)
@@ -521,8 +616,12 @@ private fun HomeScreen(
                         }
                         Spacer(Modifier.height(12.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Column { Text("天气", color = sub, style = MaterialTheme.typography.labelSmall); Text("--°", color = ink, fontSize = 32.sp, fontWeight = FontWeight.Light); Text("尚未设置城市", color = sub, style = MaterialTheme.typography.labelSmall) }
-                            Text("天气信息待接入", color = sub, style = MaterialTheme.typography.labelSmall)
+                            Column(Modifier.weight(1f).clickable { weatherCityDraft = weatherCity; editWeatherCity = true }) {
+                                Text(weatherCity.ifBlank { "天气" }, color = sub, style = MaterialTheme.typography.labelSmall)
+                                Text(weatherTemperature, color = ink, fontSize = 32.sp, fontWeight = FontWeight.Light)
+                                Text(if (weatherLoading) "正在更新…" else weatherError ?: weatherDescription, color = sub, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                            }
+                            Text("更改城市", Modifier.clickable { weatherCityDraft = weatherCity; editWeatherCity = true }, color = sub, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                     Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
