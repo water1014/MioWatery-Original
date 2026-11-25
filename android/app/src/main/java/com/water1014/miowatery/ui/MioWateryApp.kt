@@ -578,6 +578,43 @@ private fun HomeScreen(
                                 }
                             }
                         }
+                        if (page == 2) {
+                            HomePanel("音乐", Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(62.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { Text("♫", color = ink, fontSize = 28.sp) }
+                                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                                        Text("播放中", color = sub, style = MaterialTheme.typography.labelSmall)
+                                        Text("未在播放", color = ink, style = MaterialTheme.typography.titleSmall)
+                                        Text("打开音乐资料库", color = sub, style = MaterialTheme.typography.bodySmall)
+                                    }
+                                    androidx.compose.material3.TextButton(onClick = { onOpen("music") }) { Text("打开") }
+                                }
+                            }
+                            HomePanel(imessageTitle.ifBlank { "iMessage" }, Modifier.fillMaxWidth().clickable { editIMessage = true }) {
+                                Text(imessageSubtitle, color = sub, style = MaterialTheme.typography.labelSmall)
+                                listOf(imessage1, imessage2, imessage3, imessage4).forEachIndexed { index, message ->
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = if (index % 2 == 0) Arrangement.Start else Arrangement.End) {
+                                        Text(message, Modifier.background(if (index % 2 == 0) panel else Color(0xFF3982F6), RoundedCornerShape(13.dp)).padding(horizontal = 11.dp, vertical = 8.dp), color = if (index % 2 == 0) ink else Color.White, style = MaterialTheme.typography.bodySmall)
+                                    }
+                                }
+                                Text("点击编辑对话预览", color = sub, style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                        if (page == 3) {
+                            HomePanel("音乐与歌词", Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { Text("♫", color = ink, fontSize = 26.sp) }
+                                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
+                                        Text("未在播放", color = sub, style = MaterialTheme.typography.labelSmall)
+                                        Text("音乐歌词组件", color = ink, style = MaterialTheme.typography.titleSmall)
+                                    }
+                                    androidx.compose.material3.TextButton(onClick = { onOpen("music") }) { Text("音乐") }
+                                }
+                                Text(lyricLine1, color = ink, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+                                Text(lyricLine2, color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 5.dp))
+                                androidx.compose.material3.TextButton(onClick = { editLyrics = true }) { Text("编辑歌词与封面文案") }
+                            }
+                        }
                     }
                 }
             }
