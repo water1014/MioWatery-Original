@@ -69,20 +69,18 @@ abstract class MioDatabase : RoomDatabase() {
                 database.execSQL(
                     """CREATE TABLE IF NOT EXISTS memory_entries (
                         id TEXT NOT NULL PRIMARY KEY,
-                        profileId TEXT NOT NULL,
-                        personaId TEXT,
-                        title TEXT NOT NULL,
-                        content TEXT NOT NULL,
-                        category TEXT NOT NULL,
-                        isPinned INTEGER NOT NULL,
-                        isLocked INTEGER NOT NULL,
+                        conversationId TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        text TEXT NOT NULL,
                         createdAt INTEGER NOT NULL,
-                        updatedAt INTEGER NOT NULL
+                        rangeStart INTEGER,
+                        rangeEnd INTEGER,
+                        isMerged INTEGER NOT NULL
                     )""".trimIndent()
                 )
-                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_profileId ON memory_entries(profileId)")
-                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_personaId ON memory_entries(personaId)")
-                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_updatedAt ON memory_entries(updatedAt)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_conversationId ON memory_entries(conversationId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_type ON memory_entries(type)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_memory_entries_createdAt ON memory_entries(createdAt)")
             }
         }
 
