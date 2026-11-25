@@ -42,41 +42,35 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-private const val MEMORY_PROFILE_ID = "default"
-
 @Composable
 fun MemoryScreen(
     onBack: () -> Unit,
-    personaId: String = "default",
+    conversationId: String,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val scope = rememberCoroutineScope()
-    val entries by dao.observeMemoryEntries(MEMORY_PROFILE_ID, personaId).collectAsState(initial = emptyList())
+    val entries by dao.observeMemoryEntries(conversationId).collectAsState(initial = emptyList())
     var search by remember { mutableStateOf("") }
     var editing by remember { mutableStateOf<MemoryEntryEntity?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("日常") }
-    var shared by remember { mutableStateOf(false) }
+    var type by remember { mutableStateOf("traditional") }
 
-    fun startNew() {
+    fun startNew(kind: String) {
         editing = null
         title = ""
         content = ""
-        category = "日常"
-        shared = false
+        type = kind
         showEditor = true
     }
     fun startEdit(entry: MemoryEntryEntity) {
-        if (entry.isLocked) return
         editing = entry
-        title = entry.title
-        content = entry.content
-        category = entry.category
-        shared = entry.personaId == null
+        title = entry.text.lineSequence().firstOrNull()?.take(48).orEmpty()
+        content = entry.text
+        type = entry.type
         showEditor = true
     }
 
@@ -87,64 +81,51 @@ fun MemoryScreen(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Text("‹", Modifier.clickable { onBack() }.padding(end = 12.dp), fontSize = 30.sp, color = Color(0xFF20242A))
             Column(Modifier.weight(1f)) {
-                Text("记忆", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF171A1F))
-                Text("保存重要的事，让它们在聊天中继续生效", fontSize = 11.sp, color = Color(0xFF858C96))
+                Text("记忆管理", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF171A1F))
+                Text("只属于当前聊天的记忆，不会串到其他角色", fontSize = 11.sp, color = Color(0xFF858C96))
             }
-            Text("＋", Modifier.clickable { startNew() }.padding(8.dp), fontSize = 25.sp, color = Color(0xFF20242A))
         }
-        OutlinedTextField(
-            value = search,
-            onValueChange = { search = it },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            placeholder = { Text("搜索记忆") },
-            shape = RoundedCornerShape(14.dp)
-        )
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Card(Modifier.weight(1f).clickable { startNew("traditional") }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Column(Modifier.padding(13.dp)) {
+                    Text("＋ 手动记忆", fontWeight = FontWeight.SemiBold, color = Color(0xFF20242A), fontSize = 13.sp)
+                    Text("每次聊天都会注入", color = Color(0xFF858C96), fontSize = 10.sp)
+                }
+            }
+            Card(Modifier.weight(1f).clickable { startNew("note") }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                Column(Modifier.padding(13.dp)) {
+                    Text("＋ 总结纸条", fontWeight = FontWeight.SemiBold, color = Color(0xFF20242A), fontSize = 13.sp)
+                    Text("聊天中的长期信息", color = Color(0xFF858C96), fontSize = 10.sp)
+                }
+            }
+        }
+        OutlinedTextField(value = search, onValueChange = { search = it }, modifier = Modifier.fillMaxWidth(), singleLine = true, placeholder = { Text("搜索记忆") }, shape = RoundedCornerShape(14.dp))
+        val filtered = entries.filter { search.isBlank() || it.text.contains(search, true) }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("共 ${entries.size} 条记忆", color = Color(0xFF858C96), fontSize = 11.sp)
-            Text("置顶记忆会优先参与聊天", color = Color(0xFF858C96), fontSize = 11.sp)
-        }
-        val filtered = entries.filter {
-            search.isBlank() || it.title.contains(search, true) || it.content.contains(search, true) || it.category.contains(search, true)
+            Text("共 ${entries.size} 条", color = Color(0xFF858C96), fontSize = 11.sp)
+            Text("手动记忆 ${entries.count { it.type == "traditional" }} · 纸条 ${entries.count { it.type == "note" }}", color = Color(0xFF858C96), fontSize = 11.sp)
         }
         if (filtered.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(if (search.isBlank()) "还没有记忆" else "没有找到相关记忆", color = Color(0xFF6F7782), fontSize = 15.sp)
+                    Text(if (search.isBlank()) "还没有记忆纸条" else "没有找到相关记忆", color = Color(0xFF6F7782), fontSize = 15.sp)
                     Spacer(Modifier.height(8.dp))
-                    Text(if (search.isBlank()) "把你们的重要约定、喜好和共同经历记在这里" else "试试其他关键词", color = Color(0xFFA0A6AE), fontSize = 11.sp)
-                    if (search.isBlank()) Text("添加第一条记忆  ＋", Modifier.clickable { startNew() }.padding(12.dp), color = Color(0xFF303741), fontSize = 13.sp)
+                    Text("可以手动保存重要设定，也可以整理聊天中的共同经历", color = Color(0xFFA0A6AE), fontSize = 11.sp)
                 }
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(filtered, key = { it.id }) { entry ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(17.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White)
-                    ) {
+                    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(17.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                         Column(Modifier.fillMaxWidth().padding(15.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Text(entry.title.ifBlank { "未命名记忆" }, Modifier.weight(1f), color = Color(0xFF20242A), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                                if (entry.isPinned) Text("置顶", color = Color(0xFF6B7480), fontSize = 10.sp)
-                                if (entry.isLocked) Text(" · 已锁定", color = Color(0xFF6B7480), fontSize = 10.sp)
+                                Text(if (entry.type == "traditional") "手动记忆" else if (entry.isMerged) "早期记忆" else "总结纸条", Modifier.weight(1f), color = Color(0xFF737C87), fontSize = 10.sp)
+                                Text(SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date(entry.createdAt)), color = Color(0xFF9AA1AA), fontSize = 10.sp)
                             }
-                            Text(entry.content, color = Color(0xFF515A65), fontSize = 13.sp, lineHeight = 19.sp)
-                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("${entry.category} · ${if (entry.personaId == null) "共同记忆" else "角色记忆"} · ${SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()).format(Date(entry.updatedAt))}", color = Color(0xFF9AA1AA), fontSize = 10.sp)
-                                Row {
-                                    Text(if (entry.isPinned) "取消置顶" else "置顶", Modifier.clickable {
-                                        scope.launch { dao.upsertMemoryEntry(entry.copy(isPinned = !entry.isPinned, updatedAt = System.currentTimeMillis())) }
-                                    }.padding(horizontal = 5.dp), color = Color(0xFF737C87), fontSize = 10.sp)
-                                    Text(if (entry.isLocked) "解锁" else "锁定", Modifier.clickable {
-                                        scope.launch { dao.upsertMemoryEntry(entry.copy(isLocked = !entry.isLocked, updatedAt = System.currentTimeMillis())) }
-                                    }.padding(horizontal = 5.dp), color = Color(0xFF737C87), fontSize = 10.sp)
-                                    if (!entry.isLocked) {
-                                        Text("编辑", Modifier.clickable { startEdit(entry) }.padding(horizontal = 5.dp), color = Color(0xFF303741), fontSize = 10.sp)
-                                        Text("删除", Modifier.clickable { scope.launch { dao.deleteMemoryEntry(entry.id, MEMORY_PROFILE_ID) } }.padding(start = 5.dp), color = Color(0xFFB45C5C), fontSize = 10.sp)
-                                    }
-                                }
+                            Text(entry.text, color = Color(0xFF343B44), fontSize = 13.sp, lineHeight = 19.sp)
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                                Text("编辑", Modifier.clickable { startEdit(entry) }.padding(horizontal = 8.dp, vertical = 4.dp), color = Color(0xFF303741), fontSize = 11.sp)
+                                Text("删除", Modifier.clickable { scope.launch { dao.deleteMemoryEntry(entry.id, conversationId) } }.padding(start = 8.dp, end = 2.dp, top = 4.dp, bottom = 4.dp), color = Color(0xFFB45C5C), fontSize = 11.sp)
                             }
                         }
                     }
@@ -156,35 +137,27 @@ fun MemoryScreen(
     if (showEditor) {
         AlertDialog(
             onDismissRequest = { showEditor = false },
-            title = { Text(if (editing == null) "添加记忆" else "编辑记忆") },
+            title = { Text(if (editing == null) if (type == "traditional") "添加手动记忆" else "添加总结纸条" else "编辑记忆") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(title, { title = it }, label = { Text("标题") }, singleLine = true)
-                    OutlinedTextField(content, { content = it }, label = { Text("记忆内容") }, minLines = 3)
-                    OutlinedTextField(category, { category = it }, label = { Text("分类") }, singleLine = true)
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text("保存为共同记忆（所有角色可用）", Modifier.weight(1f), fontSize = 12.sp)
-                        androidx.compose.material3.Switch(checked = shared, onCheckedChange = { shared = it })
-                    }
+                    OutlinedTextField(content, { content = it }, label = { Text("记忆内容") }, minLines = 4)
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    val now = System.currentTimeMillis()
                     val old = editing
+                    val now = System.currentTimeMillis()
                     scope.launch {
                         dao.upsertMemoryEntry(
                             MemoryEntryEntity(
                                 id = old?.id ?: UUID.randomUUID().toString(),
-                                profileId = MEMORY_PROFILE_ID,
-                                personaId = if (shared) null else personaId,
-                                title = title.trim(),
-                                content = content.trim(),
-                                category = category.trim().ifBlank { "日常" },
-                                isPinned = old?.isPinned ?: false,
-                                isLocked = old?.isLocked ?: false,
+                                conversationId = conversationId,
+                                type = type,
+                                text = content.trim(),
                                 createdAt = old?.createdAt ?: now,
-                                updatedAt = now
+                                rangeStart = old?.rangeStart,
+                                rangeEnd = old?.rangeEnd,
+                                isMerged = old?.isMerged ?: false
                             )
                         )
                     }
