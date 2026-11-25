@@ -63,16 +63,29 @@ private data class AppEntry(
 )
 
 private val appEntries = listOf(
-    AppEntry("chat", "聊天", "和角色继续对话", Icons.AutoMirrored.Filled.Chat),
-    AppEntry("memory", "记忆", "重要片段与回忆", Icons.Default.FavoriteBorder),
-    AppEntry("worldbook", "世界书", "设定、词条与规则", Icons.Default.Book),
-    AppEntry("image", "生图工坊", "提示词与图片创作", Icons.Default.Image),
-    AppEntry("music", "音乐", "曲库与播放", Icons.Default.MusicNote),
-    AppEntry("album", "相册", "图片与收藏", Icons.Default.Album),
+    AppEntry("app", "聊天与应用", "聊天、联系人和动态", Icons.AutoMirrored.Filled.Chat),
+    AppEntry("worlds", "世界书", "设定、词条与规则", Icons.Default.Book),
+    AppEntry("personas", "联系人", "角色资料与管理", Icons.Default.FavoriteBorder),
     AppEntry("diary", "日记", "记录日常片段", Icons.Default.Today),
-    AppEntry("calendar", "日历", "日期与安排", Icons.Default.CalendarMonth),
-    AppEntry("proactive", "主动消息", "陪伴通知与提醒", Icons.Default.AutoAwesome),
-    AppEntry("settings", "设置", "模型、外观与数据", Icons.Default.Settings)
+    AppEntry("music", "音乐", "曲库、歌词与播放", Icons.Default.MusicNote),
+    AppEntry("couple", "情侣空间", "关系与共同记录", Icons.Default.FavoriteBorder),
+    AppEntry("coread", "共读", "一起阅读与交流", Icons.Default.Book),
+    AppEntry("crread", "阅读", "书籍与阅读记录", Icons.Default.Book),
+    AppEntry("msgs", "讯息", "消息与会话", Icons.AutoMirrored.Filled.Chat),
+    AppEntry("wallet", "钱包", "钱包与记录", Icons.Default.Album),
+    AppEntry("mcp", "MCP", "工具与服务连接", Icons.Default.AutoAwesome),
+    AppEntry("preset", "预设", "提示词与配置预设", Icons.Default.Book),
+    AppEntry("life", "生活", "Time is Nothing", Icons.Default.Today),
+    AppEntry("iff", "IF 线", "分支剧情空间", Icons.Default.AutoAwesome),
+    AppEntry("xinji", "心迹", "互动与心情记录", Icons.Default.FavoriteBorder),
+    AppEntry("repo", "作品仓库", "浏览、上传与导入", Icons.Default.Album),
+    AppEntry("youtube", "YouTube", "视频与媒体内容", Icons.Default.Image),
+    AppEntry("offline", "线下", "线下相关内容", Icons.Default.CalendarMonth),
+    AppEntry("rolephones", "角色手机", "角色的虚构手机空间", Icons.Default.Album),
+    AppEntry("desktopcustom", "桌面美化", "壁纸、图标与组件", Icons.Default.Image),
+    AppEntry("css", "美化", "外观与样式预设", Icons.Default.Settings),
+    AppEntry("stickers", "表情包", "贴纸与表情管理", Icons.Default.Image),
+    AppEntry("settings", "设置", "模型、语音、生图与数据", Icons.Default.Settings)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
