@@ -94,9 +94,18 @@ fun DesktopThemePackScreen(
             confirmButton = {
                 TextButton(onClick = {
                     val safeJson = preview?.let(DesktopThemePackStore::serialize) ?: return@TextButton
-                    DesktopThemePackStore.save(context, safeJson)
-                    showApplyConfirm = false
-                    onApplied(safeJson)
+                    busy = true
+                    scope.launch {
+                        try {
+                            withContext(Dispatchers.IO) { DesktopThemePackStore.save(context, safeJson) }
+                            showApplyConfirm = false
+                            onApplied(safeJson)
+                        } catch (failure: Exception) {
+                            error = failure.message ?: "保存桌面美化配置失败"
+                        } finally {
+                            busy = false
+                        }
+                    }
                 }) { Text("确认应用") }
             },
             dismissButton = {
