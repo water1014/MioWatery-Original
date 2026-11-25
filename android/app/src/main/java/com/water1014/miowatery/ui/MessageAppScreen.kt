@@ -192,10 +192,7 @@ fun MessageAppScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         ChatCompletionRequest(
                             model = config.model,
                             stream = false,
-                            messages = listOf(
-                                ChatMessagePayload.text("system", "【匿名问答】请模拟3位互不相识的路人匿名投来的问题，问题贴合角色身份和近况，并由角色选择回答。回答1-3句话，不要emoji。只输出 JSON：{\"items\":[{\"q\":\"问题\",\"a\":\"回答\"}]}。角色设定：$prompt"),
-                                ChatMessagePayload.text("user", "请生成这一批匿名提问和回答。")
-                            )
+                            messages = listOf(ChatMessagePayload.text("system", "【匿名问答】请模拟3位互不相识的路人匿名投来的问题，问题贴合角色身份和近况，并由角色选择回答。回答1-3句话，不要emoji。只输出 JSON：{\"items\":[{\"q\":\"问题\",\"a\":\"回答\"}]}。角色设定：$prompt")) + chatHistory.filter { it.role == "user" || it.role == "assistant" }.takeLast(12).map { ChatMessagePayload.text(it.role, it.content) } + ChatMessagePayload.text("user", "请生成这一批匿名提问和回答。")
                         )
                     )
                 }
