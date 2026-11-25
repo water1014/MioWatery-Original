@@ -1,6 +1,9 @@
 package com.water1014.miowatery.ui
 
 import coil3.compose.AsyncImage
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -111,6 +114,11 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
     var searchQuery by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf<String?>(null) }
     var showSettings by remember { mutableStateOf(false) }
+    var showAttachmentMenu by remember { mutableStateOf(false) }
+    var attachedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        attachedImageUri = uri
+    }
     var editBaseUrl by remember { mutableStateOf("") }
     var editModel by remember { mutableStateOf("") }
     var editApiKey by remember { mutableStateOf("") }
@@ -140,7 +148,19 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
     }
     LaunchedEffect(showSettings) {
-        if (showSettings) {
+        if (showAttachmentMenu) {
+        AlertDialog(
+            onDismissRequest = { showAttachmentMenu = false },
+            title = { Text("添加内容") },
+            text = { Text("选择一张图片添加到当前聊天。图片会保存在本机聊天记录中。") },
+            confirmButton = {
+                TextButton(onClick = { showAttachmentMenu = false; imagePicker.launch("image/*") }) { Text("选择图片") }
+            },
+            dismissButton = { TextButton(onClick = { showAttachmentMenu = false }) { Text("取消") } }
+        )
+    }
+
+    if (showSettings) {
             editBaseUrl = apiConfig.baseUrl
             editModel = apiConfig.model
             editApiKey = apiConfig.apiKey
@@ -150,8 +170,10 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 
     fun sendMessage() {
         val text = draft.trim()
-        if (text.isEmpty() || sending) return
+        val imageToSend = attachedImageUri
+        if ((text.isEmpty() && imageToSend == null) || sending) return
         draft = ""
+        attachedImageUri = null
         errorText = null
         sending = true
         streamingContent = ""
@@ -163,14 +185,19 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 conversationId = conversationId,
                 position = messages.size.toLong(),
                 role = "user",
-                content = text,
+                content = text.ifBlank { "[图片]" },
                 timestamp = now,
                 reasoning = null,
-                attachmentJson = null,
+                attachmentJson = imageToSend?.let { JSONObject().put("type", "image").put("uri", it.toString()).toString() },
                 metadataJson = null,
                 rawLegacyJson = "{}"
             )
             dao.insertMessages(listOf(userMessage))
+            if (imageToSend != null) {
+                errorText = "图片已保存到本机聊天记录。当前版本尚未接通视觉模型传图。"
+                sending = false
+                return@launch
+            }
             val existingConversation = dao.getConversation(conversationId)
             val originalCreatedAt = existingConversation?.createdAt ?: now
             dao.upsertConversation(
@@ -488,11 +515,19 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
         Column(
             modifier = Modifier.fillMaxWidth().background(Color.White).padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 8.dp)
         ) {
+            attachedImageUri?.let { uri ->
+                Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    AsyncImage(model = uri, contentDescription = "待发送图片", modifier = Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+                    Spacer(Modifier.width(10.dp))
+                    Text("已选择图片", color = Color(0xFF59616B), fontSize = 12.sp, modifier = Modifier.weight(1f))
+                    Text("移除", color = Color(0xFF7B848E), fontSize = 12.sp, modifier = Modifier.clickable { attachedImageUri = null }.padding(8.dp))
+                }
+            }
             Row(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Color(0xFFF3F4F5)).padding(horizontal = 13.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
-                Text("＋", color = Color(0xFF59616B), fontSize = 23.sp, modifier = Modifier.padding(bottom = 1.dp))
+                Text("＋", color = Color(0xFF59616B), fontSize = 23.sp, modifier = Modifier.clip(CircleShape).clickable { showAttachmentMenu = true }.padding(horizontal = 5.dp, vertical = 2.dp))
                 Spacer(Modifier.width(9.dp))
                 BasicTextField(
                     value = draft,
@@ -615,7 +650,13 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
                 .padding(horizontal = 11.dp, vertical = 7.dp)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(
+                val attachmentUri = remember(message.attachmentJson) {
+                    runCatching { JSONObject(message.attachmentJson ?: "{}").optString("uri").takeIf { it.isNotBlank() } }.getOrNull()
+                }
+                if (attachmentUri != null) {
+                    AsyncImage(model = attachmentUri, contentDescription = "聊天图片", modifier = Modifier.widthIn(max = 210.dp).height(150.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+                }
+                if (message.content.isNotBlank() && message.content != "[图片]") Text(
                     message.content,
                     color = if (fromUser) Color.White else Color(0xFF0F1419),
                     fontSize = 14.sp,
