@@ -101,6 +101,7 @@ private val appEntries = listOf(
     AppEntry("worlds", "世界书", "世界设定与条目", R.drawable.mio_ic_worlds),
     AppEntry("personas", "联系人设定", "联系人与角色资料", R.drawable.mio_ic_personas),
     AppEntry("diary", "日记", "日记记录", R.drawable.mio_ic_diary),
+    AppEntry("memory", "记忆", "重要经历与共同记忆", R.drawable.mio_ic_memory),
     AppEntry("rolephones", "iPhone", "角色手机", R.drawable.mio_ic_rolephones),
     AppEntry("desktopcustom", "桌面美化", "桌面壁纸、图标与组件", R.drawable.mio_ic_desktopcustom),
     AppEntry("music", "音乐", "音乐播放与资料库", R.drawable.mio_ic_music),
@@ -171,7 +172,7 @@ fun MioWateryApp() {
     ) {
         Scaffold(
             topBar = {
-                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas" && selectedPage != "worlds" && selectedPage != "music") TopAppBar(
+                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas" && selectedPage != "worlds" && selectedPage != "music" && selectedPage != "memory") TopAppBar(
                     title = {
                         Column {
                             Text(selectedEntry?.title ?: "MioWatery")
@@ -239,6 +240,8 @@ fun MioWateryApp() {
                 )
             } else if (selectedPage == "diary") {
                 DiaryScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
+            } else if (selectedPage == "memory") {
+                MemoryScreen(onBack = { selectedPage = "home" }, personaId = selectedPersonaId, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {
