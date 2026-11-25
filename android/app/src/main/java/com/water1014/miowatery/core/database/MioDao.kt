@@ -52,6 +52,9 @@ interface MioDao {
     @Query("DELETE FROM messages WHERE conversationId = :conversationId")
     suspend fun clearMessages(conversationId: String)
 
+    @Query("DELETE FROM messages WHERE id = :messageId AND conversationId = :conversationId")
+    suspend fun deleteMessage(messageId: String, conversationId: String): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWorldbookCategory(category: WorldbookCategoryEntity)
 
