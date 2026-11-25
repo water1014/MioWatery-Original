@@ -99,6 +99,7 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
     LaunchedEffect(selected){
         if(selected!=null) while(true){delay(60_000);minutes=prefs.getInt(todayKey,0)+1;prefs.edit().putInt(todayKey,minutes).apply()}
     }
+    LaunchedEffect(chapter) { scroll.scrollTo(0) }
     Column(modifier.fillMaxSize().background(Color(0xFFF7F8FA)).padding(horizontal=16.dp,vertical=12.dp)){
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){
             TextButton(onClick={if(selected!=null)selected=null else onBack()}){Text("‹ 返回")}
@@ -120,7 +121,7 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
                 if(books.isEmpty()) Card(colors=CardDefaults.cardColors(containerColor=Color.White),shape=RoundedCornerShape(20.dp)){
                     Column(Modifier.fillMaxWidth().padding(22.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(8.dp)){
                         Text("还没有加入书籍",fontSize=17.sp,fontWeight=FontWeight.Medium)
-                        Text("目前支持导入 TXT、Markdown 和 HTML 文本。",color=Color.Gray,fontSize=12.sp)
+                        Text("支持导入 TXT、Markdown、HTML 和 EPUB 书籍。",color=Color.Gray,fontSize=12.sp)
                         Button(onClick={picker.launch(arrayOf("text/plain","text/markdown","text/html","application/xhtml+xml","application/epub+zip"))}){Text("导入一本书")}
                     }
                 }
@@ -151,7 +152,7 @@ fun CoreadScreen(onBack:()->Unit, modifier:Modifier=Modifier) {
                 Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){
                     TextButton(enabled=chapter>0,onClick={chapter--;updateProgress(chapter)}){Text("上一章")}
                     Text((chapter+1).toString()+" / "+chapters.size,color=Color.Gray,fontSize=12.sp)
-                    TextButton(enabled=chapter<chapters.lastIndex,onClick={chapter++;updateProgress(chapter);scroll.scrollToTop()}){Text("下一章")}
+                    TextButton(enabled=chapter<chapters.lastIndex,onClick={chapter++;updateProgress(chapter)}){Text("下一章")}
                 }
             }
         }
