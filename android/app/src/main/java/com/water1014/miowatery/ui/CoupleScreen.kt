@@ -31,6 +31,10 @@ fun CoupleScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var dateDraft by remember { mutableStateOf(since) }
     var introDialog by remember { mutableStateOf(false) }
     var introDraft by remember { mutableStateOf(intro) }
+    var notes by remember { mutableStateOf(loadCoupleNotes(prefs)) }
+    var noteDialog by remember { mutableStateOf(false) }
+    var noteKind by remember { mutableStateOf("树洞") }
+    var noteDraft by remember { mutableStateOf("") }
     val days = remember(since) { runCatching { ChronoUnit.DAYS.between(LocalDate.parse(since), LocalDate.now()).toInt() + 1 }.getOrNull() }
 
     Column(modifier.fillMaxSize().background(Color(0xFFF7F8FA)).verticalScroll(rememberScrollState()).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -81,7 +85,34 @@ fun CoupleScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 }
             }
         }
-        Text("纪念日、介绍和愿望清单会保存在本机。原版中的树洞、每日回忆和互动卡片还需要继续逐项迁移。", color = Color.Gray, fontSize = 11.sp, lineHeight = 17.sp)
+        Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(22.dp)) {
+            Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text("树洞与每日回忆", fontWeight = FontWeight.SemiBold, color = Color(0xFF20232A))
+                        Text("把想说的话和今天的小瞬间留在这里", color = Color.Gray, fontSize = 11.sp)
+                    }
+                    TextButton(onClick = { noteKind = "树洞"; noteDraft = ""; noteDialog = true }) { Text("写一封树洞") }
+                }
+                Button(onClick = { noteKind = "每日回忆"; noteDraft = ""; noteDialog = true }, modifier = Modifier.fillMaxWidth()) { Text("记录今天的回忆") }
+                if (notes.isEmpty()) Text("这里还空着，第一条共同回忆等你们来写。", color = Color.Gray, fontSize = 12.sp)
+                notes.sortedByDescending { it.first }.forEachIndexed { index, entry ->
+                    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F8FB)), shape = RoundedCornerShape(14.dp)) {
+                        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(entry.second, color = Color(0xFF6B7C99), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Text(entry.third, color = Color.Gray, fontSize = 10.sp)
+                            }
+                            Text(entry.fourth, color = Color(0xFF343B46), fontSize = 13.sp, lineHeight = 20.sp)
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                                TextButton(onClick = { notes = notes.filterNot { it.first == entry.first }; saveCoupleNotes(prefs, notes) }) { Text("删除") }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Text("纪念日、介绍、愿望清单、树洞和每日回忆均保存在本机。", color = Color.Gray, fontSize = 11.sp, lineHeight = 17.sp)
     }
     if (dateDialog) AlertDialog(
         onDismissRequest = { dateDialog = false }, title = { Text("设置纪念日") },
@@ -99,6 +130,24 @@ fun CoupleScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         confirmButton = { TextButton(onClick = { intro = introDraft; prefs.edit().putString("intro", intro).apply(); introDialog = false }) { Text("保存") } },
         dismissButton = { TextButton(onClick = { introDialog = false }) { Text("取消") } }
     )
+    if (noteDialog) AlertDialog(
+        onDismissRequest = { noteDialog = false },
+        title = { Text(if (noteKind == "树洞") "写一封树洞" else "记录今日回忆") },
+        text = { OutlinedTextField(noteDraft, { noteDraft = it }, minLines = 4, placeholder = { Text(if (noteKind == "树洞") "把想说的话留在这里……" else "今天有什么值得记住的小事？") }) },
+        confirmButton = {
+            TextButton(onClick = {
+                val value = noteDraft.trim()
+                if (value.isNotEmpty()) {
+                    val now = java.time.LocalDateTime.now()
+                    val stamp = now.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                    notes = notes + Triple(System.currentTimeMillis().toString(), noteKind, stamp) .let { it.first to (it.second to (it.third to value)) }
+                    saveCoupleNotes(prefs, notes)
+                    noteDialog = false
+                }
+            }, enabled = noteDraft.isNotBlank()) { Text("保存") }
+        },
+        dismissButton = { TextButton(onClick = { noteDialog = false }) { Text("取消") } }
+    )
 }
 
 private fun loadWishes(prefs: android.content.SharedPreferences): List<Pair<String, Boolean>> = runCatching {
@@ -113,4 +162,22 @@ private fun saveWishes(prefs: android.content.SharedPreferences, wishes: List<Pa
     val array = JSONArray()
     wishes.forEach { (text, done) -> array.put(JSONObject().put("text", text).put("done", done)) }
     prefs.edit().putString("wishes", array.toString()).apply()
+}
+
+
+private fun loadCoupleNotes(prefs: android.content.SharedPreferences): List<Triple<String, String, Pair<String, String>>> = runCatching {
+    val array = JSONArray(prefs.getString("couple_notes", "[]") ?: "[]")
+    (0 until array.length()).mapNotNull { i ->
+        val item = array.optJSONObject(i) ?: return@mapNotNull null
+        val id = item.optString("id").takeIf { it.isNotBlank() } ?: return@mapNotNull null
+        Triple(id, item.optString("kind", "树洞"), item.optString("date") to item.optString("text"))
+    }
+}.getOrDefault(emptyList())
+
+private fun saveCoupleNotes(prefs: android.content.SharedPreferences, notes: List<Triple<String, String, Pair<String, String>>>) {
+    val array = JSONArray()
+    notes.forEach { (id, kind, detail) ->
+        array.put(JSONObject().put("id", id).put("kind", kind).put("date", detail.first).put("text", detail.second))
+    }
+    prefs.edit().putString("couple_notes", array.toString()).apply()
 }
