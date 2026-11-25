@@ -11,15 +11,36 @@ import androidx.room.RoomDatabase
         PersonaEntity::class,
         ConversationEntity::class,
         MessageEntity::class,
-        WorldbookEntryEntity::class
+        WorldbookEntryEntity::class,
+        DiaryEntryEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class MioDatabase : RoomDatabase() {
     abstract fun mioDao(): MioDao
 
     companion object {
+        private val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS diary_entries (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        title TEXT NOT NULL,
+                        content TEXT NOT NULL,
+                        entryDate TEXT NOT NULL,
+                        mood TEXT NOT NULL,
+                        isFavorite INTEGER NOT NULL,
+                        isLocked INTEGER NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )""".trimIndent()
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_diary_entries_entryDate ON diary_entries(entryDate)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_diary_entries_updatedAt ON diary_entries(updatedAt)")
+            }
+        }
+
         @Volatile private var instance: MioDatabase? = null
 
         fun getInstance(context: Context): MioDatabase =
@@ -28,7 +49,7 @@ abstract class MioDatabase : RoomDatabase() {
                     context.applicationContext,
                     MioDatabase::class.java,
                     "miowatery-native.db"
-                ).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2).build().also { instance = it }
             }
     }
 }
