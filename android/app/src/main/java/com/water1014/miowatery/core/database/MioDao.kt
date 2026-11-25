@@ -63,11 +63,17 @@ interface MioDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertMemoryEntry(entry: MemoryEntryEntity)
 
-    @Query("SELECT * FROM memory_entries WHERE profileId = :profileId AND (personaId IS NULL OR personaId = :personaId) ORDER BY isPinned DESC, updatedAt DESC")
-    fun observeMemoryEntries(profileId: String, personaId: String): Flow<List<MemoryEntryEntity>>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertMemoryEntries(entries: List<MemoryEntryEntity>)
 
-    @Query("DELETE FROM memory_entries WHERE id = :id AND profileId = :profileId AND isLocked = 0")
-    suspend fun deleteMemoryEntry(id: String, profileId: String): Int
+    @Query("SELECT * FROM memory_entries WHERE conversationId = :conversationId ORDER BY createdAt DESC")
+    fun observeMemoryEntries(conversationId: String): Flow<List<MemoryEntryEntity>>
+
+    @Query("SELECT * FROM memory_entries WHERE conversationId = :conversationId AND type = :type ORDER BY createdAt DESC")
+    suspend fun getMemoryEntries(conversationId: String, type: String): List<MemoryEntryEntity>
+
+    @Query("DELETE FROM memory_entries WHERE id = :id AND conversationId = :conversationId")
+    suspend fun deleteMemoryEntry(id: String, conversationId: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertDiaryEntry(entry: DiaryEntryEntity)
