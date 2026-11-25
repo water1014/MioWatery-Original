@@ -1,5 +1,6 @@
 package com.water1014.miowatery.ui
 
+import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -299,7 +300,7 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                 }
                 itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
                     val firstInGroup = index == 0 || messages[index - 1].role != message.role
-                    ChatMessageBubble(message, firstInGroup)
+                    ChatMessageBubble(message, firstInGroup, persona?.avatar)
                 }
                 if (sending) {
                     item {
@@ -383,7 +384,7 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
 }
 
 @Composable
-private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean) {
+private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, personaAvatar: String?) {
     val fromUser = message.role == "user"
     val avatar = @Composable {
         Box(
@@ -392,7 +393,11 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean) {
             contentAlignment = Alignment.Center
         ) {
             if (firstInGroup) {
-                Text(if (fromUser) "我" else "M", color = Color(0xFF555D66), fontSize = 13.sp)
+                if (!fromUser && !personaAvatar.isNullOrBlank()) {
+                    AsyncImage(model = personaAvatar, contentDescription = "角色头像", modifier = Modifier.fillMaxSize().clip(CircleShape))
+                } else {
+                    Text(if (fromUser) "我" else "M", color = Color(0xFF555D66), fontSize = 13.sp)
+                }
             }
         }
     }
