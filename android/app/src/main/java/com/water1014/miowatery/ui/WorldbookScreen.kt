@@ -60,9 +60,11 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
     var trigger by remember { mutableStateOf("global") }
     var position by remember { mutableStateOf("after") }
     var globalOnly by remember { mutableStateOf(true) }
+    var entryPersonaId by remember { mutableStateOf<String?>(null) }
 
     fun openEditor(item: WorldbookEntryEntity?) {
         editing = item
+        entryPersonaId = item?.personaId
         globalOnly = item?.personaId == null
         bookId = item?.bookId ?: "默认分类"
         title = item?.title.orEmpty()
@@ -159,7 +161,7 @@ fun WorldbookScreen(modifier: Modifier = Modifier) {
                                 WorldbookEntryEntity(
                                     id = old?.id ?: UUID.randomUUID().toString(),
                                     profileId = WORLDBOOK_PROFILE_ID,
-                                    personaId = if (globalOnly) null else "default",
+                                    personaId = if (globalOnly) null else (entryPersonaId ?: "default"),
                                     bookId = bookId.trim().ifBlank { "默认分类" },
                                     title = title.trim().ifBlank { "未命名词条" },
                                     content = body,
