@@ -271,19 +271,19 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     val memoryPrefs = context.getSharedPreferences("mio_memory_settings", android.content.Context.MODE_PRIVATE)
                     val autoEnabled = memoryPrefs.getBoolean("auto_summary_$conversationId", false)
                     val summaryInterval = memoryPrefs.getInt("auto_summary_interval_$conversationId", 20).coerceIn(4, 500)
-                    val allMessages = messages + userMessage + assistantMessage
+                    val allMessages = dao.getMessagesForConversation(conversationId)
                     val lastSummarizedCount = memoryPrefs.getInt("last_auto_summary_count_$conversationId", 0)
                     if (autoEnabled && allMessages.size - lastSummarizedCount >= summaryInterval) {
                         runCatching {
                             val summaryInput = allMessages.drop(lastSummarizedCount.coerceIn(0, allMessages.size))
-                                .joinToString("\\n") { message ->
+                                .joinToString("\n") { message ->
                                     (if (message.role == "user") "我：" else "角色：") + message.content
                                 }.takeLast(24000)
                             if (summaryInput.isNotBlank()) {
                                 val customInstruction = memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty().trim()
                                 val summarySystem = buildString {
                                     append("你是聊天记忆整理助手。请把聊天记录整理成未来聊天可用的长期记忆纸条。保留明确事实、关系变化、称呼、稳定偏好、共同经历和未完成约定；区分双方，不确定内容不要编造。简体中文，分点，600字以内，只输出记忆内容。")
-                                    if (customInstruction.isNotBlank()) append("\\n\\n用户额外总结规则：\\n").append(customInstruction)
+                                    if (customInstruction.isNotBlank()) append("\n\n用户额外总结规则：\n").append(customInstruction)
                                 }
                                 val summaryResult = withContext(Dispatchers.IO) {
                                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
