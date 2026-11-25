@@ -613,12 +613,6 @@ private fun HomeScreen(
                         Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 60.sp, fontWeight = FontWeight.Light, letterSpacing = (-2).sp)
                         Text(now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE)), color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 7.dp))
                     }
-                    if (quoteLine1.isNotBlank()) {
-                        Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)) {
-                            Text(quoteLine1, color = ink, fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium)
-                            if (quoteLine2.isNotBlank()) Text(quoteLine2, color = sub, fontSize = 12.sp, lineHeight = 18.sp, modifier = Modifier.padding(top = 4.dp))
-                        }
-                    }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
                         Column(Modifier.weight(1f)) {
                             Text("备忘录图片", color = sub, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(start = 3.dp, bottom = 8.dp))
@@ -723,25 +717,34 @@ private fun HomeScreen(
                             }
                         }
                         if (page == 2) {
-                            HomePanel("音乐", Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                    Box(Modifier.size(62.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { if (!musicCover.isNullOrBlank()) AsyncImage(model = musicCover, contentDescription = "音乐封面", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop) else Text("♫", color = ink, fontSize = 28.sp) }
-                                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                                        Text(if (musicPlaying) "正在播放" else "音乐播放器", color = sub, style = MaterialTheme.typography.labelSmall)
-                                        Text(musicTitle, color = ink, style = MaterialTheme.typography.titleSmall)
-                                        Text(if (musicPlaying) "轻触进入播放控制" else "选择本机音乐开始播放", color = sub, style = MaterialTheme.typography.bodySmall)
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onOpen("music") },
+                                shape = RoundedCornerShape(24.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                                        Box(
+                                            Modifier.size(104.dp).clip(RoundedCornerShape(14.dp)).background(panel),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (!musicCover.isNullOrBlank()) {
+                                                AsyncImage(model = musicCover, contentDescription = "音乐封面", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                            } else {
+                                                Text("♫", color = sub, fontSize = 34.sp)
+                                            }
+                                        }
+                                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                            Text("播放中", color = sub, style = MaterialTheme.typography.labelSmall)
+                                            Text(musicTitle, color = ink, style = MaterialTheme.typography.titleMedium, maxLines = 2)
+                                            Text(if (musicPlaying) "正在播放 · 轻触打开控制" else "尚未播放 · 轻触选择音乐", color = sub, style = MaterialTheme.typography.bodySmall)
+                                            Text("打开音乐播放器  ›", color = ink, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 5.dp))
+                                        }
                                     }
-                                    androidx.compose.material3.TextButton(onClick = { onOpen("music") }) { Text("打开") }
+                                    Text("最近播放", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                    Text(if (musicTitle == "尚未选择歌曲") "还没有播放记录" else musicTitle, color = sub, style = MaterialTheme.typography.bodySmall, maxLines = 1)
                                 }
-                            }
-                            HomePanel(imessageTitle.ifBlank { "iMessage" }, Modifier.fillMaxWidth().clickable { editIMessage = true }) {
-                                Text(imessageSubtitle, color = sub, style = MaterialTheme.typography.labelSmall)
-                                listOf(imessage1, imessage2, imessage3, imessage4).forEachIndexed { index, message ->
-                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = if (index % 2 == 0) Arrangement.Start else Arrangement.End) {
-                                        Text(message, Modifier.background(if (index % 2 == 0) panel else Color(0xFF3982F6), RoundedCornerShape(13.dp)).padding(horizontal = 11.dp, vertical = 8.dp), color = if (index % 2 == 0) ink else Color.White, style = MaterialTheme.typography.bodySmall)
-                                    }
-                                }
-                                Text("点击编辑对话预览", color = sub, style = MaterialTheme.typography.labelSmall)
                             }
                         }
                         if (page == 3) {
