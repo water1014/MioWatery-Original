@@ -3682,15 +3682,15 @@ function apiRequestHeaders(c){
     Object.keys(extra).forEach(k=>{if(extra[k]!==undefined&&extra[k]!==null&&String(extra[k]).trim())h[k]=String(extra[k])});
   }
   const sessionKey=Object.keys(h).find(k=>k.toLowerCase()==='x-opencode-session');
-  const isOpenCode=/opencode\\.ai/i.test(String(c&&c.base||S.cfg.base||''));
-  if(sessionKey)h[sessionKey]=h[sessionKey].replace(/\\$SESSION_ID|\\{\\{SESSION_ID\\}\\}/g,apiSessionId());
+  const isOpenCode=/opencode\.ai/i.test(String(c&&c.base||S.cfg.base||''));
+  if(sessionKey)h[sessionKey]=h[sessionKey].replace(/\$SESSION_ID|\{\{SESSION_ID\}\}/g,apiSessionId());
   else if(isOpenCode)h['x-opencode-session']=apiSessionId();
   return h;
 }
 function modelListEndpoint(base){
-  base=String(base||'').replace(/\\/+$/,'');
-  if(/\\/inference\\/go\\/openai\\/v1$/i.test(base))return base.replace(/\\/openai\\/v1$/i,'/v1')+'/models';
-  if(/\\/inference\\/go$/i.test(base))return base+'/v1/models';
+  base=String(base||'').replace(/\/+$/,'');
+  if(/\/inference\/go\/openai\/v1$/i.test(base))return base.replace(/\/openai\/v1$/i,'/v1')+'/models';
+  if(/\/inference\/go$/i.test(base))return base+'/v1/models';
   return base+'/models';
 }
 function rsnSplit(c,r){c=String(c||'');r=String(r||'');
