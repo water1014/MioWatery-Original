@@ -1679,6 +1679,24 @@ button.feed-follow-plus{padding:0;cursor:pointer}
 /* Gacha machine casing: neutral cool gray; keep the red header lettering unchanged */
 .gc-cap{background:#FEFFF7!important;border-color:#FEFFF7!important}
 .gc-body{background:#FEFFF7!important;border-color:#FEFFF7!important}
+
+/* API custom headers: integrated advanced settings panel */
+.api-header-panel{margin:16px 0 18px;padding:15px;border:1px solid var(--line);border-radius:16px;background:var(--p)}
+.api-header-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
+.api-header-title{font-size:14px;font-weight:650;letter-spacing:.01em;color:var(--ink)}
+.api-header-subtitle{margin-top:2px;font-size:11px;color:var(--sub);line-height:1.5}
+.api-header-tag{flex:none;padding:4px 9px;border-radius:999px;background:var(--bg);border:1px solid var(--line);font-size:10px;color:var(--sub);letter-spacing:.04em}
+.api-header-panel textarea#c-headers{display:block;width:100%;min-height:100px;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;outline:none;transition:border-color .18s,box-shadow .18s}
+.api-header-panel textarea#c-headers:focus{border-color:var(--sub);box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 7%,transparent)}
+.api-header-hint{display:flex;align-items:flex-start;gap:7px;margin:10px 1px 12px;font-size:11px;line-height:1.65;color:var(--sub)}
+.api-header-hint-dot{width:6px;height:6px;margin-top:5px;border-radius:50%;background:#30a46c;flex:none}
+.api-header-hint code{padding:1px 4px;border-radius:4px;background:var(--bg);font:10px ui-monospace,monospace;color:var(--ink)}
+.api-header-fill{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:12px;font-weight:550;text-align:left;transition:background .15s,border-color .15s}
+.api-header-fill:active{background:var(--p);border-color:var(--sub)}
+.api-header-fill>span:first-child{color:var(--sub);font-size:15px}
+.api-header-arrow{margin-left:auto;font-size:19px;color:var(--sub);line-height:1}
+[data-theme=dark] .api-header-panel{background:#171719;border-color:#303034}
+[data-theme=dark] .api-header-tag,[data-theme=dark] .api-header-panel textarea#c-headers,[data-theme=dark] .api-header-fill{background:#202023;border-color:#38383d}
 </style>
 <style id="ucss"></style>
 
@@ -3165,7 +3183,14 @@ setTimeout(function(){finish(false)},7600);
     <div class="cap">API 设置</div><div class="card">
       <label style="margin-top:0">API 接口地址（兼容 OpenAI 格式）</label><input id="c-base" placeholder="https://api.openai.com/v1">
       <label>API 密钥</label><input id="c-key" type="password" placeholder="sk-...">
-      <label>自定义请求头（JSON）</label><textarea id="c-headers" rows="4" spellcheck="false" placeholder='{"x-opencode-session":"$SESSION_ID"}' style="width:100%;min-height:92px;font:13px/1.5 ui-monospace,monospace"></textarea><p class="note" style="margin-top:6px">OpenCode Go 会自动为每段聊天附带稳定的 x-opencode-session。也可在这里添加其他请求头，使用 $SESSION_ID 自动填入当前聊天 ID。</p><button class="btn" id="opencode-go-fill" type="button">一键填入 OpenCode Go 地址与请求头</button>
+      <section class="api-header-panel" aria-label="自定义请求头">
+        <div class="api-header-head"><div><div class="api-header-title">自定义请求头</div><div class="api-header-subtitle">为特殊 API 服务添加额外参数</div></div><span class="api-header-tag">进阶</span></div>
+        <textarea id="c-headers" rows="4" spellcheck="false" placeholder='{
+  "x-opencode-session": "$SESSION_ID"
+}'></textarea>
+        <p class="api-header-hint"><span class="api-header-hint-dot"></span><span>OpenCode Go 会自动附带稳定的聊天会话标识。需要其他请求头时，在此填写 JSON，<code>$SESSION_ID</code> 会自动替换为当前聊天 ID。</span></p>
+        <button class="api-header-fill" id="opencode-go-fill" type="button"><span aria-hidden="true">✦</span> 一键配置 OpenCode Go <span class="api-header-arrow" aria-hidden="true">›</span></button>
+      </section>
       <label>模型 ID</label><div style="display:flex;flex-direction:column;gap:8px"><input id="c-model" placeholder="手动输入模型 ID" style="width:100%;min-width:0"><button class="btn" id="pull-models" type="button" style="white-space:nowrap;width:100%;margin:0">获取模型列表</button></div><label style="margin-top:10px">可用模型（点击选择）</label><select id="c-model-select" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">请先获取模型列表</option></select><p class="note" id="models-result">填写 API 地址和密钥后，点击“获取模型列表”，准备好后在下方选择模型。</p>
       <div style="display:none"><label>已保存的 API 预设</label><div style="display:flex;gap:8px;align-items:center"><select id="api-preset-select" style="flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">选择已保存预设</option></select><button class="btn" id="api-preset-load" type="button">使用</button></div><div style="margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--fld)"><label for="api-preset-name" style="display:block;margin:0 0 7px;font-weight:600;color:var(--text)">新预设名称</label><input id="api-preset-name" type="text" autocomplete="off" placeholder="例如：我的主力模型 API" style="display:block;width:100%;box-sizing:border-box;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px"><p class="note" style="margin:6px 0 10px">先在这里输入名称，再点下面的保存按钮。保存后下次可直接从上方列表选择。</p><div style="display:flex;gap:8px"><button class="btn fill" id="api-preset-save" type="button" style="flex:1">保存为预设</button><button class="btn" id="api-preset-delete" type="button">删除所选</button></div></div></div><div class="cap" style="margin-top:16px">API 预设</div><div id="pz-api"></div>
       <div class="cap" style="margin-top:18px">备用 API（可选，用于记忆总结）</div><p class="note">用于自动或手动生成聊天记忆总结。留空则使用主 API。</p><label>备用 API 地址</label><input id="c-secondary-base" placeholder="留空则使用主 API 地址"><label>备用 API 密钥</label><input id="c-secondary-key" type="password" placeholder="留空则使用主 API 密钥"><label>备用 API 模型 ID</label><input id="c-secondary-model" placeholder="留空则使用主模型 ID">
