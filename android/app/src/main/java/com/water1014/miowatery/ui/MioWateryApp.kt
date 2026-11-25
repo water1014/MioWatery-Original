@@ -457,7 +457,6 @@ private fun HomeScreen(
                         Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 60.sp, fontWeight = FontWeight.Light, letterSpacing = (-2).sp)
                         Text(now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE)), color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 7.dp))
                     }
-                    HomePanel("人と人の漣", Modifier.fillMaxWidth()) { Text("把今天的心情，留在这里。", color = sub, style = MaterialTheme.typography.bodySmall) }
                     Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
                         Text("备忘录图片", color = ink, style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.height(9.dp))
@@ -476,20 +475,6 @@ private fun HomeScreen(
                         Spacer(Modifier.height(10.dp))
                         Text("还没有最近聊天", color = sub, style = MaterialTheme.typography.bodySmall)
                     }
-                    if (nativeWidgets.isNotEmpty()) {
-                        Text("桌面组件", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                        nativeWidgets.forEach { widget ->
-                            HomePanel(widget.title.ifBlank { "桌面组件" }, Modifier.fillMaxWidth()) {
-                                when (widget.kind) {
-                                    "clock" -> Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 34.sp, fontWeight = FontWeight.Light)
-                                    "text" -> Text(widget.text.orEmpty(), color = sub, style = MaterialTheme.typography.bodyMedium)
-                                    "image" -> widget.image?.let { image ->
-                                        AsyncImage(model = image, contentDescription = widget.title, modifier = Modifier.fillMaxWidth().height(160.dp), contentScale = ContentScale.Crop)
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
                 else -> {
                     val pageApps = when (page) {
@@ -498,23 +483,40 @@ private fun HomeScreen(
                         else -> listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube")
                     }
                     val visibleApps = pageApps.filterNot { it in hiddenDesktopIds }.mapNotNull { id -> appEntries.firstOrNull { it.id == id } }
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(4),
-                        modifier = Modifier.fillMaxSize().widthIn(max = 560.dp).padding(horizontal = 8.dp),
-                        contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 28.dp, bottom = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(26.dp)
+                    Column(
+                        Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 8.dp)
                     ) {
-                        items(visibleApps) { entry ->
-                            Column(
-                                Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
-                                    AppEntryIcon(entry, desktopOverrides, 29.dp)
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(4),
+                            modifier = Modifier.fillMaxWidth().height(154.dp),
+                            contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 28.dp, bottom = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(26.dp)
+                        ) {
+                            items(visibleApps) { entry ->
+                                Column(
+                                    Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+                                        AppEntryIcon(entry, desktopOverrides, 29.dp)
+                                    }
+                                    Spacer(Modifier.height(7.dp))
+                                    Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
                                 }
-                                Spacer(Modifier.height(7.dp))
-                                Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
+                            }
+                        }
+                        if (page == 1) {
+                            nativeWidgets.forEach { widget ->
+                                HomePanel(widget.title.ifBlank { "桌面组件" }, Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                                    when (widget.kind) {
+                                        "clock" -> Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 34.sp, fontWeight = FontWeight.Light)
+                                        "text" -> Text(widget.text.orEmpty(), color = sub, style = MaterialTheme.typography.bodyMedium)
+                                        "image" -> widget.image?.let { image ->
+                                            AsyncImage(model = image, contentDescription = widget.title, modifier = Modifier.fillMaxWidth().height(160.dp), contentScale = ContentScale.Crop)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
