@@ -262,8 +262,30 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             Text("世界书", color = Color(0xFF111111), fontSize = 25.sp, fontWeight = FontWeight.Bold)
             Text("收纳世界背景、人物关系与故事规则。", color = Color(0xFF8A929B), fontSize = 12.sp)
         }
+        val scopeCategories = categories.filter { if (globalOnly) it.personaId == null else it.personaId != null }
+        Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+            Text(
+                "全部分类",
+                Modifier.clip(RoundedCornerShape(14.dp))
+                    .background(if (selectedCategory == null) Color(0xFFE8EAED) else Color(0xFFF3F4F5))
+                    .clickable { selectedCategory = null }
+                    .padding(horizontal = 11.dp, vertical = 7.dp),
+                color = Color(0xFF303740), fontSize = 11.sp
+            )
+            scopeCategories.forEach { category ->
+                Text(
+                    category.name,
+                    Modifier.clip(RoundedCornerShape(14.dp))
+                        .background(if (selectedCategory == category.name) Color(0xFFE8EAED) else Color(0xFFF3F4F5))
+                        .clickable { selectedCategory = category.name }
+                        .padding(horizontal = 11.dp, vertical = 7.dp),
+                    color = Color(0xFF303740), fontSize = 11.sp
+                )
+            }
+        }
         val visible = entries.filter {
             (if (globalOnly) it.personaId == null else it.personaId != null) &&
+                (selectedCategory == null || it.bookId == selectedCategory) &&
                 (searchText.isBlank() || it.title.contains(searchText, true) || it.content.contains(searchText, true) || it.bookId.contains(searchText, true))
         }
         if (visible.isEmpty()) {
@@ -312,6 +334,71 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             Spacer(Modifier.weight(1f))
             Text("⌕", Modifier.clickable { searchOpen = !searchOpen; if (!searchOpen) searchText = "" }.padding(horizontal = 10.dp), color = Color(0xFF111111), fontSize = 23.sp)
         }
+    }
+
+    if (showCategoryEditor) {
+        AlertDialog(
+            onDismissRequest = { showCategoryEditor = false },
+            title = { Text("新建分类") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = newCategoryName,
+                        onValueChange = { newCategoryName = it },
+                        label = { Text("分类名称") },
+                        singleLine = true
+                    )
+                    if (!globalOnly) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(onClick = { showCategoryPersonaMenu = true }) {
+                                Text("所属联系人：${personas.firstOrNull { it.personaId == categoryPersonaId }?.name ?: "请选择"}")
+                            }
+                            DropdownMenu(expanded = showCategoryPersonaMenu, onDismissRequest = { showCategoryPersonaMenu = false }) {
+                                personas.forEach { persona ->
+                                    DropdownMenuItem(text = { Text(persona.name) }, onClick = {
+                                        categoryPersonaId = persona.personaId
+                                        showCategoryPersonaMenu = false
+                                    })
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val name = newCategoryName.trim()
+                    if (name.isBlank()) return@TextButton
+                    if (!globalOnly && categoryPersonaId == null) {
+                        screenMessage = "请先选择联系人，再创建专属分类。"
+                        return@TextButton
+                    }
+                    scope.launch {
+                        val now = System.currentTimeMillis()
+                        val owner = if (globalOnly) null else categoryPersonaId
+                        val exists = categories.any { it.name.equals(name, true) && it.personaId == owner }
+                        if (exists) {
+                            screenMessage = "这个分类已经存在。"
+                        } else {
+                            dao.upsertWorldbookCategory(
+                                WorldbookCategoryEntity(
+                                    id = UUID.randomUUID().toString(),
+                                    profileId = WORLDBOOK_PROFILE_ID,
+                                    personaId = owner,
+                                    name = name,
+                                    createdAt = now,
+                                    updatedAt = now
+                                )
+                            )
+                            selectedCategory = name
+                            screenMessage = "分类已创建。"
+                        }
+                        showCategoryEditor = false
+                    }
+                }) { Text("创建") }
+            },
+            dismissButton = { TextButton(onClick = { showCategoryEditor = false }) { Text("取消") } }
+        )
     }
 
     if (showEditor) {
