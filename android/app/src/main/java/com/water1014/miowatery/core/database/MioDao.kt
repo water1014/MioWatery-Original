@@ -53,6 +53,15 @@ interface MioDao {
     @Query("SELECT * FROM worldbook_entries WHERE profileId = :profileId ORDER BY bookId, title COLLATE NOCASE")
     fun observeAllWorldbookEntries(profileId: String): Flow<List<WorldbookEntryEntity>>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertDiaryEntry(entry: DiaryEntryEntity)
+
+    @Query("SELECT * FROM diary_entries ORDER BY entryDate DESC, updatedAt DESC")
+    fun observeDiaryEntries(): Flow<List<DiaryEntryEntity>>
+
+    @Query("DELETE FROM diary_entries WHERE id = :entryId AND isLocked = 0")
+    suspend fun deleteDiaryEntry(entryId: String): Int
+
     @Query("SELECT COUNT(*) FROM messages")
     suspend fun messageCount(): Int
 }
