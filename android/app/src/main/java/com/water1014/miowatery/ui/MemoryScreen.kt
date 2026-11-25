@@ -36,6 +36,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.water1014.miowatery.core.database.MemoryEntryEntity
 import com.water1014.miowatery.core.database.MioDatabase
+import com.water1014.miowatery.core.network.ApiConfigStore
+import com.water1014.miowatery.core.network.ApiConnectionConfig
+import com.water1014.miowatery.core.network.ApiHeaderResolver
+import com.water1014.miowatery.core.network.ApiSessionStore
+import com.water1014.miowatery.core.network.ChatCompletionClient
+import com.water1014.miowatery.core.network.ChatCompletionRequest
+import com.water1014.miowatery.core.network.ChatMessagePayload
+import com.water1014.miowatery.core.network.DataStoreApiSessionStore
+import com.water1014.miowatery.core.network.SavedApiConfig
+import com.water1014.miowatery.core.database.MessageEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -52,12 +65,84 @@ fun MemoryScreen(
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val scope = rememberCoroutineScope()
     val entries by dao.observeMemoryEntries(conversationId).collectAsState(initial = emptyList())
+    val messages by dao.observeMessages(conversationId).collectAsState(initial = emptyList())
+    val configStore = remember { ApiConfigStore(context) }
+    val apiConfig by configStore.config.collectAsState(initial = SavedApiConfig())
+    var rangeStart by remember { mutableStateOf("1") }
+    var rangeEnd by remember { mutableStateOf("0") }
+    var generating by remember { mutableStateOf(false) }
+    var generationError by remember { mutableStateOf<String?>(null) }
     var search by remember { mutableStateOf("") }
     var editing by remember { mutableStateOf<MemoryEntryEntity?>(null) }
     var showEditor by remember { mutableStateOf(false) }
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var type by remember { mutableStateOf("traditional") }
+
+    fun generateSummary() {
+        if (generating) return
+        val start = (rangeStart.toIntOrNull() ?: 1).coerceAtLeast(1)
+        val end = (rangeEnd.toIntOrNull() ?: messages.size).coerceAtMost(messages.size)
+        if (end < start || messages.isEmpty()) {
+            generationError = "请选择有效的聊天消息范围"
+            return
+        }
+        if (apiConfig.baseUrl.isBlank() || apiConfig.apiKey.isBlank() || apiConfig.model.isBlank()) {
+            generationError = "请先在聊天页面配置模型 API"
+            return
+        }
+        generating = true
+        generationError = null
+        scope.launch {
+            try {
+                val transcript = messages.subList(start - 1, end).joinToString("\n") { message ->
+                    (if (message.role == "user") "我：" else "角色：") + message.content
+                }.takeLast(24000)
+                val summaryPrompt = "你是聊天记忆整理助手。请把下面的聊天记录整理成给未来聊天使用的记忆纸条，不要写泛泛摘要。保留明确日期、双方关系变化、称呼、稳定偏好、共同经历、未完成约定和重要事实；区分谁说的，不确定的内容不要编造。用简体中文，分点清晰，控制在 600 字以内，只输出记忆内容。"
+                val result = withContext(Dispatchers.IO) {
+                    val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
+                    val client = ChatCompletionClient(ApiHeaderResolver(sessions))
+                    client.complete(
+                        ApiConnectionConfig(
+                            baseUrl = apiConfig.baseUrl,
+                            apiKey = apiConfig.apiKey,
+                            customHeadersJson = apiConfig.customHeadersJson,
+                            userProfileId = "default",
+                            conversationId = conversationId
+                        ),
+                        ChatCompletionRequest(
+                            model = apiConfig.model,
+                            messages = listOf(
+                                ChatMessagePayload.text("system", summaryPrompt),
+                                ChatMessagePayload.text("user", "当前聊天的角色与用户记录：\n" + transcript)
+                            ),
+                            stream = false
+                        )
+                    )
+                }
+                val note = result.content.trim()
+                if (note.isBlank()) error("模型没有返回记忆内容")
+                dao.upsertMemoryEntry(
+                    MemoryEntryEntity(
+                        id = UUID.randomUUID().toString(),
+                        conversationId = conversationId,
+                        type = "note",
+                        text = note,
+                        createdAt = System.currentTimeMillis(),
+                        rangeStart = start,
+                        rangeEnd = end,
+                        isMerged = false
+                    )
+                )
+                rangeStart = "1"
+                rangeEnd = messages.size.toString()
+            } catch (failure: Exception) {
+                generationError = failure.message ?: "记忆总结失败"
+            } finally {
+                generating = false
+            }
+        }
+    }
 
     fun startNew(kind: String) {
         editing = null
@@ -83,6 +168,19 @@ fun MemoryScreen(
             Column(Modifier.weight(1f)) {
                 Text("记忆管理", fontSize = 22.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF171A1F))
                 Text("只属于当前聊天的记忆，不会串到其他角色", fontSize = 11.sp, color = Color(0xFF858C96))
+            }
+        }
+        Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+            Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("生成聊天记忆", color = Color(0xFF20242A), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                Text("选择消息范围，AI 会整理成之后聊天可参考的纸条", color = Color(0xFF858C96), fontSize = 10.sp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(rangeStart, { rangeStart = it }, modifier = Modifier.weight(1f), label = { Text("起始消息") }, singleLine = true)
+                    OutlinedTextField(rangeEnd, { rangeEnd = it }, modifier = Modifier.weight(1f), label = { Text("结束消息") }, placeholder = { Text(messages.size.toString()) }, singleLine = true)
+                }
+                Text("当前聊天共 ${messages.size} 条消息", color = Color(0xFF9AA1AA), fontSize = 10.sp)
+                Text(if (generating) "正在整理记忆…" else "生成纸条", Modifier.fillMaxWidth().background(Color(0xFF171A1F), RoundedCornerShape(12.dp)).clickable(enabled = !generating) { generateSummary() }.padding(vertical = 11.dp), color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center, fontSize = 12.sp)
+                generationError?.let { Text(it, color = Color(0xFFB45C5C), fontSize = 10.sp) }
             }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
