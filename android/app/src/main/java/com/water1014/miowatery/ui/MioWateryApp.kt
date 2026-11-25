@@ -49,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,7 +58,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 private data class AppEntry(
     val id: String,
@@ -136,7 +139,7 @@ fun MioWateryApp() {
     ) {
         Scaffold(
             topBar = {
-                TopAppBar(
+                if (selectedPage != "home") TopAppBar(
                     title = {
                         Column {
                             Text(selectedEntry?.title ?: "MioWatery")
@@ -248,113 +251,54 @@ private fun queryBackupName(context: Context, uri: Uri): String {
 }
 
 @Composable
-private fun HomeScreen(
-    modifier: Modifier = Modifier,
-    onOpen: (String) -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 20.dp)
-    ) {
-        Spacer(Modifier.height(12.dp))
-        Text(
-            "把日常，慢慢收进这里。",
-            style = MaterialTheme.typography.headlineSmall
-        )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            "原生应用正在搭建中，旧版数据不会被自动改动。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(20.dp))
-        Card(
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(18.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("新的开始", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "先搭好原生骨架，再逐项迁移完整功能。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.mio_ic_xinji),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(23.dp)
-                    )
-                }
+private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) {
+    var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
+    LaunchedEffect(Unit) {
+        while (true) { now = java.time.LocalDateTime.now(); delay(30_000) }
+    }
+    val time = now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+    val date = now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE))
+    val dock = listOf(
+        appEntries.first { it.id == "app" },
+        appEntries.first { it.id == "worlds" },
+        appEntries.first { it.id == "personas" },
+        appEntries.first { it.id == "settings" }
+    )
+    Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(horizontal = 18.dp)) {
+        Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState())) {
+            Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 20.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                Text(time, style = MaterialTheme.typography.displayLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Light, letterSpacing = (-2).sp), color = MaterialTheme.colorScheme.onBackground)
+                Text(date, Modifier.padding(bottom = 7.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            androidx.compose.foundation.lazy.grid.LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth().height(290.dp), userScrollEnabled = false, horizontalArrangement = Arrangement.spacedBy(14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                item { HomePanel("便签", Modifier.height(140.dp)) { Text("点这里写便签", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+                item { HomePanel("天气", Modifier.height(140.dp)) { Text("设置城市", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("--°", style = MaterialTheme.typography.headlineLarge.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Light)); Text("天气信息将在接入后显示", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) { HomePanel("Messages", Modifier.fillMaxWidth().height(130.dp), "See all") { Text("还没有最近聊天", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
             }
         }
-        Spacer(Modifier.height(20.dp))
-        Text("应用", style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(10.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(appEntries) { entry ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onOpen(entry.id) },
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(entry.icon),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(23.dp)
-                            )
-                        }
-                        Spacer(Modifier.height(16.dp))
-                        Text(entry.title, style = MaterialTheme.typography.titleSmall)
-                        Spacer(Modifier.height(3.dp))
-                        Text(
-                            entry.subtitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+        Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+            dock.forEach { entry ->
+                Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.size(54.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp)) }
+                    Spacer(Modifier.height(5.dp))
+                    Text(if (entry.id == "personas") "联系人设定" else entry.title, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface)
                 }
             }
         }
     }
 }
 
+@Composable
+private fun HomePanel(title: String, modifier: Modifier = Modifier, trailing: String? = null, content: @Composable Column.() -> Unit) {
+    Column(modifier.background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(22.dp)).padding(16.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Text(title, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+            if (trailing != null) Text(trailing, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Spacer(Modifier.height(12.dp))
+        content()
+    }
+}
 @Composable
 private fun FeaturePlaceholder(
     title: String,
