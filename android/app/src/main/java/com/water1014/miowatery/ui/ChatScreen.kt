@@ -14,8 +14,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -277,7 +278,10 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 item {
                     Text("今天", modifier = Modifier.fillMaxWidth(), color = Color(0xFF9AA1A9), fontSize = 11.sp, textAlign = TextAlign.Center)
                 }
-                items(messages, key = { it.id }) { message -> ChatMessageBubble(message) }
+                itemsIndexed(messages, key = { _, message -> message.id }) { index, message ->
+                    val firstInGroup = index == 0 || messages[index - 1].role != message.role
+                    ChatMessageBubble(message, firstInGroup)
+                }
                 if (sending) {
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -360,24 +364,39 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ChatMessageBubble(message: MessageEntity) {
+private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean) {
     val fromUser = message.role == "user"
+    val avatar = @Composable {
+        Box(
+            Modifier.size(40.dp).clip(CircleShape)
+                .background(if (firstInGroup) Color(0xFFF0F1F2) else Color.Transparent),
+            contentAlignment = Alignment.Center
+        ) {
+            if (firstInGroup) {
+                Text(if (fromUser) "我" else "M", color = Color(0xFF555D66), fontSize = 13.sp)
+            }
+        }
+    }
+    val bubbleShape = RoundedCornerShape(
+        topStart = if (!fromUser && firstInGroup) 4.dp else 16.dp,
+        topEnd = if (fromUser && firstInGroup) 4.dp else 16.dp,
+        bottomEnd = 16.dp,
+        bottomStart = 16.dp
+    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (fromUser) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Top
     ) {
         if (!fromUser) {
-            Box(
-                Modifier.size(34.dp).clip(CircleShape).background(Color(0xFFF0F1F2)),
-                contentAlignment = Alignment.Center
-            ) { Text("M", color = Color(0xFF555D66), fontSize = 13.sp) }
+            avatar()
             Spacer(Modifier.width(8.dp))
         }
         Box(
-            modifier = Modifier.clip(RoundedCornerShape(18.dp))
+            modifier = Modifier.widthIn(max = 270.dp)
+                .clip(bubbleShape)
                 .background(if (fromUser) Color(0xFF111111) else Color(0xFFECEEF0))
-                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .padding(horizontal = 11.dp, vertical = 7.dp)
         ) {
             Text(
                 message.content,
@@ -385,6 +404,10 @@ private fun ChatMessageBubble(message: MessageEntity) {
                 fontSize = 14.sp,
                 lineHeight = 21.sp
             )
+        }
+        if (fromUser) {
+            Spacer(Modifier.width(8.dp))
+            avatar()
         }
     }
 }
