@@ -266,9 +266,7 @@ private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) 
     val pager = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
     var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
-    LaunchedEffect(Unit) {
-        while (true) { now = java.time.LocalDateTime.now(); kotlinx.coroutines.delay(15_000) }
-    }
+    LaunchedEffect(Unit) { while (true) { now = java.time.LocalDateTime.now(); kotlinx.coroutines.delay(15_000) } }
     val ink = Color(0xFF0F1419)
     val sub = Color(0xFF6B7480)
     val panel = Color(0xFFF3F4F5)
@@ -276,102 +274,64 @@ private fun HomeScreen(modifier: Modifier = Modifier, onOpen: (String) -> Unit) 
     Column(modifier.fillMaxSize().background(Color.White), horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(state = pager, modifier = Modifier.fillMaxWidth().weight(1f), beyondViewportPageCount = 1) { page ->
             when (page) {
-                0 -> Column(
-                    Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState())
-                        .padding(horizontal = 18.dp).padding(top = 20.dp, bottom = 14.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    Column(Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 2.dp)) {
-                        Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink,
-                            fontSize = 60.sp, fontWeight = FontWeight.Light, letterSpacing = (-2).sp)
-                        Text(now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE)),
-                            color = sub, style = MaterialTheme.typography.bodySmall)
+                0 -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 18.dp).padding(top = 20.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                        Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 60.sp, fontWeight = FontWeight.Light, letterSpacing = (-2).sp)
+                        Text(now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE)), color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 7.dp))
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        HomePanel("天气", Modifier.weight(1f).height(154.dp)) {
-                            Text("--°", color = ink, fontSize = 34.sp, fontWeight = FontWeight.Light)
-                            Text("天气信息", color = sub, style = MaterialTheme.typography.labelSmall)
-                        }
-                        HomePanel("照片", Modifier.weight(1f).height(154.dp)) {
-                            Box(Modifier.fillMaxWidth().weight(1f).background(Color(0xFFE7E9EB), RoundedCornerShape(14.dp)),
-                                contentAlignment = Alignment.Center) {
-                                Text("留住此刻", color = sub, style = MaterialTheme.typography.labelSmall)
-                            }
+                    HomePanel("人と人の漣", Modifier.fillMaxWidth()) { Text("把今天的心情，留在这里。", color = sub, style = MaterialTheme.typography.bodySmall) }
+                    Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
+                        Text("备忘录图片", color = ink, style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(9.dp))
+                        Box(Modifier.fillMaxWidth().height(140.dp).background(Color(0xFFE2E4E7), RoundedCornerShape(14.dp)).clickable { onOpen("diary") }, contentAlignment = Alignment.Center) { Text("点击添加图片", color = sub, style = MaterialTheme.typography.labelSmall) }
+                        Spacer(Modifier.height(12.dp))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Column { Text("Set city", color = sub, style = MaterialTheme.typography.labelSmall); Text("--°", color = ink, fontSize = 32.sp, fontWeight = FontWeight.Light); Text("Tap to set city", color = sub, style = MaterialTheme.typography.labelSmall) }
+                            Text("天气", color = sub, style = MaterialTheme.typography.labelSmall)
                         }
                     }
-                    HomePanel("最近消息", Modifier.fillMaxWidth().height(132.dp), "查看全部") {
+                    Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("Messages", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text("See all", Modifier.clickable { onOpen("app") }, color = sub, style = MaterialTheme.typography.labelSmall)
+                        }
+                        Spacer(Modifier.height(10.dp))
                         Text("还没有最近聊天", color = sub, style = MaterialTheme.typography.bodySmall)
                     }
                 }
                 1 -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).padding(horizontal = 8.dp).padding(top = 18.dp)) {
-                    Text("应用", Modifier.padding(start = 10.dp, bottom = 10.dp), color = ink,
-                        style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(4), modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp)
-                    ) {
-                        items(appEntries) { entry ->
-                            Column(Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(Modifier.size(58.dp).background(
-                                    brush = androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFF8F8F8), Color(0xFFE9EAEC))),
-                                    shape = RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
-                                    Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(29.dp))
-                                }
-                                Spacer(Modifier.height(7.dp))
-                                Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
-                            }
-                        }
+                    Text("应用", Modifier.padding(start = 10.dp, bottom = 10.dp), color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                    LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                        items(appEntries) { entry -> Column(Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(29.dp)) }
+                            Spacer(Modifier.height(7.dp)); Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
+                        } }
                     }
                 }
-                else -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState())
-                    .padding(horizontal = 18.dp).padding(top = 18.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                else -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 18.dp).padding(top = 18.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     CalendarHomeCard(ink, sub)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        HomePanel("聊天预览", Modifier.weight(1f).height(120.dp)) {
-                            Text("开始一段对话", color = ink, style = MaterialTheme.typography.bodyMedium)
-                            Text("点此进入聊天", color = sub, style = MaterialTheme.typography.labelSmall)
-                        }
-                        HomePanel("快捷入口", Modifier.weight(1f).height(120.dp)) {
-                            Text("联系人 · 世界书", color = ink, style = MaterialTheme.typography.bodyMedium)
-                            Text("角色与设定", color = sub, style = MaterialTheme.typography.labelSmall)
-                        }
+                        HomePanel("聊天预览", Modifier.weight(1f).height(120.dp)) { Text("开始一段对话", color = ink, style = MaterialTheme.typography.bodyMedium); Text("点此进入聊天", color = sub, style = MaterialTheme.typography.labelSmall) }
+                        HomePanel("快捷入口", Modifier.weight(1f).height(120.dp)) { Text("联系人 · 世界书", color = ink, style = MaterialTheme.typography.bodyMedium); Text("角色与设定", color = sub, style = MaterialTheme.typography.labelSmall) }
                     }
                     Text("常用应用", color = ink, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        listOf("app", "personas", "worlds", "diary").forEach { id ->
-                            val entry = appEntries.first { it.id == id }
-                            Column(Modifier.weight(1f).clickable { onOpen(id) }, horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(Modifier.size(40.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) {
-                                    Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(22.dp))
-                                }
-                                Spacer(Modifier.height(6.dp))
-                                Text(entry.title, color = sub, fontSize = 10.sp, textAlign = TextAlign.Center)
-                            }
-                        }
-                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { listOf("app", "personas", "worlds", "diary").forEach { id -> val entry = appEntries.first { it.id == id }; Column(Modifier.weight(1f).clickable { onOpen(id) }, horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(40.dp).background(panel, RoundedCornerShape(13.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(22.dp)) }; Spacer(Modifier.height(6.dp)); Text(entry.title, color = sub, fontSize = 10.sp, textAlign = TextAlign.Center) } } }
                 }
             }
         }
-        Row(Modifier.fillMaxWidth().height(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-            repeat(3) { index ->
-                Box(Modifier.padding(horizontal = 5.dp).size(if (pager.currentPage == index) 7.dp else 5.dp)
-                    .background(if (pager.currentPage == index) ink else Color(0xFFD5D8DC), CircleShape)
-                    .clickable { scope.launch { pager.animateScrollToPage(index) } })
-            }
+        Row(Modifier.fillMaxWidth().height(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { repeat(3) { index -> Box(Modifier.padding(horizontal = 5.dp).size(if (pager.currentPage == index) 7.dp else 5.dp).background(if (pager.currentPage == index) ink else Color(0xFFD5D8DC), CircleShape).clickable { scope.launch { pager.animateScrollToPage(index) } }) } }
+        Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 5.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
+            dock.forEach { entry -> Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(54.dp).background(panel, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) { Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(24.dp)) }; Spacer(Modifier.height(5.dp)); Text(if (entry.id == "app") "聊天" else if (entry.id == "personas") "联系人设定" else entry.title, color = ink, fontSize = 11.sp) } }
         }
-        Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 5.dp, bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
-            dock.forEach { entry ->
-                Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(Modifier.size(42.dp).background(panel, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
-                        Icon(painterResource(entry.icon), contentDescription = entry.title, tint = ink, modifier = Modifier.size(23.dp))
-                    }
-                }
-            }
-        }
+    }
+}
+
+@Composable
+private fun HomePanel(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier.background(Color(0xFFF3F4F5), RoundedCornerShape(22.dp)).padding(16.dp)) {
+        Text(title, color = Color(0xFF0F1419), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(9.dp))
+        content()
     }
 }
 
