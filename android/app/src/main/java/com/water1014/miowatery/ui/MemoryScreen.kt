@@ -58,6 +58,7 @@ import java.util.UUID
 @Composable
 fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val memoryPrefs = remember(conversationId) { context.getSharedPreferences("mio_memory_settings", android.content.Context.MODE_PRIVATE) }
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val scope = rememberCoroutineScope()
     val entries by dao.observeMemoryEntries(conversationId).collectAsState(initial = emptyList())
@@ -77,6 +78,9 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
     var expandedEntryId by remember { mutableStateOf<String?>(null) }
     var pendingDelete by remember { mutableStateOf<MemoryEntryEntity?>(null) }
     var traditionalExpanded by remember { mutableStateOf(false) }
+    var contextCount by remember(conversationId) { mutableStateOf(memoryPrefs.getInt("context_count_$conversationId", 0).takeIf { it > 0 }?.toString().orEmpty()) }
+    var summaryInstruction by remember(conversationId) { mutableStateOf(memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty()) }
+    var settingsSaved by remember { mutableStateOf(false) }
 
     val traditionalEntries = entries.filter { it.type == "traditional" }
     val noteEntries = entries.filter { it.type != "traditional" }
@@ -117,7 +121,11 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                 val transcript = messages.subList(start - 1, end).joinToString("\n") { message ->
                     (if (message.role == "user") "我：" else "角色：") + message.content
                 }.takeLast(24000)
-                val summaryPrompt = "你是聊天记忆整理助手。请把下面的聊天记录整理成给未来聊天使用的记忆纸条，不要写泛泛摘要。保留明确日期、双方关系变化、称呼、稳定偏好、共同经历、未完成约定和重要事实；区分谁说的，不确定的内容不要编造。用简体中文，分点清晰，控制在 600 字以内，只输出记忆内容。"
+                val customInstruction = memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty().trim()
+                val summaryPrompt = buildString {
+                    append("你是聊天记忆整理助手。请把下面的聊天记录整理成给未来聊天使用的记忆纸条，不要写泛泛摘要。保留明确日期、双方关系变化、称呼、稳定偏好、共同经历、未完成约定和重要事实；区分谁说的，不确定的内容不要编造。用简体中文，分点清晰，控制在 600 字以内，只输出记忆内容。")
+                    if (customInstruction.isNotBlank()) append("\\n\\n用户额外总结规则（优先遵守）：\\n").append(customInstruction)
+                }
                 val result = withContext(Dispatchers.IO) {
                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
                     val client = ChatCompletionClient(ApiHeaderResolver(sessions))
@@ -191,6 +199,54 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                         Spacer(Modifier.weight(1f))
                         Text("手动记忆与最近 8 张纸条会参与回复", color = secondaryText, fontSize = 10.sp, textAlign = TextAlign.End)
                     }
+                }
+            }
+        }
+        item { SectionLabel("聊天记忆设置") }
+        item {
+            Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = groupBackground)) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("上下文读取条数", color = ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text("每次发送给 AI 的最近聊天消息数。留空则使用全部聊天记录。", color = secondaryText, fontSize = 11.sp)
+                    OutlinedTextField(
+                        value = contextCount,
+                        onValueChange = { contextCount = it.filter(Char::isDigit).take(4) },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("消息条数（1–1000，留空为全部）") },
+                        singleLine = true
+                    )
+                    Text("自定义总结规则", color = ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    OutlinedTextField(
+                        value = summaryInstruction,
+                        onValueChange = { summaryInstruction = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("例如：优先记录关系变化、双方明确说过的偏好和承诺。") },
+                        minLines = 3,
+                        maxLines = 6
+                    )
+                    Text(
+                        "保存后会应用于当前聊天，不影响其他角色。",
+                        color = secondaryText,
+                        fontSize = 11.sp
+                    )
+                    Text(
+                        if (settingsSaved) "已保存" else "保存设置",
+                        Modifier.fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(18.dp))
+                            .clickable {
+                                val count = contextCount.toIntOrNull()?.coerceIn(1, 1000) ?: 0
+                                memoryPrefs.edit()
+                                    .putInt("context_count_$conversationId", count)
+                                    .putString("summary_instruction_$conversationId", summaryInstruction.trim())
+                                    .apply()
+                                settingsSaved = true
+                            }
+                            .padding(vertical = 10.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
             }
         }
