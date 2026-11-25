@@ -111,3 +111,10 @@ The previous batch-progress paragraph above is superseded where it described the
 - Music now has a native Media3 screen supporting a local audio picker, play/pause, replay, seek, cover selection and editable two-line lyrics. Track URI, title, cover URI and lyrics persist locally. Playback stops when leaving the screen. Online QQ Music search/catalog, playlists, automatic lyric matching and background MediaSession/foreground service remain incomplete.
 - Messages is no longer a placeholder: its independent Compose screen implements 传讯 and 匿名问答, uses saved API config/custom headers, includes up to 12 recent messages from the selected persona's latest chat as context, and persists SMS / QA / anonymous batch entries in Room. Migration 2→3 creates message_app_entries without clearing existing data.
 - Remaining Messages gaps: the current native implementation uses the default profile rather than full upstream multi-profile isolation; anonymous questions are generated as a batch rather than using the original per-question receive/selection flow; exact SMS navigation and bubble styling still need parity work.
+
+## 首页组件实际数据接入（2026-11-25）
+
+- 首页备忘录图片现在使用 Android 图片选择器，图片 URI 和授权状态尽可能持久化；重启后会尝试继续显示已选图片。
+- 首页最近消息卡已连接 Room 查询，展示数据库中最近三条真实聊天消息，不再固定显示空状态；点击可进入聊天。
+- 天气卡已接入 Open-Meteo 地理编码和当前天气接口，城市名称可编辑并保存；请求失败时展示错误状态，不伪造温度。天气服务需要网络连接。
+- 这些是原生首页功能接入，不代表桌面视觉已经达到上游像素级一致；天气图标、原版卡片比例与动效仍需对照原版继续校准。
