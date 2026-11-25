@@ -169,7 +169,7 @@ fun MioSplashScreen(onFinished: () -> Unit) {
                     color = android.graphics.Color.rgb(16, 16, 16)
                     strokeCap = NativePaint.Cap.ROUND
                     strokeWidth = 1.1f
-                    alpha = 95
+                    setAlpha(95)
                 }
                 for (i in 0 until count) {
                     val x = ((i * 97.31f + (i % 5) * 23f) % size.width)

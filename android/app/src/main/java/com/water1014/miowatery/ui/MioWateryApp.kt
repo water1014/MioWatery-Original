@@ -217,9 +217,11 @@ fun MioWateryApp() {
             }
         }
     }
+    }
     if (showSplash) {
         MioSplashScreen(onFinished = { showSplash = false })
     }
+}
 }
 
 @Composable
