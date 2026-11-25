@@ -298,12 +298,6 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 )
             }
             Text(
-                "记忆",
-                modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onOpenMemory(conversationId) }.padding(horizontal = 8.dp, vertical = 7.dp),
-                color = Color(0xFF0F1419),
-                fontSize = 12.sp
-            )
-            Text(
                 "设置",
                 modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showSettings = true }.padding(horizontal = 8.dp, vertical = 7.dp),
                 color = Color(0xFF0F1419),
@@ -411,9 +405,24 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
     if (showSettings) {
         AlertDialog(
             onDismissRequest = { showSettings = false },
-            title = { Text("模型 API 设置") },
+            title = { Text("聊天设置") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("记忆", color = Color(0xFF0F1419), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Row(
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF3F4F5))
+                            .clickable { showSettings = false; onOpenMemory(conversationId) }
+                            .padding(horizontal = 12.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text("记忆管理", color = Color(0xFF0F1419), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text("生成总结条目、编辑和删除记忆", color = Color(0xFF7B848E), fontSize = 11.sp)
+                        }
+                        Text("›", color = Color(0xFF8A929B), fontSize = 20.sp)
+                    }
+                    Text("模型 API", color = Color(0xFF0F1419), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     OutlinedTextField(editBaseUrl, { editBaseUrl = it }, label = { Text("API 地址") }, placeholder = { Text("https://example.com/v1") }, singleLine = true)
                     OutlinedTextField(editModel, { editModel = it }, label = { Text("模型名称") }, singleLine = true)
                     OutlinedTextField(editApiKey, { editApiKey = it }, label = { Text("API 密钥") }, visualTransformation = PasswordVisualTransformation(), singleLine = true)
