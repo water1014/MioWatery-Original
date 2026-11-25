@@ -1,5 +1,9 @@
 package com.water1014.miowatery.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -37,6 +41,8 @@ fun PersonaScreen(onBack: () -> Unit, onOpenChat: (String) -> Unit, modifier: Mo
     var bio by remember { mutableStateOf("") }
     var prompt by remember { mutableStateOf("") }
     var greet by remember { mutableStateOf("") }
+    var avatar by remember { mutableStateOf("") }
+    val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> avatar = uri?.toString().orEmpty() }
 
     LaunchedEffect(personas.isEmpty()) {
         if (personas.isEmpty()) {
@@ -49,9 +55,9 @@ fun PersonaScreen(onBack: () -> Unit, onOpenChat: (String) -> Unit, modifier: Mo
             )))
         }
     }
-    fun newPersona() { editing = null; name = ""; bio = ""; prompt = ""; greet = ""; showEditor = true }
+    fun newPersona() { editing = null; name = ""; bio = ""; prompt = ""; greet = ""; avatar = ""; showEditor = true }
     fun editPersona(p: PersonaEntity) {
-        editing = p; name = p.name; bio = p.description.orEmpty()
+        editing = p; name = p.name; bio = p.description.orEmpty(); avatar = p.avatar.orEmpty()
         val raw = runCatching { JSONObject(p.rawLegacyJson) }.getOrNull()
         prompt = raw?.optString("prompt").orEmpty(); greet = raw?.optString("greet").orEmpty()
         showEditor = true
@@ -72,7 +78,8 @@ fun PersonaScreen(onBack: () -> Unit, onOpenChat: (String) -> Unit, modifier: Mo
             items(personas, key = { it.personaId }) { p ->
                 Row(Modifier.fillMaxWidth().clickable { onOpenChat(p.personaId) }.padding(horizontal = 18.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(46.dp).clip(RoundedCornerShape(16.dp)).background(Color(0xFFF0F1F2)), contentAlignment = Alignment.Center) {
-                        Text(p.name.take(1), fontSize = 17.sp, color = Color(0xFF4D5660))
+                        if (!p.avatar.isNullOrBlank()) AsyncImage(model = p.avatar, contentDescription = p.name, modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)))
+                        else Text(p.name.take(1), fontSize = 17.sp, color = Color(0xFF4D5660))
                     }
                     Column(Modifier.weight(1f).padding(start = 12.dp)) {
                         Text(p.name, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFF111111))
@@ -93,6 +100,16 @@ fun PersonaScreen(onBack: () -> Unit, onOpenChat: (String) -> Unit, modifier: Mo
         title = { Text(if (editing == null) "新增联系人" else "编辑联系人") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.fillMaxWidth().clickable { avatarPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(Modifier.size(54.dp).clip(RoundedCornerShape(18.dp)).background(Color(0xFFF0F1F2)), contentAlignment = Alignment.Center) {
+                        if (avatar.isNotBlank()) AsyncImage(model = avatar, contentDescription = "人物头像", modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(18.dp)))
+                        else Text(name.take(1).ifBlank { "＋" }, color = Color(0xFF59616B), fontSize = 20.sp)
+                    }
+                    Column {
+                        Text("更换人物头像", color = Color(0xFF111111), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Text("从相册选择一张图片", color = Color(0xFF9299A1), fontSize = 10.sp)
+                    }
+                }
                 OutlinedTextField(name, { name = it }, label = { Text("名字") }, singleLine = true)
                 OutlinedTextField(bio, { bio = it }, label = { Text("简介") }, singleLine = true)
                 OutlinedTextField(prompt, { prompt = it }, label = { Text("角色人设") }, minLines = 4, maxLines = 7)
@@ -104,7 +121,7 @@ fun PersonaScreen(onBack: () -> Unit, onOpenChat: (String) -> Unit, modifier: Mo
                 val old = editing; val id = old?.personaId ?: UUID.randomUUID().toString(); val now = System.currentTimeMillis()
                 val raw = JSONObject().put("prompt", prompt).put("greet", greet).toString()
                 scope.launch {
-                    dao.upsertPersonas(listOf(PersonaEntity(PERSONA_PROFILE_ID, id, name.trim().ifBlank { "未命名联系人" }, old?.avatar, bio.trim(), raw, now)))
+                    dao.upsertPersonas(listOf(PersonaEntity(PERSONA_PROFILE_ID, id, name.trim().ifBlank { "未命名联系人" }, avatar.ifBlank { null }, bio.trim(), raw, now)))
                     showEditor = false
                 }
             }) { Text("保存") }
