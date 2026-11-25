@@ -2,6 +2,8 @@ package com.water1014.miowatery.ui
 
 import coil3.compose.AsyncImage
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -407,7 +409,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
             onDismissRequest = { showSettings = false },
             title = { Text("聊天设置") },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("记忆", color = Color(0xFF0F1419), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Row(
                         Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
