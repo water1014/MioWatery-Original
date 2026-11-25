@@ -1,3 +1,8 @@
+package com.water1014.miowatery.core.network
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
 class ApiEndpointResolverTest {
     @Test
     fun chatEndpointTrimsTrailingSlashes() {
