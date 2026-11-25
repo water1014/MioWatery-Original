@@ -92,10 +92,10 @@
 - [ ] 定义导出包格式、导入校验、冲突处理和回滚策略。
 
 ### Phase 1：原生工程与系统骨架
-- [ ] Gradle / Kotlin / Compose 工程可构建。
+- [x] Gradle / Kotlin / Compose 工程已完成首轮编译验证（Debug APK 构建成功）。
 - [ ] 原生启动、导航、主题、设置与空状态。
 - [ ] Room / DataStore / 安全存储基础设施。
-- [ ] CI 自动构建 Debug APK。
+- [x] GitHub Actions 已自动构建并上传 Debug APK 工件。
 
 ### Phase 2：聊天与 AI 核心
 - [ ] 主/备用 OpenAI 兼容 API、模型拉取、自定义请求头。
@@ -173,3 +173,15 @@
 - 单元 / UI 测试覆盖关键路径。
 - 数据导入导出可验证。
 - 在目标 Android 设备上完成实际测试。
+
+
+## 10. 已落地的原生工程状态（2026-11-25）
+
+- 已建立 `android/` 独立 Android 工程，包名 `com.water1014.miowatery`。
+- 已完成 Kotlin + Jetpack Compose + Material 3 基础工程配置。
+- 已实现原生启动入口、浅/深色主题、首页卡片、侧栏和占位页面切换。
+- 已把源码中识别到的桌面应用入口纳入原生导航清单；目前均为迁移入口，不代表业务已实现。
+- GitHub Actions 已成功构建 Debug APK。已验证的成功构建提交：`5f2aa8ef4bd41334dba3b69cdb6fdefaa14c1d38`。
+- 后续首页导航扩展已提交，仍需等待该最新代码对应的 CI 构建验证。
+- 当前没有接入旧版 IndexedDB，也没有写入、覆盖或清理旧版数据。
+- 当前尚未进行 vivo S19 实机安装、性能、权限和后台运行测试。
