@@ -752,7 +752,7 @@ private fun HomeScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        Box(Modifier.size(30.dp).background(Color(0xFFE9EAF0), CircleShape), contentAlignment = Alignment.Center) {
+                                        Box(Modifier.size(34.dp).background(Color(0xFFEEF0F1), CircleShape), contentAlignment = Alignment.Center) {
                                             Text("♡", color = Color(0xFF6B7480), fontSize = 17.sp)
                                         }
                                         Column(Modifier.weight(1f)) {
@@ -771,14 +771,14 @@ private fun HomeScreen(
                                                 Box(
                                                     Modifier.widthIn(max = 190.dp)
                                                         .background(
-                                                            if (index % 2 == 0) Color(0xFFECEEF0) else Color(0xFF111111),
+                                                            if (index % 2 == 0) Color(0xFFE9E9ED) else Color(0xFF3982F6),
                                                             RoundedCornerShape(13.dp)
                                                         )
                                                         .padding(horizontal = 10.dp, vertical = 7.dp)
                                                 ) {
                                                     Text(
                                                         message,
-                                                        color = if (index % 2 == 0) Color(0xFF171719) else Color.White,
+                                                        color = Color(0xFF171719),
                                                         fontSize = 10.sp,
                                                         lineHeight = 14.sp
                                                     )
@@ -788,13 +788,13 @@ private fun HomeScreen(
                                     }
                                     Row(
                                         Modifier.fillMaxWidth().padding(top = 11.dp)
-                                            .background(Color(0xFFF3F4F5), RoundedCornerShape(18.dp))
+                                            .border(1.dp, Color(0xFFE5E5E8), RoundedCornerShape(18.dp))
                                             .padding(horizontal = 10.dp, vertical = 7.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text("+", color = Color(0xFF8B8B90), fontSize = 16.sp)
                                         Text("iMessage", Modifier.weight(1f).padding(start = 8.dp), color = Color(0xFF8B8B90), fontSize = 10.sp)
-                                        Text("↑", color = Color(0xFF8B8B90), fontSize = 13.sp)
+                                        Box(Modifier.size(19.dp).background(Color(0xFF3982F6), CircleShape), contentAlignment = Alignment.Center) { Text("↑", color = Color.White, fontSize = 11.sp) }
                                     }
                                 }
                             }
