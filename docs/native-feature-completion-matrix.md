@@ -144,3 +144,12 @@ The screen now uses the app theme's light/dark surfaces and restrained grouped r
 Still missing from upstream memory parity: automatic summary toggle and interval, per-chat context-count override, vector-memory mode and Embedding API configuration, vectorization/rebuild actions, old-note compression, custom summary instructions, and import/export of traditional memories. These must be implemented with real persistence and API behavior before being shown as working controls.
 
 Visual parity is still a work in progress across the entire app. The upstream global visual baseline is white/black with muted secondary text, 14–15px system typography, low-contrast grouped surfaces, thin separators, and compact 16–22px corner radii depending on component. The home desktop's exact card geometry, original icon placement, chat bubbles, settings rows, and page transitions still require systematic comparison and correction. This is not a claim of pixel-level parity.
+
+
+## Per-chat memory controls (2026-11-25)
+
+- Added a per-conversation context message limit (1–1000, blank means full history), persisted locally and applied to the actual chat request.
+- Added per-conversation custom memory-summary instructions, persisted locally and appended to the summary-generation system prompt.
+- These settings are keyed by the stable conversation ID, so they do not bleed between different chats/personas.
+- Memory injection now includes all manually maintained traditional memories and only the latest eight generated note entries, matching the upstream intent more closely.
+- Automatic summary scheduling, summary interval, old-note compression, vector memory/embeddings, and import/export are still not implemented. No non-functional toggles are presented for them.
