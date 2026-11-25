@@ -69,7 +69,7 @@ fun MemoryScreen(
     val configStore = remember { ApiConfigStore(context) }
     val apiConfig by configStore.config.collectAsState(initial = SavedApiConfig())
     var rangeStart by remember { mutableStateOf("1") }
-    var rangeEnd by remember { mutableStateOf("0") }
+    var rangeEnd by remember { mutableStateOf("") }
     var generating by remember { mutableStateOf(false) }
     var generationError by remember { mutableStateOf<String?>(null) }
     var search by remember { mutableStateOf("") }
