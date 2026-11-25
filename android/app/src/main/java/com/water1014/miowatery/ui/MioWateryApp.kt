@@ -118,7 +118,10 @@ private val appEntries = listOf(
 @Composable
 fun MioWateryApp() {
     val context = LocalContext.current
-    var desktopPackJson by remember { mutableStateOf(DesktopThemePackStore.load(context)) }
+    var desktopPackJson by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(context) {
+        desktopPackJson = withContext(Dispatchers.IO) { DesktopThemePackStore.load(context) }
+    }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showSplash by remember { mutableStateOf(true) }
