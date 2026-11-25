@@ -740,61 +740,85 @@ private fun HomeScreen(
                             }
                         }
                         if (page == 2) {
-                            Card(
-                                modifier = Modifier.fillMaxWidth().padding(top = 14.dp).clickable { editIMessage = true },
-                                shape = RoundedCornerShape(22.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.White),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            Row(
+                                Modifier.fillMaxWidth().padding(top = 12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                                verticalAlignment = Alignment.Top
                             ) {
-                                Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 11.dp)) {
-                                    Row(
-                                        Modifier.fillMaxWidth().padding(bottom = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Box(Modifier.size(34.dp).background(Color(0xFFEEF0F1), CircleShape), contentAlignment = Alignment.Center) {
-                                            Text("♡", color = Color(0xFF6B7480), fontSize = 17.sp)
+                                Card(
+                                    modifier = Modifier.weight(1.25f).clickable { editIMessage = true },
+                                    shape = RoundedCornerShape(22.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                                ) {
+                                    Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 11.dp)) {
+                                        Row(
+                                            Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            Box(Modifier.size(34.dp).background(Color(0xFFEEF0F1), CircleShape), contentAlignment = Alignment.Center) {
+                                                Text("♡", color = Color(0xFF6B7480), fontSize = 17.sp)
+                                            }
+                                            Column(Modifier.weight(1f)) {
+                                                Text(imessageTitle, color = Color(0xFF171719), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                                Text(imessageSubtitle, color = Color(0xFF8B8B90), fontSize = 9.sp)
+                                            }
+                                            Text("•••", color = Color(0xFF8B8B90), fontSize = 12.sp)
                                         }
-                                        Column(Modifier.weight(1f)) {
-                                            Text(imessageTitle, color = Color(0xFF171719), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                                            Text(imessageSubtitle, color = Color(0xFF8B8B90), fontSize = 9.sp)
-                                        }
-                                        Text("•••", color = Color(0xFF8B8B90), fontSize = 12.sp)
-                                    }
-                                    Divider(color = Color(0xFFEAECEE), thickness = 0.7.dp)
-                                    listOf(imessage1, imessage2, imessage3, imessage4).forEachIndexed { index, message ->
-                                        if (message.isNotBlank()) {
-                                            Row(
-                                                Modifier.fillMaxWidth().padding(top = 7.dp),
-                                                horizontalArrangement = if (index % 2 == 0) Arrangement.Start else Arrangement.End
-                                            ) {
-                                                Box(
-                                                    Modifier.widthIn(max = 190.dp)
-                                                        .background(
-                                                            if (index % 2 == 0) Color(0xFFE9E9ED) else Color(0xFF3982F6),
-                                                            RoundedCornerShape(13.dp)
-                                                        )
-                                                        .padding(horizontal = 10.dp, vertical = 7.dp)
+                                        Divider(color = Color(0xFFEAECEE), thickness = 0.7.dp)
+                                        listOf(imessage1, imessage2, imessage3, imessage4).forEachIndexed { index, message ->
+                                            if (message.isNotBlank()) {
+                                                Row(
+                                                    Modifier.fillMaxWidth().padding(top = 7.dp),
+                                                    horizontalArrangement = if (index % 2 == 0) Arrangement.Start else Arrangement.End
                                                 ) {
-                                                    Text(
-                                                        message,
-                                                        color = Color(0xFF171719),
-                                                        fontSize = 10.sp,
-                                                        lineHeight = 14.sp
-                                                    )
+                                                    Box(
+                                                        Modifier.widthIn(max = 190.dp)
+                                                            .background(
+                                                                if (index % 2 == 0) Color(0xFFE9E9ED) else Color(0xFF3982F6),
+                                                                RoundedCornerShape(13.dp)
+                                                            )
+                                                            .padding(horizontal = 10.dp, vertical = 7.dp)
+                                                    ) {
+                                                        Text(
+                                                            message,
+                                                            color = if (index % 2 == 0) Color(0xFF171719) else Color.White,
+                                                            fontSize = 10.sp,
+                                                            lineHeight = 14.sp
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }
+                                        Row(
+                                            Modifier.fillMaxWidth().padding(top = 11.dp)
+                                                .border(1.dp, Color(0xFFE5E5E8), RoundedCornerShape(18.dp))
+                                                .padding(horizontal = 10.dp, vertical = 7.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text("+", color = Color(0xFF8B8B90), fontSize = 16.sp)
+                                            Text("iMessage", Modifier.weight(1f).padding(start = 8.dp), color = Color(0xFF8B8B90), fontSize = 10.sp)
+                                            Box(Modifier.size(19.dp).background(Color(0xFF3982F6), CircleShape), contentAlignment = Alignment.Center) { Text("↑", color = Color.White, fontSize = 11.sp) }
+                                        }
                                     }
-                                    Row(
-                                        Modifier.fillMaxWidth().padding(top = 11.dp)
-                                            .border(1.dp, Color(0xFFE5E5E8), RoundedCornerShape(18.dp))
-                                            .padding(horizontal = 10.dp, vertical = 7.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text("+", color = Color(0xFF8B8B90), fontSize = 16.sp)
-                                        Text("iMessage", Modifier.weight(1f).padding(start = 8.dp), color = Color(0xFF8B8B90), fontSize = 10.sp)
-                                        Box(Modifier.size(19.dp).background(Color(0xFF3982F6), CircleShape), contentAlignment = Alignment.Center) { Text("↑", color = Color.White, fontSize = 11.sp) }
+                                }
+                                Column(
+                                    Modifier.weight(0.75f),
+                                    verticalArrangement = Arrangement.spacedBy(15.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    visibleApps.forEach { entry ->
+                                        Column(
+                                            Modifier.fillMaxWidth().clickable { onOpen(entry.id) },
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Box(Modifier.size(44.dp).background(Color.White, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
+                                                AppEntryIcon(entry, desktopOverrides, 22.dp)
+                                            }
+                                            Spacer(Modifier.height(6.dp))
+                                            Text(entry.title, color = ink, fontSize = 10.sp, lineHeight = 13.sp, textAlign = TextAlign.Center, maxLines = 2)
+                                        }
                                     }
                                 }
                             }
