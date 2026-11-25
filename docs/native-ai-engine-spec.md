@@ -101,3 +101,15 @@ API Key 必须来自加密凭据仓库，不直接写入 Room 的普通配置表
 - [ ] reasoning 字段和 think 标签解析。
 - [ ] 请求取消、超时和网络断开。
 - [ ] 图片消息与未知扩展字段保留。
+
+
+## 8. 原生实现进度
+
+已加入原生代码的第一批 AI 网络基础组件：
+
+- `ApiSessionStore`：会话 ID 按用户资料 ID 与聊天 ID 隔离；正式实现使用 Preferences DataStore 持久保存。
+- `ApiHeaderResolver`：默认 Authorization、JSON 自定义请求头、大小写无关的 header 覆盖、OpenCode 自动 session header 和占位符替换。
+- `ApiEndpointResolver`：聊天补全地址与模型列表地址分开解析，保留 OpenCode Go 特殊路径规则。
+- `ApiHeaderResolverTest` / `ApiEndpointResolverTest`：覆盖默认请求头、自定义 header、OpenCode session 稳定性、占位符替换、非法 JSON 和模型列表路径。
+
+GitHub Actions 已调整为先运行 `testDebugUnitTest`，再构建 Debug APK。测试通过前，不把这些兼容性用例标记为已验收。
