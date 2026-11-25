@@ -84,6 +84,8 @@ The upstream desktop contains four swipe pages plus a four-item fixed dock:
 
 The first desktop page is the clock / weather / recent-message widget page. Native implementation currently retains a provisional version and still needs visual and interaction parity work.
 
+Current page-by-page gaps are explicit: page 1 still has a non-persistent memo-image placeholder, a non-configurable weather placeholder and an empty recent-message state; page 2 does not yet port the original recent-search and quote/photo widgets; page 3 currently shows its four app shortcuts but not the music mini-player or editable iMessage preview; page 4 currently shows its eight app shortcuts but not the original music/lyrics widget. These are remaining parity tasks, not completed features.
+
 - `app` and `msgs` are distinct upstream routes. Native `app` opens chat; `msgs` now has its own route and is explicitly not redirected to ChatScreen. The message inbox itself is still a placeholder.
 - The native desktop app grids now use the upstream page grouping and no longer display the invented generic "应用" title, calendar page, or "常用应用" shortcut card.
 - Theme-pack widgets are no longer rendered as extra cards on the first clock/weather page; they are placed below the original first app-grid page, pending exact positional mapping from the source desktop layout.
