@@ -218,6 +218,8 @@ fun MioWateryApp() {
                     personaId = selectedPersonaId,
                     modifier = Modifier.padding(innerPadding)
                 )
+            } else if (selectedPage == "music") {
+                MusicScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "msgs") {
                 MessageAppScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "worlds") {
@@ -447,8 +449,11 @@ private fun HomeScreen(
     var imessage2 by remember { mutableStateOf(homePrefs.getString("imessage_2", "刚到，放心。") ?: "") }
     var imessage3 by remember { mutableStateOf(homePrefs.getString("imessage_3", "那就好，早点休息。") ?: "") }
     var imessage4 by remember { mutableStateOf(homePrefs.getString("imessage_4", "好，晚安。") ?: "") }
-    var lyricLine1 by remember { mutableStateOf(homePrefs.getString("lyric_line_1", "歌曲名称 / 歌词展示") ?: "") }
-    var lyricLine2 by remember { mutableStateOf(homePrefs.getString("lyric_line_2", "点击编辑歌词内容") ?: "") }
+    val musicPrefs = remember(context) { context.getSharedPreferences("mio_music_player", Context.MODE_PRIVATE) }
+    var musicTitle by remember { mutableStateOf(musicPrefs.getString("track_name", "尚未选择歌曲") ?: "尚未选择歌曲") }
+    var musicPlaying by remember { mutableStateOf(musicPrefs.getBoolean("is_playing", false)) }
+    var lyricLine1 by remember { mutableStateOf(musicPrefs.getString("lyric_1", "") ?: "") }
+    var lyricLine2 by remember { mutableStateOf(musicPrefs.getString("lyric_2", "") ?: "") }
     var editSearches by remember { mutableStateOf(false) }
     var editQuote by remember { mutableStateOf(false) }
     var editIMessage by remember { mutableStateOf(false) }
@@ -668,7 +673,7 @@ private fun HomeScreen(
             androidx.compose.material3.OutlinedTextField(lyricLine1, { lyricLine1 = it }, label = { Text("歌曲 / 歌词") }, minLines = 2)
             androidx.compose.material3.OutlinedTextField(lyricLine2, { lyricLine2 = it }, label = { Text("第二行歌词") }, minLines = 2)
         } },
-        confirmButton = { androidx.compose.material3.TextButton(onClick = { homePrefs.edit().putString("lyric_line_1", lyricLine1).putString("lyric_line_2", lyricLine2).apply(); editLyrics = false }) { Text("保存") } },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = { musicPrefs.edit().putString("lyric_1", lyricLine1).putString("lyric_2", lyricLine2).apply(); editLyrics = false }) { Text("保存") } },
         dismissButton = { androidx.compose.material3.TextButton(onClick = { editLyrics = false }) { Text("取消") } }
     )
 }
