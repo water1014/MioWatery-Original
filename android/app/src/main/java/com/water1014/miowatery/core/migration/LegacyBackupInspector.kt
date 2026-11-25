@@ -89,14 +89,18 @@ object LegacyBackupInspector {
 
         val state = root.asJsonObject
         val chatsByUser = state.objectOrNull("chatsByUser")
+        val legacyChats = state.objectOrNull("chats")
+        val chatOwners = chatsByUser ?: if (legacyChats != null) JsonObject().apply {
+            add(state.get("activeUserProfile")?.takeIf { it.isJsonPrimitive }?.asString?.ifBlank { "default" } ?: "default", legacyChats)
+        } else null
         val worlds = state.arrayOrNull("worlds")
         val personas = state.arrayOrNull("personas")
         val profiles = state.arrayOrNull("userProfiles")
-        val chatOwnerCount = chatsByUser?.size() ?: 0
-        val conversations = chatsByUser?.entrySet()?.sumOf { (_, value) ->
+        val chatOwnerCount = chatOwners?.size() ?: 0
+        val conversations = chatOwners?.entrySet()?.sumOf { (_, value) ->
             if (value.isJsonObject) value.asJsonObject.size() else 0
         } ?: 0
-        val messages = chatsByUser?.entrySet()?.sumOf { (_, value) ->
+        val messages = chatOwners?.entrySet()?.sumOf { (_, value) ->
             if (!value.isJsonObject) 0 else value.asJsonObject.entrySet().sumOf { (_, chat) ->
                 if (chat.isJsonArray) chat.asJsonArray.size() else 0
             }
@@ -106,8 +110,8 @@ object LegacyBackupInspector {
             if (state.has("apiPresets") || state.has("apiSessions")) {
                 add("备份可能包含 API 配置或凭据；正式导入时会先检查敏感字段。")
             }
-            if (state.has("chats") && !state.has("chatsByUser")) {
-                add("发现旧式 chats 字段，当前预览暂未统计其会话和消息数量。")
+            if (legacyChats != null && chatsByUser == null) {
+                add("发现旧式 chats 字段，已按当前用户统计其中的会话和消息。")
             }
             if (profiles == null) add("未发现 userProfiles 数组，不能据此判断是否存在其他用户资料结构。")
             if (personas == null) add("未发现 personas 数组，角色数量显示为 0 不代表没有角色数据。")
@@ -120,7 +124,7 @@ object LegacyBackupInspector {
             jsonFileName = jsonName,
             jsonBytes = bytes.size,
             topLevelKeys = state.keySet().sorted(),
-            profileCount = profiles?.size() ?: 0,
+            profileCount = profiles?.size() ?: if (state.has("me")) 1 else 0,
             personaCount = personas?.size() ?: 0,
             worldbookCount = worlds?.size() ?: 0,
             chatOwnerCount = chatOwnerCount,
