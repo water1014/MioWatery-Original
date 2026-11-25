@@ -102,3 +102,12 @@ Current page-by-page gaps are explicit: page 1 still has a non-persistent memo-i
 - Page 4: added editable two-line music/lyrics card and Music entry. It is a presentation widget only; no fake playback progress is shown.
 - Messages: independent Compose screen implements source tabs 传讯 and 匿名问答. It calls the existing OpenAI-compatible client using saved API config and custom headers, scopes records to selected persona, and persists SMS / QA / anonymous batch entries in Room. Database migration 2→3 creates `message_app_entries`; no destructive migration is used.
 - Remaining fidelity: Messages source has historical SMS navigation/soft keyboard and detailed bubble styling; current native version has the functional flows but not pixel-level UI parity. User-profile isolation beyond the currently active default profile remains to be completed.
+## Follow-up correction: music player and functional widgets (2026-11-25)
+
+The previous batch-progress paragraph above is superseded where it described the mini-player and Messages as placeholders:
+- Page 2 Recent Searches has three editable, locally persisted entries. The quote/photo card has editable copy and three image slots; image URI permissions are persisted when the document provider supports it.
+- Page 3 mini-player now reads saved local track name, cover and playback state. The iMessage preview title/subtitle and four alternating bubbles are editable and persisted.
+- Page 4 lyrics/music card reads the two lines saved in the Music screen and links into the player.
+- Music now has a native Media3 screen supporting a local audio picker, play/pause, replay, seek, cover selection and editable two-line lyrics. Track URI, title, cover URI and lyrics persist locally. Playback stops when leaving the screen. Online QQ Music search/catalog, playlists, automatic lyric matching and background MediaSession/foreground service remain incomplete.
+- Messages is no longer a placeholder: its independent Compose screen implements 传讯 and 匿名问答, uses saved API config/custom headers, includes up to 12 recent messages from the selected persona's latest chat as context, and persists SMS / QA / anonymous batch entries in Room. Migration 2→3 creates message_app_entries without clearing existing data.
+- Remaining Messages gaps: the current native implementation uses the default profile rather than full upstream multi-profile isolation; anonymous questions are generated as a batch rather than using the original per-question receive/selection flow; exact SMS navigation and bubble styling still need parity work.
