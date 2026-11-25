@@ -37,3 +37,12 @@ gradle assembleDebug
 ## 数据安全
 
 现阶段不读取、不覆盖旧版浏览器数据。Room 数据库与旧版 IndexedDB 迁移器尚未实现。
+
+
+## 迁移资料
+
+- [总迁移计划](../docs/native-migration-plan.md)
+- [功能入口清单](../docs/native-feature-inventory.md)
+- [页面与设置子页面清单](../docs/native-page-inventory.md)
+- [旧版数据映射](../docs/native-data-map.md)
+- [AI 引擎兼容规格](../docs/native-ai-engine-spec.md)
