@@ -116,8 +116,13 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
     var showSettings by remember { mutableStateOf(false) }
     var showAttachmentMenu by remember { mutableStateOf(false) }
     var attachedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
-    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        attachedImageUri = uri
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            attachedImageUri = uri
+        }
     }
     var editBaseUrl by remember { mutableStateOf("") }
     var editModel by remember { mutableStateOf("") }
@@ -154,7 +159,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
             title = { Text("添加内容") },
             text = { Text("选择一张图片添加到当前聊天。图片会保存在本机聊天记录中。") },
             confirmButton = {
-                TextButton(onClick = { showAttachmentMenu = false; imagePicker.launch("image/*") }) { Text("选择图片") }
+                TextButton(onClick = { showAttachmentMenu = false; imagePicker.launch(arrayOf("image/*")) }) { Text("选择图片") }
             },
             dismissButton = { TextButton(onClick = { showAttachmentMenu = false }) { Text("取消") } }
         )
