@@ -624,7 +624,7 @@ private fun HomeScreen(
                             Text("更换图片", Modifier.align(Alignment.End).clickable { memoImagePicker.launch(arrayOf("image/*")) }.padding(top = 6.dp), color = sub, style = MaterialTheme.typography.labelSmall)
                         }
                         Column(Modifier.weight(1f).height(174.dp).background(Color.White, RoundedCornerShape(22.dp)).clickable { weatherCityDraft = weatherCity; editWeatherCity = true }.padding(14.dp), verticalArrangement = Arrangement.SpaceBetween) {
-                            Text(weatherCity.ifBlank { "Set city" }, color = ink, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                            Text(weatherCity.ifBlank { "城市" }, color = ink, style = MaterialTheme.typography.labelMedium, maxLines = 1)
                             Text(weatherTemperature, color = ink, fontSize = 42.sp, fontWeight = FontWeight.Light, letterSpacing = (-1).sp)
                             Text(if (weatherLoading) "正在更新…" else weatherError ?: weatherDescription, color = sub, style = MaterialTheme.typography.labelSmall, maxLines = 2)
                             Text("设置城市", color = sub, style = MaterialTheme.typography.labelSmall)
