@@ -397,6 +397,7 @@ private fun HomeScreen(
     desktopPackJson: String? = null,
     onOpen: (String) -> Unit
 ) {
+    val context = LocalContext.current
     val desktopOverrides = remember(desktopPackJson) {
         runCatching {
             val desktop = JSONObject(desktopPackJson ?: "{}").optJSONObject("desktop")
