@@ -64,17 +64,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
+import org.json.JSONObject
 
 private const val CHAT_PROFILE_ID = "default"
-private const val personaId = "default"
-private const val CHAT_CONVERSATION_ID = "native-default-chat"
-
 @Composable
-fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val conversationId = CHAT_CONVERSATION_ID
+    val conversationId = "native-chat-$personaId"
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
+    val personas by dao.observePersonas(CHAT_PROFILE_ID).collectAsState(initial = emptyList())
+    val persona = personas.firstOrNull { it.personaId == personaId }
+    val personaPrompt = remember(persona?.rawLegacyJson) {
+        runCatching { JSONObject(persona?.rawLegacyJson ?: "{}").optString("prompt") }.getOrDefault("")
+    }
     val messages by dao.observeMessages(conversationId).collectAsState(initial = emptyList())
     val configStore = remember { ApiConfigStore(context) }
     val apiConfig by configStore.config.collectAsState(initial = SavedApiConfig())
@@ -89,7 +92,7 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var editHeaders by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(conversationId) {
         if (dao.getConversation(conversationId) == null) {
             val createdAt = System.currentTimeMillis()
             dao.upsertConversation(
