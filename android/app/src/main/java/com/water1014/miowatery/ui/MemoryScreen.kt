@@ -84,9 +84,15 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
     var settingsSaved by remember { mutableStateOf(false) }
     var autoSummaryEnabled by remember(conversationId) { mutableStateOf(memoryPrefs.getBoolean("auto_summary_$conversationId", false)) }
     var autoSummaryInterval by remember(conversationId) { mutableStateOf(memoryPrefs.getInt("auto_summary_interval_$conversationId", 200).toString()) }
+    var showCompressConfirm by remember { mutableStateOf(false) }
+    var compressing by remember { mutableStateOf(false) }
+    var compressionError by remember { mutableStateOf<String?>(null) }
 
     val traditionalEntries = entries.filter { it.type == "traditional" }
     val noteEntries = entries.filter { it.type != "traditional" }
+    val normalNoteEntries = noteEntries.filter { it.type == "note" && !it.isMerged }.sortedBy { it.createdAt }
+    val oldNoteEntries = normalNoteEntries.dropLast(8)
+    val mergedNoteEntries = noteEntries.filter { it.type == "note" && it.isMerged }
     val filteredNotes = noteEntries.filter { search.isBlank() || it.text.contains(search, true) }
     val filteredTraditional = traditionalEntries.filter { search.isBlank() || it.text.contains(search, true) }
     val groupBackground = MaterialTheme.colorScheme.surface
@@ -170,6 +176,73 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                 generationError = failure.message ?: "记忆总结失败"
             } finally {
                 generating = false
+            }
+        }
+    }
+
+    fun compressOldNotes() {
+        if (compressing) return
+        if (oldNoteEntries.size < 3) return
+        if (apiConfig.baseUrl.isBlank() || apiConfig.apiKey.isBlank() || apiConfig.model.isBlank()) {
+            compressionError = "请先在聊天页面配置模型 API"
+            return
+        }
+        compressing = true
+        compressionError = null
+        scope.launch {
+            try {
+                val sourceEntries = (mergedNoteEntries + oldNoteEntries).sortedBy { it.createdAt }
+                val sourceText = sourceEntries.joinToString("\\n---\\n") { entry ->
+                    val date = SimpleDateFormat("yyyy年M月d日", Locale.CHINA).format(Date(entry.createdAt))
+                    "[$date] " + entry.text.trim()
+                }.takeLast(24000)
+                val prompt = "今天是" + SimpleDateFormat("yyyy年M月d日", Locale.CHINA).format(Date()) +
+                    "。你是聊天记忆整理助手。请把以下较早的聊天记忆纸条合并压缩成一份“早期记忆”，供未来聊天长期参考。\\n" +
+                    "严格按以下结构输出，不要开场白：\\n【长期事实】按时间顺序，保留仍然有效的事实、关系变化、称呼和稳定偏好；若后来有变化，只保留最新状态；区分双方，不要臆测。\\n" +
+                    "【未了的事】保留仍未兑现的承诺和未解决事项，已完成的内容删除。全文不超过 800 字。"
+                val customInstruction = memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty().trim()
+                val finalPrompt = if (customInstruction.isBlank()) prompt else prompt + "\\n\\n补充规则：\\n" + customInstruction
+                val result = withContext(Dispatchers.IO) {
+                    val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
+                    val client = ChatCompletionClient(ApiHeaderResolver(sessions))
+                    client.complete(
+                        ApiConnectionConfig(
+                            baseUrl = apiConfig.baseUrl,
+                            apiKey = apiConfig.apiKey,
+                            customHeadersJson = apiConfig.customHeadersJson,
+                            userProfileId = "default",
+                            conversationId = conversationId
+                        ),
+                        ChatCompletionRequest(
+                            model = apiConfig.model,
+                            messages = listOf(
+                                ChatMessagePayload.text("system", finalPrompt),
+                                ChatMessagePayload.text("user", "以下是按时间记录的旧记忆纸条：\\n" + sourceText)
+                            ),
+                            stream = false
+                        )
+                    )
+                }
+                val mergedText = result.content.trim()
+                if (mergedText.isBlank()) error("模型没有返回压缩结果")
+                val first = sourceEntries.first()
+                val last = oldNoteEntries.last()
+                val mergedEntry = MemoryEntryEntity(
+                    id = UUID.randomUUID().toString(),
+                    conversationId = conversationId,
+                    type = "note",
+                    text = mergedText,
+                    createdAt = first.createdAt,
+                    rangeStart = first.rangeStart,
+                    rangeEnd = last.rangeEnd,
+                    isMerged = true
+                )
+                dao.upsertMemoryEntry(mergedEntry)
+                sourceEntries.forEach { dao.deleteMemoryEntry(it.id, conversationId) }
+            } catch (failure: Exception) {
+                compressionError = failure.message ?: "记忆压缩失败，原纸条未删除"
+            } finally {
+                compressing = false
             }
         }
     }
@@ -293,7 +366,17 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                 }
             }
         }
-        item { SectionLabel("纸条（${noteEntries.size}）") }
+        item {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text("纸条（${noteEntries.size}）", Modifier.weight(1f), fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = ink)
+                if (oldNoteEntries.size >= 3) {
+                    TextButton(onClick = { showCompressConfirm = true }, enabled = !compressing) {
+                        Text(if (compressing) "压缩中…" else "压缩 ${oldNoteEntries.size} 张旧纸条")
+                    }
+                }
+            }
+            compressionError?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 12.sp) }
+        }
         item {
             OutlinedTextField(search, { search = it }, Modifier.fillMaxWidth(), singleLine = true, placeholder = { Text("搜索记忆") }, shape = RoundedCornerShape(12.dp))
         }
@@ -352,6 +435,20 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
         }
     }
 
+    if (showCompressConfirm) {
+        AlertDialog(
+            onDismissRequest = { if (!compressing) showCompressConfirm = false },
+            title = { Text("压缩旧记忆纸条？") },
+            text = { Text("将把 ${oldNoteEntries.size} 张较早纸条与已有早期记忆合并为一份。只有新记忆成功保存后，才会删除被替换的旧纸条；最近 8 张纸条会保留。") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showCompressConfirm = false
+                    compressOldNotes()
+                }, enabled = !compressing) { Text("确认压缩") }
+            },
+            dismissButton = { TextButton(onClick = { showCompressConfirm = false }, enabled = !compressing) { Text("取消") } }
+        )
+    }
     if (showEditor) {
         AlertDialog(
             onDismissRequest = { showEditor = false },
