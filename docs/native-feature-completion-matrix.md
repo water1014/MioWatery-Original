@@ -12,18 +12,18 @@ This matrix distinguishes a working native feature from a navigation placeholder
 
 | App / area | Current native state | Completion requirement |
 |---|---|---|
-| Home / desktop | Partial | Theme-pack wallpaper/icons/widgets/hidden IDs are supported; exact grid placement, ordering, full widget map and responsive polish remain. |
+| Home / desktop | Partial, expanded | Four swipe pages and fixed dock; page 2 recent-search and quote/photo widgets, page 3 editable iMessage preview and music entry card, page 4 editable lyric text card. These user-edited values and photo URIs persist locally. Weather, memo/photo card on page 1, exact native music playback binding and visual parity remain. |
 | Chat / messages | Partial | Local text chat, OpenAI-compatible API transport, streaming parser and reasoning storage exist. Attachments, multimodal payloads, robust cancellation, conversation list/search and full chat controls remain. |
 | Contacts / personas | Partial | Persona list, editor, avatar selection and persona-specific chat entry exist. Full profile fields, import/export, deletion/management and parity remain. |
 | Worldbook | Partial | CRUD, global/persona scope, trigger keywords and prompt injection exist. Full legacy schema parity, book-level management/import/export and advanced activation rules remain. |
 | Desktop customization | Partial | Safe theme-pack import/preview/apply/export exists. Exact placement and full built-in widget compatibility remain. |
 | Backup / migration | Partial | JSON/ZIP preview and confirmed import for selected core records exist. Full data-type coverage, round-trip export and upgrade preservation verification remain. |
 | Diary | Partial (first native implementation) | Local create/edit/delete, date sorting and Room persistence. Search, annotations, image attachments, export and calendar integration remain. Keep the diary scope aligned with upstream; do not invent mood/favorite/lock features. |
-| Music | Placeholder | Library, local media import, background playback, queue, playback controls and notification controls. |
+| Music | Placeholder, desktop hooks added | Desktop page 3 and 4 show an honest 未在播放 state and open the Music route; lyrics text can be edited and persisted. Actual library, local media import, background playback, queue, playback controls and notification controls remain. |
 | Couple space | Placeholder | Relationship timeline, shared records and configurable relationship start date. |
 | Co-reading | Placeholder | Books, reading progress, notes and shared reading sessions. |
 | Reading | Placeholder | Book library, reader, bookmarks and progress. |
-| Messages | Placeholder | Message inbox, notifications and deep links; define relationship to chat conversations. |
+| Messages | Partial, functional core | Independent 传讯 / 匿名问答 tabs; persona selection; AI-generated SMS and replies; named/anonymous questions; AI-generated anonymous question batches; delete; Room persistence with v2→v3 non-destructive migration. Notification/deep-link parity, full source UI and cross-profile persona binding remain. |
 | Wallet | Placeholder | Ledger accounts, categories, income/expense records, budgets and summaries. |
 | MCP | Placeholder | Server configuration, connection state, tool discovery, consent and safe tool invocation. |
 | Presets | Placeholder | Prompt/configuration preset CRUD, import/export and selection in chat. |
@@ -93,3 +93,12 @@ Current page-by-page gaps are explicit: page 1 still has a non-persistent memo-i
 - The original source also contains CSS beautification, stickers management and data backup as internal/settings/chat workflows. They should not be promoted to invented desktop shortcuts without evidence.
 - Backup remains available during migration work and should ultimately be placed under the original Settings/Data flow.
 - This is a navigation and grouping correction, not a claim that the listed app features are already implemented. Placeholder modules remain clearly marked as incomplete.
+
+
+## Batch progress: desktop widgets and Messages (2026-11-25)
+
+- Page 2: Recent Searches supports three editable entries; quote/photo card supports editable copy and three image slots. Text and URI values persist in app-private SharedPreferences; image URI grants are persisted where the document provider supports it.
+- Page 3: restored the mini-player card location with a truthful 未在播放 state and an entry to Music. Added editable iMessage preview title/subtitle and four alternating bubbles, persisted locally.
+- Page 4: added editable two-line music/lyrics card and Music entry. It is a presentation widget only; no fake playback progress is shown.
+- Messages: independent Compose screen implements source tabs 传讯 and 匿名问答. It calls the existing OpenAI-compatible client using saved API config and custom headers, scopes records to selected persona, and persists SMS / QA / anonymous batch entries in Room. Database migration 2→3 creates `message_app_entries`; no destructive migration is used.
+- Remaining fidelity: Messages source has historical SMS navigation/soft keyboard and detailed bubble styling; current native version has the functional flows but not pixel-level UI parity. User-profile isolation beyond the currently active default profile remains to be completed.
