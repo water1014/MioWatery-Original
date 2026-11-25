@@ -270,7 +270,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     // Optional per-chat automatic memory generation. Failures never block the reply.
                     val memoryPrefs = context.getSharedPreferences("mio_memory_settings", android.content.Context.MODE_PRIVATE)
                     val autoEnabled = memoryPrefs.getBoolean("auto_summary_$conversationId", false)
-                    val summaryInterval = memoryPrefs.getInt("auto_summary_interval_$conversationId", 20).coerceIn(4, 500)
+                    val summaryInterval = memoryPrefs.getInt("auto_summary_interval_$conversationId", 200).coerceIn(20, 2000)
                     val allMessages = dao.getMessagesForConversation(conversationId)
                     val lastSummarizedCount = memoryPrefs.getInt("last_auto_summary_count_$conversationId", 0)
                     if (autoEnabled && allMessages.size - lastSummarizedCount >= summaryInterval) {
