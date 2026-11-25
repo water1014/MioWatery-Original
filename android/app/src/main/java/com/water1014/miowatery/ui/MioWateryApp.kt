@@ -608,24 +608,26 @@ private fun HomeScreen(
                         Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 60.sp, fontWeight = FontWeight.Light, letterSpacing = (-2).sp)
                         Text(now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE)), color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 7.dp))
                     }
-                    Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("备忘录图片", color = ink, style = MaterialTheme.typography.labelMedium)
-                            Text("更换", Modifier.clickable { memoImagePicker.launch(arrayOf("image/*")) }, color = sub, style = MaterialTheme.typography.labelSmall)
+                    if (quoteLine1.isNotBlank()) {
+                        Column(Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp)) {
+                            Text(quoteLine1, color = ink, fontSize = 15.sp, lineHeight = 22.sp, fontWeight = FontWeight.Medium)
+                            if (quoteLine2.isNotBlank()) Text(quoteLine2, color = sub, fontSize = 12.sp, lineHeight = 18.sp, modifier = Modifier.padding(top = 4.dp))
                         }
-                        Spacer(Modifier.height(9.dp))
-                        Box(Modifier.fillMaxWidth().height(140.dp).background(Color(0xFFE2E4E7), RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp)).clickable { memoImagePicker.launch(arrayOf("image/*")) }, contentAlignment = Alignment.Center) {
-                            if (!memoImage.isNullOrBlank()) AsyncImage(model = memoImage, contentDescription = "备忘录图片", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                            else Text("点击选择一张图片", color = sub, style = MaterialTheme.typography.labelSmall)
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f).clickable { weatherCityDraft = weatherCity; editWeatherCity = true }) {
-                                Text(weatherCity.ifBlank { "天气" }, color = sub, style = MaterialTheme.typography.labelSmall)
-                                Text(weatherTemperature, color = ink, fontSize = 32.sp, fontWeight = FontWeight.Light)
-                                Text(if (weatherLoading) "正在更新…" else weatherError ?: weatherDescription, color = sub, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+                        Column(Modifier.weight(1f)) {
+                            Text("备忘录图片", color = sub, style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(start = 3.dp, bottom = 8.dp))
+                            Box(Modifier.fillMaxWidth().height(140.dp).background(Color(0xFFE2E4E7), RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp)).clickable { memoImagePicker.launch(arrayOf("image/*")) }, contentAlignment = Alignment.Center) {
+                                if (!memoImage.isNullOrBlank()) AsyncImage(model = memoImage, contentDescription = "备忘录图片", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                else Text("点击选择图片", color = sub, style = MaterialTheme.typography.labelSmall)
                             }
-                            Text("更改城市", Modifier.clickable { weatherCityDraft = weatherCity; editWeatherCity = true }, color = sub, style = MaterialTheme.typography.labelSmall)
+                            Text("更换图片", Modifier.align(Alignment.End).clickable { memoImagePicker.launch(arrayOf("image/*")) }.padding(top = 6.dp), color = sub, style = MaterialTheme.typography.labelSmall)
+                        }
+                        Column(Modifier.weight(1f).height(174.dp).background(Color.White, RoundedCornerShape(22.dp)).clickable { weatherCityDraft = weatherCity; editWeatherCity = true }.padding(14.dp), verticalArrangement = Arrangement.SpaceBetween) {
+                            Text(weatherCity.ifBlank { "Set city" }, color = ink, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                            Text(weatherTemperature, color = ink, fontSize = 42.sp, fontWeight = FontWeight.Light, letterSpacing = (-1).sp)
+                            Text(if (weatherLoading) "正在更新…" else weatherError ?: weatherDescription, color = sub, style = MaterialTheme.typography.labelSmall, maxLines = 2)
+                            Text("设置城市", color = sub, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                     Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
