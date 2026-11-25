@@ -14,6 +14,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.platform.LocalContext
 import com.water1014.miowatery.core.migration.LegacyBackupInspector
 import com.water1014.miowatery.core.migration.LegacyBackupPreview
+import com.water1014.miowatery.core.migration.LegacyBackupImporter
+import com.water1014.miowatery.core.migration.LegacyImportResult
+import com.water1014.miowatery.core.database.MioDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.background
@@ -230,47 +233,129 @@ private fun BackupPreviewScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var preview by remember { mutableStateOf<LegacyBackupPreview?>(null) }
+    var importResult by remember { mutableStateOf<LegacyImportResult?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+    var importing by remember { mutableStateOf(false) }
+    var selectedUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedName by remember { mutableStateOf("backup.json") }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) { loading = true; preview = null; error = null
-            scope.launch { try { preview = withContext(Dispatchers.IO) {
-                val name = queryBackupName(context, uri)
-                val stream = context.contentResolver.openInputStream(uri) ?: throw IllegalArgumentException("无法打开所选文件")
-                LegacyBackupInspector.inspect(stream, name)
-            } } catch (failure: Exception) { error = failure.message ?: "读取备份失败，请检查文件是否完整"
-            } finally { loading = false } }
+        if (uri != null) {
+            selectedUri = uri
+            importResult = null
+            loading = true
+            preview = null
+            error = null
+            scope.launch {
+                try {
+                    preview = withContext(Dispatchers.IO) {
+                        val name = queryBackupName(context, uri)
+                        val stream = context.contentResolver.openInputStream(uri) ?: throw IllegalArgumentException("无法打开所选文件")
+                        LegacyBackupInspector.inspect(stream, name)
+                    }
+                    selectedName = queryBackupName(context, uri)
+                } catch (failure: Exception) {
+                    error = failure.message ?: "读取备份失败，请检查文件是否完整"
+                } finally {
+                    loading = false
+                }
+            }
         }
     }
-    Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    Column(
+        modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState()).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
         Card(shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Icon(painter = painterResource(R.drawable.mio_ic_backup), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(30.dp))
-                Text("检查旧版备份", style = MaterialTheme.typography.titleLarge)
-                Text("选择 MioWatery 旧版导出的 JSON 或 ZIP 文件，先查看可识别的数据数量。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Button(onClick = { picker.launch(arrayOf("application/json", "application/zip", "application/octet-stream", "*/*")) }, enabled = !loading) { Text("选择备份文件") }
+                Text("旧版数据迁移", style = MaterialTheme.typography.titleLarge)
+                Text("选择旧版导出的 JSON 或 ZIP。导入前先检查内容，原始备份会另外保存在应用私有目录中。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Button(onClick = { picker.launch(arrayOf("application/json", "application/zip", "application/octet-stream", "*/*")) }, enabled = !loading && !importing) {
+                    Text("选择备份文件")
+                }
             }
         }
-        if (loading) { Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-            Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp); Text("正在读取备份…") } } }
-        error?.let { message -> Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-            Text(message, Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onErrorContainer) } }
+        if (loading || importing) {
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
+                    Text(if (importing) "正在导入资料、角色、世界书和聊天记录…" else "正在读取备份…")
+                }
+            }
+        }
+        error?.let { message ->
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                Text(message, Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onErrorContainer)
+            }
+        }
         preview?.let { data ->
             Text("备份概览", style = MaterialTheme.typography.titleMedium)
             Text(data.sourceFormat + " · " + data.jsonFileName + " · " + (data.jsonBytes / 1024) + " KB", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { BackupCountCard("用户资料", data.profileCount, Modifier.weight(1f)); BackupCountCard("角色", data.personaCount, Modifier.weight(1f)); BackupCountCard("世界书", data.worldbookCount, Modifier.weight(1f)) }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { BackupCountCard("聊天归属", data.chatOwnerCount, Modifier.weight(1f)); BackupCountCard("会话", data.conversationCount, Modifier.weight(1f)); BackupCountCard("消息", data.messageCount, Modifier.weight(1f)) }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                BackupCountCard("用户资料", data.profileCount, Modifier.weight(1f))
+                BackupCountCard("角色", data.personaCount, Modifier.weight(1f))
+                BackupCountCard("世界书", data.worldbookCount, Modifier.weight(1f))
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                BackupCountCard("聊天归属", data.chatOwnerCount, Modifier.weight(1f))
+                BackupCountCard("会话", data.conversationCount, Modifier.weight(1f))
+                BackupCountCard("消息", data.messageCount, Modifier.weight(1f))
+            }
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(20.dp)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text("检查提示", style = MaterialTheme.typography.titleSmall)
-                    data.warnings.forEach { warning -> Text("• " + warning, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } } }
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("检查提示", style = MaterialTheme.typography.titleSmall)
+                    data.warnings.forEach { warning ->
+                        Text("• " + warning, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), shape = RoundedCornerShape(20.dp)) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text("识别到的顶层字段", style = MaterialTheme.typography.titleSmall)
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("识别到的顶层字段", style = MaterialTheme.typography.titleSmall)
                     val extra = if (data.topLevelKeys.size > 18) " …（共 " + data.topLevelKeys.size + " 项）" else ""
-                    Text(data.topLevelKeys.take(18).joinToString(" · ") + extra, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+                    Text(data.topLevelKeys.take(18).joinToString(" · ") + extra, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            Button(
+                onClick = {
+                    val uri = selectedUri ?: return@Button
+                    importing = true
+                    error = null
+                    scope.launch {
+                        try {
+                            val result = withContext(Dispatchers.IO) {
+                                val stream = context.contentResolver.openInputStream(uri) ?: throw IllegalArgumentException("无法重新读取备份文件")
+                                val json = LegacyBackupImporter.readJson(stream, selectedName)
+                                LegacyBackupImporter.importJson(context, json, MioDatabase.getInstance(context))
+                            }
+                            importResult = result
+                        } catch (failure: Exception) {
+                            error = failure.message ?: "导入失败，原始备份文件仍然保留"
+                        } finally {
+                            importing = false
+                        }
+                    }
+                },
+                enabled = !importing && !loading
+            ) { Text("确认导入到原生版") }
         }
-        Text("安全说明：当前版本只读取并展示预览，不会写入原生数据库，也不会修改所选备份。正式迁移前还会补齐旧版字段映射与敏感信息检查。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        importResult?.let { result ->
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("导入完成", style = MaterialTheme.typography.titleMedium)
+                    Text("用户资料 " + result.profiles + " · 角色 " + result.personas + " · 世界书 " + result.worldbookEntries)
+                    Text("会话 " + result.conversations + " · 消息 " + result.messages)
+                    Text("原始备份已保存在应用私有目录：" + result.preservedBackupPath, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+        Text(
+            "导入会将旧数据写入独立的 legacy ID，不覆盖当前默认角色和原生聊天。API 密钥与服务商配置不会自动导入；未知字段通过原始 JSON 备份保留。",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
