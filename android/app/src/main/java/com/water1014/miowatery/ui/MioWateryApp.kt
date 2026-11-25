@@ -558,6 +558,8 @@ private fun HomeScreen(
     var imessage4 by remember { mutableStateOf(homePrefs.getString("imessage_4", "好，晚安。") ?: "") }
     val musicPrefs = remember(context) { context.getSharedPreferences("mio_music_player", Context.MODE_PRIVATE) }
     var musicTitle by remember { mutableStateOf(musicPrefs.getString("track_name", "尚未选择歌曲") ?: "尚未选择歌曲") }
+    var musicArtist by remember { mutableStateOf(musicPrefs.getString("artist_name", "未知艺人") ?: "未知艺人") }
+    var musicRecent by remember { mutableStateOf(readRecentMusicTracks(context)) }
     var musicCover by remember { mutableStateOf(musicPrefs.getString("cover_uri", null)) }
     var musicPlaying by remember { mutableStateOf(musicPrefs.getBoolean("is_playing", false)) }
     var lyricLine1 by remember { mutableStateOf(musicPrefs.getString("lyric_1", "") ?: "") }
@@ -693,12 +695,30 @@ private fun HomeScreen(
                                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                             Text("播放中", color = sub, style = MaterialTheme.typography.labelSmall)
                                             Text(musicTitle, color = ink, style = MaterialTheme.typography.titleMedium, maxLines = 2)
-                                            Text(if (musicPlaying) "正在播放 · 轻触打开控制" else "尚未播放 · 轻触选择音乐", color = sub, style = MaterialTheme.typography.bodySmall)
+                                            Text(musicArtist, color = sub, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                                            Text(if (musicPlaying) "正在播放 · 轻触打开控制" else "已暂停 · 轻触打开音乐", color = sub, style = MaterialTheme.typography.bodySmall)
                                             Text("打开音乐播放器  ›", color = ink, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 5.dp))
                                         }
                                     }
                                     Text("最近播放", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                                    Text(if (musicTitle == "尚未选择歌曲") "还没有播放记录" else musicTitle, color = sub, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                                    if (musicRecent.isEmpty()) {
+                                        Text("还没有播放记录", color = sub, style = MaterialTheme.typography.bodySmall)
+                                    } else {
+                                        musicRecent.forEach { track ->
+                                            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { onOpen("music") }.padding(vertical = 5.dp),
+                                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                                                Box(Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)).background(panel), contentAlignment = Alignment.Center) {
+                                                    if (!track.coverUri.isNullOrBlank()) AsyncImage(model = track.coverUri, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                                    else Text("♫", color = sub, fontSize = 17.sp)
+                                                }
+                                                Column(Modifier.weight(1f)) {
+                                                    Text(track.name, color = ink, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                                                    Text(track.artist, color = sub, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                                                }
+                                                Text("打开", color = sub, style = MaterialTheme.typography.labelSmall)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
