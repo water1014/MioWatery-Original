@@ -69,10 +69,24 @@ Implement each remaining app against upstream behavior and data schema, preservi
 A feature is complete only when its primary actions work, data persists after process restart, empty/loading/error states are handled, navigation is correct, accessibility labels exist for important controls, and automated tests/build pass. A placeholder route does not satisfy this definition.
 
 
-## Source-fidelity cleanup (2026-11-25)
+## Source-fidelity audit and desktop correction (2026-11-25)
 
-- Removed unverified extra app shortcuts from the native app grid: Wallet, MCP, Presets, Life, IF line, Xinji, Repository, YouTube, Offline and Stickers. They must not reappear unless the upstream MioWatery source confirms them.
-- Chat and Messages are distinct upstream concepts; they must not silently route to the same chat-detail screen. Implement their correct separate behaviors rather than deleting a legitimate source app.
-- Backup remains available during migration work, but should ultimately live in the original Settings/Data flow if that is where the upstream UI places it.
-- Desktop customization and general appearance must be checked against the upstream "Look" area before deciding whether they are separate apps or one feature.
-- The current native home still contains provisional cards, page labels and generic desktop widgets. These are not accepted as final parity. Replace them with the original Mio small-phone desktop structure and wording after a source-by-source UI audit.
+The upstream `index.html` desktop was rechecked directly. The earlier cleanup that removed Wallet, MCP, Presets, Life, IF line, Xinji, Repository, YouTube and Offline was incorrect: all of these are real original desktop shortcuts. They have been restored to the native route registry and grouped by their original desktop pages.
+
+The upstream desktop contains four swipe pages plus a four-item fixed dock:
+
+| Desktop position | Original shortcuts |
+|---|---|
+| Dock | 聊天 (`app`), 世界书 (`worlds`), 联系人设定 (`personas`), 设置 (`settings`) |
+| Page 2 | 日记 (`diary`), iPhone (`rolephones`), 桌面美化 (`desktopcustom`), 音乐 (`music`) |
+| Page 3 | 情侣空间 (`couple`), 共读 (`coread`), 线下 (`offline`), 讯息 (`msgs`) |
+| Page 4 | 钱包 (`wallet`), MCP (`mcp`), 预设 (`preset`), 生活 (`life`), IF线 (`iff`), 心迹 (`xinji`), 仓库 (`repo`), YouTube (`youtube`) |
+
+The first desktop page is the clock / weather / recent-message widget page. Native implementation currently retains a provisional version and still needs visual and interaction parity work.
+
+- `app` and `msgs` are distinct upstream routes. Native `app` opens chat; `msgs` now has its own route and is explicitly not redirected to ChatScreen. The message inbox itself is still a placeholder.
+- The native desktop app grids now use the upstream page grouping and no longer display the invented generic "应用" title, calendar page, or "常用应用" shortcut card.
+- The four fixed dock entries are excluded from the three app-grid pages to avoid duplicate icons.
+- The original source also contains CSS beautification, stickers management and data backup as internal/settings/chat workflows. They should not be promoted to invented desktop shortcuts without evidence.
+- Backup remains available during migration work and should ultimately be placed under the original Settings/Data flow.
+- This is a navigation and grouping correction, not a claim that the listed app features are already implemented. Placeholder modules remain clearly marked as incomplete.
