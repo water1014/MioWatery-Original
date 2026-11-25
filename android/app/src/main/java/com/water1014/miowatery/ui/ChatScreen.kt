@@ -1,6 +1,6 @@
 package com.water1014.miowatery.ui
 
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -80,8 +80,8 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
         val legacy = runCatching { JSONObject(persona?.rawLegacyJson ?: "{}") }.getOrNull()
         val legacyPersonaId = legacy?.optString("id").orEmpty()
         if (legacyPersonaId.isNotBlank()) {
-            val sourceProfileId = legacy.optString("_nativeSourceProfileId")
-                .ifBlank { legacy.optString("boundUser").ifBlank { "default" } }
+            val sourceProfileId = legacy?.optString("_nativeSourceProfileId").orEmpty()
+                .ifBlank { legacy?.optString("boundUser").orEmpty().ifBlank { "default" } }
             "legacy-chat-" + nativeSafeId(sourceProfileId) + "-" + nativeSafeId(legacyPersonaId)
         } else "native-chat-" + personaId
     }
