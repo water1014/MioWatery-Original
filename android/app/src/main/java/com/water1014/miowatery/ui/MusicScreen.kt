@@ -179,6 +179,15 @@ fun MusicScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         }
     }
 
+    LaunchedEffect(player, trackUri) {
+        if (prefs.getBoolean("play_on_open", false) && !trackUri.isNullOrBlank()) {
+            prefs.edit().putBoolean("play_on_open", false).apply()
+            player.setMediaItem(MediaItem.fromUri(Uri.parse(trackUri)))
+            player.prepare()
+            player.play()
+        }
+    }
+
     Column(modifier.fillMaxSize().background(Color(0xFFF7F7F8)).padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text("‹", Modifier.clip(RoundedCornerShape(18.dp)).clickable(onClick = onBack).padding(horizontal = 10.dp, vertical = 2.dp), fontSize = 28.sp, color = Color(0xFF171719))
