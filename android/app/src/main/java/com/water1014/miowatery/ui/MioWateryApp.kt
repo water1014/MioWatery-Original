@@ -697,7 +697,7 @@ private fun HomeScreen(
                                             }
                                         }
                                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                            Text("播放中", color = sub, style = MaterialTheme.typography.labelSmall)
+                                            Text(if (musicPlaying) "正在播放" else "最近播放", color = sub, style = MaterialTheme.typography.labelSmall)
                                             Text(musicTitle, color = ink, style = MaterialTheme.typography.titleMedium, maxLines = 2)
                                             Text(musicArtist, color = sub, style = MaterialTheme.typography.bodySmall, maxLines = 1)
                                             Text(if (musicPlaying) "正在播放 · 轻触打开控制" else "已暂停 · 轻触打开音乐", color = sub, style = MaterialTheme.typography.bodySmall)
@@ -732,7 +732,7 @@ private fun HomeScreen(
                                                     Text(track.name, color = ink, style = MaterialTheme.typography.bodySmall, maxLines = 1)
                                                     Text(track.artist, color = sub, style = MaterialTheme.typography.labelSmall, maxLines = 1)
                                                 }
-                                                Text("打开", color = sub, style = MaterialTheme.typography.labelSmall)
+                                                Text("播放", color = sub, style = MaterialTheme.typography.labelSmall)
                                             }
                                         }
                                     }
