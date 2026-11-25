@@ -50,6 +50,7 @@ import com.water1014.miowatery.core.network.ChatCompletionRequest
 import com.water1014.miowatery.core.network.ChatMessagePayload
 import com.water1014.miowatery.core.network.DataStoreApiSessionStore
 import com.water1014.miowatery.core.network.SavedApiConfig
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -66,6 +67,11 @@ fun MessageAppScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val personas by dao.observePersonas(MESSAGE_PROFILE_ID).collectAsState(initial = emptyList())
     var selectedPersonaId by remember { mutableStateOf("") }
     val selectedPersona = personas.firstOrNull { it.personaId == selectedPersonaId } ?: personas.firstOrNull()
+    val conversations by dao.observeConversations(MESSAGE_PROFILE_ID, selectedPersona?.personaId ?: "").collectAsState(initial = emptyList())
+    val activeConversationId = conversations.firstOrNull()?.id
+    val chatHistory by remember(activeConversationId) {
+        if (activeConversationId == null) flowOf(emptyList()) else dao.observeMessages(activeConversationId)
+    }.collectAsState(initial = emptyList())
     val entries by dao.observeMessageAppEntries(MESSAGE_PROFILE_ID, selectedPersona?.personaId ?: "").collectAsState(initial = emptyList())
     val config by remember { ApiConfigStore(context).config }.collectAsState(initial = SavedApiConfig())
     var tab by remember { mutableStateOf("sms") }
@@ -120,7 +126,7 @@ fun MessageAppScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         ),
                         ChatCompletionRequest(
                             model = config.model,
-                            messages = listOf(ChatMessagePayload.text("system", system), ChatMessagePayload.text("user", user)),
+                            messages = listOf(ChatMessagePayload.text("system", system)) + chatHistory.filter { it.role == "user" || it.role == "assistant" }.takeLast(12).map { ChatMessagePayload.text(it.role, it.content) } + ChatMessagePayload.text("user", user),
                             stream = false
                         )
                     )
