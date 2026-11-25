@@ -447,8 +447,8 @@ private fun HomeScreen(
     var imessage2 by remember { mutableStateOf(homePrefs.getString("imessage_2", "刚到，放心。") ?: "") }
     var imessage3 by remember { mutableStateOf(homePrefs.getString("imessage_3", "那就好，早点休息。") ?: "") }
     var imessage4 by remember { mutableStateOf(homePrefs.getString("imessage_4", "好，晚安。") ?: "") }
-    var lyricLine1 by remember { mutableStateOf(homePrefs.getString("lyric_line_1", "水循環｜下一秒接住的 會是你上世紀的淚嗎") ?: "") }
-    var lyricLine2 by remember { mutableStateOf(homePrefs.getString("lyric_line_2", "Were I your tear, I would glide down your cheek until I reached your lips, for I long to kiss you") ?: "") }
+    var lyricLine1 by remember { mutableStateOf(homePrefs.getString("lyric_line_1", "歌曲名称 / 歌词展示") ?: "") }
+    var lyricLine2 by remember { mutableStateOf(homePrefs.getString("lyric_line_2", "点击编辑歌词内容") ?: "") }
     var editSearches by remember { mutableStateOf(false) }
     var editQuote by remember { mutableStateOf(false) }
     var editIMessage by remember { mutableStateOf(false) }
