@@ -237,8 +237,11 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                     rangeEnd = last.rangeEnd,
                     isMerged = true
                 )
-                dao.upsertMemoryEntry(mergedEntry)
-                sourceEntries.forEach { dao.deleteMemoryEntry(it.id, conversationId) }
+                dao.replaceCompressedMemoryNotes(
+                    mergedEntry,
+                    sourceEntries.map { it.id },
+                    conversationId
+                )
             } catch (failure: Exception) {
                 compressionError = failure.message ?: "记忆压缩失败，原纸条未删除"
             } finally {
