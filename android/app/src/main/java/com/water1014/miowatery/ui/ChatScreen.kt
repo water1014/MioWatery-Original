@@ -70,7 +70,7 @@ import org.json.JSONObject
 // Native chat entry point: persona title and configured opening line are shown before the first message.
 private const val CHAT_PROFILE_ID = "default"
 @Composable
-fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modifier = Modifier) {
+fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaId: String = "default", modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
@@ -86,7 +86,7 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
         } else "native-chat-" + personaId
     }
     val worldbookEntries by dao.observeWorldbookEntries(CHAT_PROFILE_ID, personaId).collectAsState(initial = emptyList())
-    val memoryEntries by dao.observeMemoryEntries(CHAT_PROFILE_ID, personaId).collectAsState(initial = emptyList())
+    val memoryEntries by dao.observeMemoryEntries(conversationId).collectAsState(initial = emptyList())
     val personaPrompt = remember(persona?.rawLegacyJson) {
         runCatching { JSONObject(persona?.rawLegacyJson ?: "{}").optString("prompt") }.getOrDefault("")
     }
@@ -194,12 +194,16 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                 val systemPrompt = buildString {
                     beforeWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                     if (personaPrompt.isNotBlank()) append(personaPrompt).append("\n\n")
-                    if (activeMemories.isNotEmpty()) {
-                        append("【长期记忆】以下内容是用户主动保存的长期记忆，请在相关话题中自然参考，不要逐条复述：\n")
-                        activeMemories.forEach { memory ->
-                            append("· ").append(memory.title.ifBlank { memory.category }).append("：")
-                                .append(memory.content.take(2000)).append("\n")
-                        }
+                    val manualMemories = activeMemories.filter { it.type == "traditional" }
+                    val memoryNotes = activeMemories.filter { it.type == "note" }
+                    if (manualMemories.isNotEmpty()) {
+                        append("【传统记忆】以下是用户为当前聊天手动保存的长期信息，每次回复都应参考：\n")
+                        manualMemories.forEach { append("· ").append(it.text.take(2000)).append("\n") }
+                        append("\n")
+                    }
+                    if (memoryNotes.isNotEmpty()) {
+                        append("【聊天总结纸条】以下内容是当前聊天的历史记忆，请在相关话题中自然参考，不要把旧事说成刚刚发生：\n")
+                        memoryNotes.take(8).forEach { append("· ").append(it.text.take(600)).append("\n") }
                         append("\n")
                     }
                     afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
@@ -293,6 +297,12 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                     maxLines = 1
                 )
             }
+            Text(
+                "记忆",
+                modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { onOpenMemory(conversationId) }.padding(horizontal = 8.dp, vertical = 7.dp),
+                color = Color(0xFF0F1419),
+                fontSize = 12.sp
+            )
             Text(
                 "设置",
                 modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showSettings = true }.padding(horizontal = 8.dp, vertical = 7.dp),
