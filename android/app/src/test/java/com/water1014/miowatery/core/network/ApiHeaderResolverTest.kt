@@ -65,9 +65,10 @@ class ApiHeaderResolverTest {
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun invalidCustomHeaderJsonIsRejected() = runBlocking {
+    fun invalidCustomHeaderJsonIsRejected(): Unit = runBlocking {
         ApiHeaderResolver(InMemoryApiSessionStore()).resolve(
             ApiConnectionConfig("https://api.example.com/v1", "test-key", "not-json")
         )
+        Unit
     }
 }
