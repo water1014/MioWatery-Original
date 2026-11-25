@@ -91,3 +91,20 @@ data class DiaryEntryEntity(
     val createdAt: Long,
     val updatedAt: Long
 )
+
+
+@Entity(
+    tableName = "message_app_entries",
+    indices = [Index("profileId"), Index("personaId"), Index("kind"), Index("createdAt")]
+)
+data class MessageAppEntryEntity(
+    @PrimaryKey val id: String,
+    val profileId: String,
+    val personaId: String,
+    /** sms, qa, or pass */
+    val kind: String,
+    val text: String,
+    val reply: String,
+    val author: String,
+    val createdAt: Long
+)
