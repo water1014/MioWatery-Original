@@ -78,3 +78,16 @@ data class WorldbookEntryEntity(
     val rawLegacyJson: String,
     val updatedAt: Long
 )
+
+@Entity(tableName = "diary_entries", indices = [Index("entryDate"), Index("updatedAt")])
+data class DiaryEntryEntity(
+    @PrimaryKey val id: String,
+    val title: String,
+    val content: String,
+    val entryDate: String,
+    val mood: String,
+    val isFavorite: Boolean,
+    val isLocked: Boolean,
+    val createdAt: Long,
+    val updatedAt: Long
+)
