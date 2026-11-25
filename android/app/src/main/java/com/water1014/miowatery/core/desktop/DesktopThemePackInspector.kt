@@ -13,6 +13,7 @@ data class DesktopThemePackPreview(
     val name: String,
     val wallpaper: String?,
     val iconCount: Int,
+    val icons: Map<String, String>,
     val widgets: List<DesktopWidgetPreview>,
     val hiddenWidgetIds: Set<String>,
     val placementGroups: Map<String, List<String>>,
@@ -54,7 +55,13 @@ object DesktopThemePackInspector {
         }
 
         val iconsObject = desktop.optJSONObject("icons")
-        val iconCount = iconsObject?.let { minOf(it.length(), MAX_ICONS) } ?: 0
+        val icons = linkedMapOf<String, String>()
+        iconsObject?.keys()?.asSequence()?.take(MAX_ICONS)?.forEach { key ->
+            val safeKey = safeId(key)
+            val image = safeImage(iconsObject.optString(key))
+            if (safeKey != null && image != null) icons[safeKey] = image
+        }
+        val iconCount = icons.size
         if ((iconsObject?.length() ?: 0) > MAX_ICONS) warnings += "图标数量超过限制，超出部分会跳过"
 
         val widgetsArray = desktop.optJSONArray("widgets") ?: JSONArray()
@@ -125,6 +132,7 @@ object DesktopThemePackInspector {
             name = root.optString("name").take(40).ifBlank { "未命名美化包" },
             wallpaper = wallpaper,
             iconCount = iconCount,
+            icons = icons,
             widgets = widgets,
             hiddenWidgetIds = hidden,
             placementGroups = placement,
