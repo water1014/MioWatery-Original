@@ -939,7 +939,7 @@ private fun HomeScreen(
                                     Row(Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                                         Text("0:00", color = sub, fontSize = 9.sp)
                                         Box(Modifier.weight(1f).padding(horizontal = 8.dp).height(3.dp).background(Color(0xFFE5E7EA), CircleShape)) {
-                                            Box(Modifier.fillMaxWidth(0.36f).fillMaxSize().background(Color(0xFF8B8B90), CircleShape))
+                                            Box(Modifier.fillMaxWidth(0.36f).height(3.dp).background(Color(0xFF8B8B90), CircleShape))
                                         }
                                         Text("−5:20", color = sub, fontSize = 9.sp)
                                     }
