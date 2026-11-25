@@ -773,41 +773,6 @@ private fun HomePanel(title: String, modifier: Modifier = Modifier, content: @Co
 }
 
 @Composable
-private fun CalendarHomeCard(ink: Color, sub: Color) {
-    val today = java.time.LocalDate.now()
-    val firstDayOffset = today.withDayOfMonth(1).dayOfWeek.value % 7
-    val monthDays = today.lengthOfMonth()
-    Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
-        Column(Modifier.padding(horizontal = 14.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(11.dp)) {
-            Text(today.format(java.time.format.DateTimeFormatter.ofPattern("MMMM yyyy", java.util.Locale.getDefault())),
-                color = ink, fontSize = 25.sp, fontWeight = FontWeight.Bold)
-            Row(Modifier.fillMaxWidth()) {
-                listOf("日", "一", "二", "三", "四", "五", "六").forEach {
-                    Text(it, Modifier.weight(1f), color = sub, fontSize = 11.sp, textAlign = TextAlign.Center)
-                }
-            }
-            for (week in 0..5) {
-                Row(Modifier.fillMaxWidth()) {
-                    for (column in 0..6) {
-                        val day = week * 7 + column - firstDayOffset + 1
-                        Box(Modifier.weight(1f).aspectRatio(1f), contentAlignment = Alignment.Center) {
-                            if (day in 1..monthDays) {
-                                Box(Modifier.size(30.dp).then(if (day == today.dayOfMonth) Modifier.background(ink, CircleShape) else Modifier),
-                                    contentAlignment = Alignment.Center) {
-                                    Text(day.toString(), color = if (day == today.dayOfMonth) Color.White else ink, fontSize = 12.sp)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun FeaturePlaceholder(
     title: String,
     modifier: Modifier = Modifier,
