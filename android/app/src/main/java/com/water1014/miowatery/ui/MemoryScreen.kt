@@ -181,7 +181,7 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
             Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = groupBackground)) {
                 Column(Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 8.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        StatCell(entries.size.toString(), "纸条", Modifier.weight(1f))
+                        StatCell(noteEntries.size.toString(), "纸条", Modifier.weight(1f))
                         StatCell(traditionalEntries.size.toString(), "传统记忆", Modifier.weight(1f))
                         StatCell("0", "向量记忆", Modifier.weight(1f))
                     }
