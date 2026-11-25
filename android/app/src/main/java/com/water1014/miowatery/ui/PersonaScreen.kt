@@ -42,7 +42,17 @@ fun PersonaScreen(onBack: () -> Unit, onOpenChat: (String) -> Unit, modifier: Mo
     var prompt by remember { mutableStateOf("") }
     var greet by remember { mutableStateOf("") }
     var avatar by remember { mutableStateOf("") }
-    val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> avatar = uri?.toString().orEmpty() }
+    val avatarPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            avatar = uri.toString()
+        }
+    }
 
     LaunchedEffect(personas.isEmpty()) {
         if (personas.isEmpty()) {
