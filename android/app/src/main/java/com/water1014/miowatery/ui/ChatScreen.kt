@@ -73,10 +73,18 @@ private const val CHAT_PROFILE_ID = "default"
 fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val conversationId = "native-chat-$personaId"
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val personas by dao.observePersonas(CHAT_PROFILE_ID).collectAsState(initial = emptyList())
     val persona = personas.firstOrNull { it.personaId == personaId }
+    val conversationId = remember(personaId, persona?.rawLegacyJson) {
+        val legacy = runCatching { JSONObject(persona?.rawLegacyJson ?: "{}") }.getOrNull()
+        val legacyPersonaId = legacy?.optString("id").orEmpty()
+        if (legacyPersonaId.isNotBlank()) {
+            val sourceProfileId = legacy.optString("_nativeSourceProfileId")
+                .ifBlank { legacy.optString("boundUser").ifBlank { "default" } }
+            "legacy-chat-" + nativeSafeId(sourceProfileId) + "-" + nativeSafeId(legacyPersonaId)
+        } else "native-chat-" + personaId
+    }
     val worldbookEntries by dao.observeWorldbookEntries(CHAT_PROFILE_ID, personaId).collectAsState(initial = emptyList())
     val personaPrompt = remember(persona?.rawLegacyJson) {
         runCatching { JSONObject(persona?.rawLegacyJson ?: "{}").optString("prompt") }.getOrDefault("")
@@ -98,8 +106,8 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
     var editHeaders by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
-    LaunchedEffect(conversationId) {
-        if (dao.getConversation(conversationId) == null) {
+    LaunchedEffect(conversationId, persona) {
+        if (persona != null && dao.getConversation(conversationId) == null) {
             val createdAt = System.currentTimeMillis()
             dao.upsertConversation(
                 ConversationEntity(
@@ -477,3 +485,10 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
         }
     }
 }
+
+
+private fun nativeSafeId(value: String): String =
+    value.lowercase(java.util.Locale.ROOT)
+        .replace(Regex("[^a-z0-9_-]"), "_")
+        .take(64)
+        .ifBlank { "item" }
