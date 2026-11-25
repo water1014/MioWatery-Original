@@ -112,13 +112,14 @@ object LegacyBackupImporter {
             val sourceProfileId = persona.string("boundUser").ifBlank { activeSourceProfile.ifBlank { "default" } }
             val nativePersonaId = "legacy-" + safeId(sourceProfileId) + "-" + safeId(sourcePersonaId)
             personaMap[sourceProfileId to sourcePersonaId] = nativePersonaId
+            val rawPersona = persona.deepCopy().apply { addProperty("_nativeSourceProfileId", sourceProfileId) }
             personaEntities += PersonaEntity(
                 profileId = TARGET_PROFILE_ID,
                 personaId = nativePersonaId,
                 name = persona.string("name").ifBlank { "未命名角色" },
                 avatar = persona.stringOrNull("avatar"),
                 description = persona.stringOrNull("bio"),
-                rawLegacyJson = persona.toString(),
+                rawLegacyJson = rawPersona.toString(),
                 updatedAt = now
             )
         }
