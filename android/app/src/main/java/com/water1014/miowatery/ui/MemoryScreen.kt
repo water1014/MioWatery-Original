@@ -124,7 +124,7 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                 val customInstruction = memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty().trim()
                 val summaryPrompt = buildString {
                     append("你是聊天记忆整理助手。请把下面的聊天记录整理成给未来聊天使用的记忆纸条，不要写泛泛摘要。保留明确日期、双方关系变化、称呼、稳定偏好、共同经历、未完成约定和重要事实；区分谁说的，不确定的内容不要编造。用简体中文，分点清晰，控制在 600 字以内，只输出记忆内容。")
-                    if (customInstruction.isNotBlank()) append("\\n\\n用户额外总结规则（优先遵守）：\\n").append(customInstruction)
+                    if (customInstruction.isNotBlank()) append("\n\n用户额外总结规则（优先遵守）：\n").append(customInstruction)
                 }
                 val result = withContext(Dispatchers.IO) {
                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
