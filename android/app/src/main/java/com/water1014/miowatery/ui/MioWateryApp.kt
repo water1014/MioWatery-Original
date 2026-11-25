@@ -709,7 +709,20 @@ private fun HomeScreen(
                                         Text("还没有播放记录", color = sub, style = MaterialTheme.typography.bodySmall)
                                     } else {
                                         musicRecent.forEach { track ->
-                                            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable { onOpen("music") }.padding(vertical = 5.dp),
+                                            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
+                                                musicTitle = track.name
+                                                musicArtist = track.artist
+                                                musicCover = track.coverUri
+                                                musicPrefs.edit()
+                                                    .putString("track_uri", track.uri)
+                                                    .putString("track_name", track.name)
+                                                    .putString("artist_name", track.artist)
+                                                    .putString("cover_uri", track.coverUri)
+                                                    .putBoolean("play_on_open", true)
+                                                    .putBoolean("is_playing", false)
+                                                    .apply()
+                                                onOpen("music")
+                                            }.padding(vertical = 5.dp),
                                                 verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                                                 Box(Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)).background(panel), contentAlignment = Alignment.Center) {
                                                     if (!track.coverUri.isNullOrBlank()) AsyncImage(model = track.coverUri, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
