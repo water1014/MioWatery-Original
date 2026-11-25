@@ -16,7 +16,7 @@ import androidx.room.RoomDatabase
         MessageAppEntryEntity::class,
         MemoryEntryEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class MioDatabase : RoomDatabase() {
@@ -84,6 +84,31 @@ abstract class MioDatabase : RoomDatabase() {
             }
         }
 
+
+        private val MIGRATION_4_5 = object : androidx.room.migration.Migration(4, 5) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS worldbook_categories (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        profileId TEXT NOT NULL,
+                        personaId TEXT,
+                        name TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )""".trimIndent()
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_worldbook_categories_profileId ON worldbook_categories(profileId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_worldbook_categories_personaId ON worldbook_categories(personaId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_worldbook_categories_name ON worldbook_categories(name)")
+                database.execSQL(
+                    """INSERT OR IGNORE INTO worldbook_categories (id, profileId, personaId, name, createdAt, updatedAt)
+                       SELECT 'legacy-' || profileId || '-' || COALESCE(personaId, 'global') || '-' || bookId,
+                              profileId, personaId, bookId, MIN(updatedAt), MAX(updatedAt)
+                       FROM worldbook_entries GROUP BY profileId, personaId, bookId""".trimIndent()
+                )
+            }
+        }
+
         @Volatile private var instance: MioDatabase? = null
 
         fun getInstance(context: Context): MioDatabase =
@@ -92,7 +117,7 @@ abstract class MioDatabase : RoomDatabase() {
                     context.applicationContext,
                     MioDatabase::class.java,
                     "miowatery-native.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build().also { instance = it }
             }
     }
 }
