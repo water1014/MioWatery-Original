@@ -521,7 +521,7 @@ private fun HomeScreen(
                     ) {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(4),
-                            modifier = Modifier.fillMaxWidth().height(if (page == 3) 236.dp else 154.dp),
+                            modifier = Modifier.fillMaxWidth().height(if (page == 3) 270.dp else 154.dp),
                             contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 28.dp, bottom = 24.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(26.dp)
