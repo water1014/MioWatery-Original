@@ -1,18 +1,9 @@
-name: Android Debug APK
+name: Native Android Build
 
 on:
   push:
     branches:
       - native-android
-    paths:
-      - "android/**"
-      - ".github/workflows/android-debug.yml"
-  pull_request:
-    branches:
-      - native-android
-    paths:
-      - "android/**"
-      - ".github/workflows/android-debug.yml"
   workflow_dispatch:
 
 permissions:
@@ -20,13 +11,13 @@ permissions:
 
 jobs:
   build:
-    name: Build debug APK
+    name: Compile native Android app
     runs-on: ubuntu-latest
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Set up JDK 17
@@ -35,22 +26,30 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Set up Gradle
+      - name: Set up Gradle 8.13
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.13"
 
-      - name: Accept Android SDK licenses
-        run: yes | "$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager" --licenses || true
+      - name: Locate Android SDK tools
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          test -n "$SDKMANAGER"
+          echo "SDKMANAGER=$SDKMANAGER" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --version
 
-      - name: Install Android SDK platform
-        run: "$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Install Android SDK components
+        run: |
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
 
-      - name: Build debug APK
+      - name: Compile debug APK
         working-directory: android
         run: gradle --no-daemon assembleDebug
 
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: miowatery-native-debug
