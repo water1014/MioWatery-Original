@@ -192,16 +192,16 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
         scope.launch {
             try {
                 val sourceEntries = (mergedNoteEntries + oldNoteEntries).sortedBy { it.createdAt }
-                val sourceText = sourceEntries.joinToString("\\n---\\n") { entry ->
+                val sourceText = sourceEntries.joinToString("\n---\n") { entry ->
                     val date = SimpleDateFormat("yyyy年M月d日", Locale.CHINA).format(Date(entry.createdAt))
                     "[$date] " + entry.text.trim()
                 }.takeLast(24000)
                 val prompt = "今天是" + SimpleDateFormat("yyyy年M月d日", Locale.CHINA).format(Date()) +
-                    "。你是聊天记忆整理助手。请把以下较早的聊天记忆纸条合并压缩成一份“早期记忆”，供未来聊天长期参考。\\n" +
-                    "严格按以下结构输出，不要开场白：\\n【长期事实】按时间顺序，保留仍然有效的事实、关系变化、称呼和稳定偏好；若后来有变化，只保留最新状态；区分双方，不要臆测。\\n" +
+                    "。你是聊天记忆整理助手。请把以下较早的聊天记忆纸条合并压缩成一份“早期记忆”，供未来聊天长期参考。\n" +
+                    "严格按以下结构输出，不要开场白：\n【长期事实】按时间顺序，保留仍然有效的事实、关系变化、称呼和稳定偏好；若后来有变化，只保留最新状态；区分双方，不要臆测。\n" +
                     "【未了的事】保留仍未兑现的承诺和未解决事项，已完成的内容删除。全文不超过 800 字。"
                 val customInstruction = memoryPrefs.getString("summary_instruction_$conversationId", "").orEmpty().trim()
-                val finalPrompt = if (customInstruction.isBlank()) prompt else prompt + "\\n\\n补充规则：\\n" + customInstruction
+                val finalPrompt = if (customInstruction.isBlank()) prompt else prompt + "\n\n补充规则：\n" + customInstruction
                 val result = withContext(Dispatchers.IO) {
                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
                     val client = ChatCompletionClient(ApiHeaderResolver(sessions))
@@ -217,7 +217,7 @@ fun MemoryScreen(onBack: () -> Unit, conversationId: String, modifier: Modifier 
                             model = apiConfig.model,
                             messages = listOf(
                                 ChatMessagePayload.text("system", finalPrompt),
-                                ChatMessagePayload.text("user", "以下是按时间记录的旧记忆纸条：\\n" + sourceText)
+                                ChatMessagePayload.text("user", "以下是按时间记录的旧记忆纸条：\n" + sourceText)
                             ),
                             stream = false
                         )
