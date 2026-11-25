@@ -119,7 +119,10 @@ fun PersonaScreen(onBack: () -> Unit, onOpenChat: (String) -> Unit, modifier: Mo
         confirmButton = {
             TextButton(onClick = {
                 val old = editing; val id = old?.personaId ?: UUID.randomUUID().toString(); val now = System.currentTimeMillis()
-                val raw = JSONObject().put("prompt", prompt).put("greet", greet).toString()
+                val raw = runCatching { JSONObject(old?.rawLegacyJson ?: "{}") }.getOrElse { JSONObject() }
+                    .put("prompt", prompt)
+                    .put("greet", greet)
+                    .toString()
                 scope.launch {
                     dao.upsertPersonas(listOf(PersonaEntity(PERSONA_PROFILE_ID, id, name.trim().ifBlank { "未命名联系人" }, avatar.ifBlank { null }, bio.trim(), raw, now)))
                     showEditor = false
