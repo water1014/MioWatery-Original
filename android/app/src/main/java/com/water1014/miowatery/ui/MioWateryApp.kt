@@ -799,43 +799,58 @@ private fun HomeScreen(
                                 }
                             }
                         }
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(4),
-                            modifier = Modifier.fillMaxWidth().height(if (page == 3) 270.dp else 154.dp),
-                            contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 28.dp, bottom = 24.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(26.dp)
-                        ) {
-                            items(visibleApps) { entry ->
-                                Column(
-                                    Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
-                                        AppEntryIcon(entry, desktopOverrides, 29.dp)
-                                    }
-                                    Spacer(Modifier.height(7.dp))
-                                    Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
-                                }
-                            }
-                        }
                         if (page == 1) {
-                            HomePanel("Recent Searches", Modifier.fillMaxWidth().padding(top = 8.dp).clickable { editSearches = true }) {
-                                listOf(recent1, recent2, recent3).filter { it.isNotBlank() }.forEach { term ->
-                                    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        Text("⌕", color = sub, fontSize = 18.sp)
-                                        Text(term, Modifier.padding(start = 9.dp), color = ink, style = MaterialTheme.typography.bodySmall)
+                            Row(
+                                Modifier.fillMaxWidth().padding(top = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    modifier = Modifier.weight(1.05f).height(214.dp),
+                                    contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 10.dp, bottom = 8.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(22.dp),
+                                    userScrollEnabled = false
+                                ) {
+                                    items(visibleApps) { entry ->
+                                        Column(
+                                            Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+                                                AppEntryIcon(entry, desktopOverrides, 29.dp)
+                                            }
+                                            Spacer(Modifier.height(7.dp))
+                                            Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
+                                        }
                                     }
                                 }
-                                if (listOf(recent1, recent2, recent3).all { it.isBlank() }) Text("点击编辑搜索记录", color = sub, style = MaterialTheme.typography.bodySmall)
-                                Text("编辑记录", color = sub, style = MaterialTheme.typography.labelSmall, modifier = Modifier.align(Alignment.End))
+                                Column(Modifier.weight(0.95f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    HomePanel("Recent Searches", Modifier.fillMaxWidth().clickable { editSearches = true }) {
+                                        Row(Modifier.fillMaxWidth().padding(bottom = 7.dp), horizontalArrangement = Arrangement.End) {
+                                            Text("Clear All", color = Color(0xFF8E8E93), fontSize = 9.sp)
+                                        }
+                                        listOf(recent1, recent2, recent3).forEach { term ->
+                                            Row(
+                                                Modifier.fillMaxWidth().padding(vertical = 7.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(7.dp)
+                                            ) {
+                                                Text("⌕", color = Color(0xFF111111), fontSize = 16.sp)
+                                                Text(term.ifBlank { " " }, Modifier.weight(1f), color = Color(0xFF111111), fontSize = 10.sp, maxLines = 2)
+                                            }
+                                            if (term != recent3) Divider(color = Color(0xFFE3E3E5), thickness = 0.6.dp)
+                                        }
+                                    }
+                                }
                             }
-                            HomePanel("文案与照片", Modifier.fillMaxWidth().clickable { editQuote = true }) {
+                            HomePanel("文案与照片", Modifier.fillMaxWidth().padding(top = 16.dp).clickable { editQuote = true }) {
                                 Text(quoteLine1, color = ink, style = MaterialTheme.typography.titleSmall)
                                 if (quoteLine2.isNotBlank()) Text(quoteLine2, color = sub, style = MaterialTheme.typography.bodySmall)
-                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                                Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     listOf(quoteImage1, quoteImage2, quoteImage3).forEachIndexed { index, image ->
-                                        Box(Modifier.weight(1f).height(86.dp).background(panel, RoundedCornerShape(12.dp)).clickable {
+                                        Box(Modifier.weight(1f).height(82.dp).background(panel, RoundedCornerShape(12.dp)).clickable {
                                             imageSlot = index + 1
                                             desktopImagePicker.launch(arrayOf("image/*"))
                                         }, contentAlignment = Alignment.Center) {
@@ -844,16 +859,37 @@ private fun HomeScreen(
                                         }
                                     }
                                 }
-                                Text("点击卡片编辑文案，点击照片添加图片", color = sub, style = MaterialTheme.typography.labelSmall)
                             }
                             nativeWidgets.forEach { widget ->
-                                HomePanel(widget.title.ifBlank { "桌面组件" }, Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                                HomePanel(widget.title.ifBlank { "桌面组件" }, Modifier.fillMaxWidth().padding(top = 12.dp)) {
                                     when (widget.kind) {
                                         "clock" -> Text(now.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")), color = ink, fontSize = 34.sp, fontWeight = FontWeight.Light)
                                         "text" -> Text(widget.text.orEmpty(), color = sub, style = MaterialTheme.typography.bodyMedium)
                                         "image" -> widget.image?.let { image ->
                                             AsyncImage(model = image, contentDescription = widget.title, modifier = Modifier.fillMaxWidth().height(160.dp), contentScale = ContentScale.Crop)
                                         }
+                                    }
+                                }
+                            }
+                        } else {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(4),
+                                modifier = Modifier.fillMaxWidth().height(if (page == 3) 270.dp else 154.dp),
+                                contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 28.dp, bottom = 24.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(26.dp),
+                                userScrollEnabled = false
+                            ) {
+                                items(visibleApps) { entry ->
+                                    Column(
+                                        Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+                                            AppEntryIcon(entry, desktopOverrides, 29.dp)
+                                        }
+                                        Spacer(Modifier.height(7.dp))
+                                        Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
                                     }
                                 }
                             }
