@@ -625,6 +625,51 @@ private fun HomeScreen(
         }
         }
     }
+    if (editSearches) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { editSearches = false },
+        title = { Text("编辑最近搜索") },
+        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            androidx.compose.material3.OutlinedTextField(recent1, { recent1 = it }, label = { Text("搜索记录 1") }, singleLine = true)
+            androidx.compose.material3.OutlinedTextField(recent2, { recent2 = it }, label = { Text("搜索记录 2") }, singleLine = true)
+            androidx.compose.material3.OutlinedTextField(recent3, { recent3 = it }, label = { Text("搜索记录 3") }, singleLine = true)
+        } },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = { homePrefs.edit().putString("recent_1", recent1).putString("recent_2", recent2).putString("recent_3", recent3).apply(); editSearches = false }) { Text("保存") } },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = { editSearches = false }) { Text("取消") } }
+    )
+    if (editQuote) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { editQuote = false },
+        title = { Text("编辑文案") },
+        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            androidx.compose.material3.OutlinedTextField(quoteLine1, { quoteLine1 = it }, label = { Text("主文案") }, minLines = 2)
+            androidx.compose.material3.OutlinedTextField(quoteLine2, { quoteLine2 = it }, label = { Text("副文案") }, minLines = 2)
+        } },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = { homePrefs.edit().putString("quote_line_1", quoteLine1).putString("quote_line_2", quoteLine2).apply(); editQuote = false }) { Text("保存") } },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = { editQuote = false }) { Text("取消") } }
+    )
+    if (editIMessage) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { editIMessage = false },
+        title = { Text("编辑 iMessage 预览") },
+        text = { Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            androidx.compose.material3.OutlinedTextField(imessageTitle, { imessageTitle = it }, label = { Text("标题") }, singleLine = true)
+            androidx.compose.material3.OutlinedTextField(imessageSubtitle, { imessageSubtitle = it }, label = { Text("副标题") }, singleLine = true)
+            androidx.compose.material3.OutlinedTextField(imessage1, { imessage1 = it }, label = { Text("对话 1") }, singleLine = true)
+            androidx.compose.material3.OutlinedTextField(imessage2, { imessage2 = it }, label = { Text("对话 2") }, singleLine = true)
+            androidx.compose.material3.OutlinedTextField(imessage3, { imessage3 = it }, label = { Text("对话 3") }, singleLine = true)
+            androidx.compose.material3.OutlinedTextField(imessage4, { imessage4 = it }, label = { Text("对话 4") }, singleLine = true)
+        } },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = { homePrefs.edit().putString("imessage_title", imessageTitle).putString("imessage_subtitle", imessageSubtitle).putString("imessage_1", imessage1).putString("imessage_2", imessage2).putString("imessage_3", imessage3).putString("imessage_4", imessage4).apply(); editIMessage = false }) { Text("保存") } },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = { editIMessage = false }) { Text("取消") } }
+    )
+    if (editLyrics) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { editLyrics = false },
+        title = { Text("编辑音乐歌词组件") },
+        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            androidx.compose.material3.OutlinedTextField(lyricLine1, { lyricLine1 = it }, label = { Text("歌曲 / 歌词") }, minLines = 2)
+            androidx.compose.material3.OutlinedTextField(lyricLine2, { lyricLine2 = it }, label = { Text("第二行歌词") }, minLines = 2)
+        } },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = { homePrefs.edit().putString("lyric_line_1", lyricLine1).putString("lyric_line_2", lyricLine2).apply(); editLyrics = false }) { Text("保存") } },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = { editLyrics = false }) { Text("取消") } }
+    )
 }
 
 @Composable
