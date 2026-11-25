@@ -126,3 +126,21 @@ The previous batch-progress paragraph above is superseded where it described the
 - 当前原生版支持手动记忆、总结纸条的新增/编辑/删除；可选消息范围生成 AI 总结纸条；聊天请求会注入当前会话的手动记忆和最近 8 条总结纸条。
 - 尚未完成：上游的自动定期总结、传统/向量模式切换、Embedding API 配置与语义检索、旧纸条压缩、导入导出和记忆统计。不能标记为完整复刻。
 - UI 复刻仍需逐页对照上游 CSS/HTML，尤其首页桌面、聊天气泡与聊天设置；目前只是颜色基线部分接近，不能宣称像素级一致。
+
+## UI fidelity audit: chat memory manager (2026-11-25)
+
+The upstream chat-settings memory page was inspected in the original `index.html`, including its `rChatMemory()` renderer and `mem3-css` styles. The native Memory screen has been reshaped to follow the same information hierarchy rather than the earlier generic pair of add cards:
+
+- compact three-value summary for note count, traditional-memory count and vector-memory count;
+- a mode/status row;
+- a dedicated manual note-generation section with start/end message indices;
+- collapsible note rows showing date and source message range, with edit/delete actions;
+- a separate collapsible traditional-memory group;
+- search across both note and traditional-memory entries;
+- a confirmation step before deleting a memory.
+
+The screen now uses the app theme's light/dark surfaces and restrained grouped rows instead of hard-coded white cards and oversized headings. The native screen intentionally does not display non-functional controls for upstream features that are not yet ported.
+
+Still missing from upstream memory parity: automatic summary toggle and interval, per-chat context-count override, vector-memory mode and Embedding API configuration, vectorization/rebuild actions, old-note compression, custom summary instructions, and import/export of traditional memories. These must be implemented with real persistence and API behavior before being shown as working controls.
+
+Visual parity is still a work in progress across the entire app. The upstream global visual baseline is white/black with muted secondary text, 14–15px system typography, low-contrast grouped surfaces, thin separators, and compact 16–22px corner radii depending on component. The home desktop's exact card geometry, original icon placement, chat bubbles, settings rows, and page transitions still require systematic comparison and correction. This is not a claim of pixel-level parity.
