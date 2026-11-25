@@ -3,7 +3,6 @@ package com.water1014.miowatery.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -44,7 +44,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -52,22 +56,23 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 private data class AppEntry(
+    val id: String,
     val title: String,
     val subtitle: String,
     val icon: ImageVector
 )
 
 private val appEntries = listOf(
-    AppEntry("聊天", "和角色继续对话", Icons.AutoMirrored.Filled.Chat),
-    AppEntry("记忆", "重要片段与回忆", Icons.Default.FavoriteBorder),
-    AppEntry("世界书", "设定、词条与规则", Icons.Default.Book),
-    AppEntry("生图工坊", "提示词与图片创作", Icons.Default.Image),
-    AppEntry("音乐", "曲库与播放", Icons.Default.MusicNote),
-    AppEntry("相册", "图片与收藏", Icons.Default.Album),
-    AppEntry("日记", "记录日常片段", Icons.Default.Today),
-    AppEntry("日历", "日期与安排", Icons.Default.CalendarMonth),
-    AppEntry("主动消息", "陪伴通知与提醒", Icons.Default.AutoAwesome),
-    AppEntry("设置", "模型、外观与数据", Icons.Default.Settings)
+    AppEntry("chat", "聊天", "和角色继续对话", Icons.AutoMirrored.Filled.Chat),
+    AppEntry("memory", "记忆", "重要片段与回忆", Icons.Default.FavoriteBorder),
+    AppEntry("worldbook", "世界书", "设定、词条与规则", Icons.Default.Book),
+    AppEntry("image", "生图工坊", "提示词与图片创作", Icons.Default.Image),
+    AppEntry("music", "音乐", "曲库与播放", Icons.Default.MusicNote),
+    AppEntry("album", "相册", "图片与收藏", Icons.Default.Album),
+    AppEntry("diary", "日记", "记录日常片段", Icons.Default.Today),
+    AppEntry("calendar", "日历", "日期与安排", Icons.Default.CalendarMonth),
+    AppEntry("proactive", "主动消息", "陪伴通知与提醒", Icons.Default.AutoAwesome),
+    AppEntry("settings", "设置", "模型、外观与数据", Icons.Default.Settings)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,6 +80,8 @@ private val appEntries = listOf(
 fun MioWateryApp() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var selectedPage by remember { mutableStateOf("home") }
+    val selectedEntry = appEntries.firstOrNull { it.id == selectedPage }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -85,11 +92,23 @@ fun MioWateryApp() {
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 28.dp)
                 )
+                NavigationDrawerItem(
+                    label = { Text("首页") },
+                    selected = selectedPage == "home",
+                    onClick = {
+                        selectedPage = "home"
+                        scope.launch { drawerState.close() }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
                 appEntries.forEach { entry ->
                     NavigationDrawerItem(
                         label = { Text(entry.title) },
-                        selected = false,
-                        onClick = { scope.launch { drawerState.close() } },
+                        selected = selectedPage == entry.id,
+                        onClick = {
+                            selectedPage = entry.id
+                            scope.launch { drawerState.close() }
+                        },
                         modifier = Modifier.padding(horizontal = 12.dp)
                     )
                 }
@@ -101,26 +120,48 @@ fun MioWateryApp() {
                 TopAppBar(
                     title = {
                         Column {
-                            Text("MioWatery")
-                            Text(
-                                "原生版 · 初始框架",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Text(selectedEntry?.title ?: "MioWatery")
+                            if (selectedPage == "home") {
+                                Text(
+                                    "原生版 · 初始框架",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "打开导航")
+                        IconButton(
+                            onClick = {
+                                if (selectedPage == "home") {
+                                    scope.launch { drawerState.open() }
+                                } else {
+                                    selectedPage = "home"
+                                }
+                            }
+                        ) {
+                            Icon(
+                                if (selectedPage == "home") Icons.Default.Menu
+                                else Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = if (selectedPage == "home") "打开导航" else "返回首页"
+                            )
                         }
                     }
                 )
             }
         ) { innerPadding ->
-            HomeScreen(
-                modifier = Modifier.padding(innerPadding),
-                onOpen = { /* Feature destinations will be connected as modules migrate. */ }
-            )
+            if (selectedPage == "home") {
+                HomeScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    onOpen = { selectedPage = it }
+                )
+            } else {
+                FeaturePlaceholder(
+                    title = selectedEntry?.title ?: "功能",
+                    modifier = Modifier.padding(innerPadding),
+                    onBack = { selectedPage = "home" }
+                )
+            }
         }
     }
 }
@@ -190,7 +231,7 @@ private fun HomeScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onOpen(entry.title) },
+                        .clickable { onOpen(entry.id) },
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
@@ -215,6 +256,40 @@ private fun HomeScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun FeaturePlaceholder(
+    title: String,
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(title, style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(12.dp))
+        Text(
+            "这个模块还没有迁移到原生版。",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            "旧版功能和数据保持不变，后续会按迁移清单逐项实现。",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(24.dp))
+        androidx.compose.material3.OutlinedButton(onClick = onBack) {
+            Text("返回首页")
         }
     }
 }
