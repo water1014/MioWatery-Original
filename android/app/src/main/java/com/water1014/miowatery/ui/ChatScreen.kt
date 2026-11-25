@@ -192,12 +192,12 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     runCatching { JSONObject(it.rawLegacyJson).optString("position", "after") }.getOrDefault("after") == "before"
                 }
                 val afterWorldbook = activeWorldbook - beforeWorldbook.toSet()
-                val activeMemories = memoryEntries.take(20)
+                val activeMemories = memoryEntries
                 val systemPrompt = buildString {
                     beforeWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                     if (personaPrompt.isNotBlank()) append(personaPrompt).append("\n\n")
                     val manualMemories = activeMemories.filter { it.type == "traditional" }
-                    val memoryNotes = activeMemories.filter { it.type == "note" }
+                    val memoryNotes = activeMemories.filter { it.type == "note" }.take(8)
                     if (manualMemories.isNotEmpty()) {
                         append("【传统记忆】以下是用户为当前聊天手动保存的长期信息，每次回复都应参考：\n")
                         manualMemories.forEach { append("· ").append(it.text.take(2000)).append("\n") }
