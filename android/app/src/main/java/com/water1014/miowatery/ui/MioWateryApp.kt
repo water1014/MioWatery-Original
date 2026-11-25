@@ -164,7 +164,7 @@ fun MioWateryApp() {
     ) {
         Scaffold(
             topBar = {
-                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas" && selectedPage != "worlds") TopAppBar(
+                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas" && selectedPage != "worlds" && selectedPage != "music") TopAppBar(
                     title = {
                         Column {
                             Text(selectedEntry?.title ?: "MioWatery")
