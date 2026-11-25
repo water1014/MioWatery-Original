@@ -67,12 +67,13 @@ import java.util.UUID
 
 private const val CHAT_PROFILE_ID = "default"
 private const val CHAT_PERSONA_ID = "default"
+private const val CHAT_CONVERSATION_ID = "native-default-chat"
 
 @Composable
 fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val conversationId = remember { "native-chat-" + UUID.randomUUID().toString() }
+    val conversationId = CHAT_CONVERSATION_ID
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
     val messages by dao.observeMessages(conversationId).collectAsState(initial = emptyList())
     val configStore = remember { ApiConfigStore(context) }
@@ -89,16 +90,19 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(Unit) {
-        dao.upsertConversation(
-            ConversationEntity(
-                id = conversationId,
-                profileId = CHAT_PROFILE_ID,
-                personaId = CHAT_PERSONA_ID,
-                title = "新对话",
-                createdAt = System.currentTimeMillis(),
-                updatedAt = System.currentTimeMillis()
+        if (dao.getConversation(conversationId) == null) {
+            val createdAt = System.currentTimeMillis()
+            dao.upsertConversation(
+                ConversationEntity(
+                    id = conversationId,
+                    profileId = CHAT_PROFILE_ID,
+                    personaId = CHAT_PERSONA_ID,
+                    title = "新对话",
+                    createdAt = createdAt,
+                    updatedAt = createdAt
+                )
             )
-        )
+        }
     }
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
@@ -133,13 +137,15 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 rawLegacyJson = "{}"
             )
             dao.insertMessages(listOf(userMessage))
+            val existingConversation = dao.getConversation(conversationId)
+            val originalCreatedAt = existingConversation?.createdAt ?: now
             dao.upsertConversation(
                 ConversationEntity(
                     id = conversationId,
                     profileId = CHAT_PROFILE_ID,
                     personaId = CHAT_PERSONA_ID,
                     title = text.take(36),
-                    createdAt = now,
+                    createdAt = originalCreatedAt,
                     updatedAt = now
                 )
             )
@@ -197,7 +203,7 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                             profileId = CHAT_PROFILE_ID,
                             personaId = CHAT_PERSONA_ID,
                             title = text.take(36),
-                            createdAt = now,
+                            createdAt = originalCreatedAt,
                             updatedAt = assistantNow
                         )
                     )

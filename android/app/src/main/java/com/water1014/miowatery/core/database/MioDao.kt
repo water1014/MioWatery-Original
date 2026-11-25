@@ -23,6 +23,9 @@ interface MioDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertConversation(conversation: ConversationEntity)
 
+    @Query("SELECT * FROM conversations WHERE id = :conversationId LIMIT 1")
+    suspend fun getConversation(conversationId: String): ConversationEntity?
+
     @Query("SELECT * FROM conversations WHERE profileId = :profileId AND personaId = :personaId ORDER BY updatedAt DESC")
     fun observeConversations(profileId: String, personaId: String): Flow<List<ConversationEntity>>
 
