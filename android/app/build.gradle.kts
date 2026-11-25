@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.media3.session)
 
     testImplementation(libs.junit)
+    // Use a real JVM JSON implementation in unit tests instead of Android's mocked org.json stubs.
+    testImplementation("org.json:json:20240303")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
