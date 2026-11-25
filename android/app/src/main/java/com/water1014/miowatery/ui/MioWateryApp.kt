@@ -111,11 +111,13 @@ private val appEntries = listOf(
 fun MioWateryApp() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var showSplash by remember { mutableStateOf(true) }
     var selectedPage by remember { mutableStateOf("home") }
     var selectedPersonaId by remember { mutableStateOf("default") }
     var chatReturnPage by remember { mutableStateOf("home") }
     val selectedEntry = appEntries.firstOrNull { it.id == selectedPage }
 
+    Box(Modifier.fillMaxSize()) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -214,6 +216,9 @@ fun MioWateryApp() {
                 )
             }
         }
+    }
+    if (showSplash) {
+        MioSplashScreen(onFinished = { showSplash = false })
     }
 }
 
