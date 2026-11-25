@@ -4,6 +4,8 @@ import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 object DesktopThemePackStore {
     private const val FILE_NAME = "desktop-theme-pack.json"
@@ -22,13 +24,18 @@ object DesktopThemePackStore {
         val target = File(context.filesDir, FILE_NAME)
         val temp = File(context.filesDir, "$FILE_NAME.tmp")
         temp.writeText(json, Charsets.UTF_8)
-        if (target.exists() && !target.delete()) {
+        try {
+            Files.move(
+                temp.toPath(),
+                target.toPath(),
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.ATOMIC_MOVE
+            )
+        } catch (_: java.nio.file.AtomicMoveNotSupportedException) {
+            Files.move(temp.toPath(), target.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        } catch (failure: Exception) {
             temp.delete()
-            throw IllegalStateException("无法替换旧的桌面美化配置")
-        }
-        if (!temp.renameTo(target)) {
-            temp.delete()
-            throw IllegalStateException("保存桌面美化配置失败")
+            throw IllegalStateException("保存桌面美化配置失败", failure)
         }
     }
 
