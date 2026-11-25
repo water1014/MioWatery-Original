@@ -98,7 +98,9 @@ object LegacyBackupInspector {
         val profiles = state.arrayOrNull("userProfiles")
         val chatOwnerCount = chatOwners?.size() ?: 0
         val conversations = chatOwners?.entrySet()?.sumOf { (_, value) ->
-            if (value.isJsonObject) value.asJsonObject.size() else 0
+            if (!value.isJsonObject) 0 else value.asJsonObject.entrySet().count { (_, chat) ->
+                chat.isJsonArray && chat.asJsonArray.size() > 0
+            }
         } ?: 0
         val messages = chatOwners?.entrySet()?.sumOf { (_, value) ->
             if (!value.isJsonObject) 0 else value.asJsonObject.entrySet().sumOf { (_, chat) ->
