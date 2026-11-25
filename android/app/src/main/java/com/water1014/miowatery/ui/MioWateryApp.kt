@@ -219,7 +219,7 @@ fun MioWateryApp() {
                     modifier = Modifier.padding(innerPadding)
                 )
             } else if (selectedPage == "msgs") {
-                FeaturePlaceholder(title = "讯息", modifier = Modifier.padding(innerPadding), onBack = { selectedPage = "home" })
+                MessageAppScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "worlds") {
                 WorldbookScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "desktopcustom") {
@@ -431,6 +431,39 @@ private fun HomeScreen(
     }
     val pager = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
+    val homePrefs = remember(context) { context.getSharedPreferences("mio_home_widgets", Context.MODE_PRIVATE) }
+    var recent1 by remember { mutableStateOf(homePrefs.getString("recent_1", "") ?: "") }
+    var recent2 by remember { mutableStateOf(homePrefs.getString("recent_2", "") ?: "") }
+    var recent3 by remember { mutableStateOf(homePrefs.getString("recent_3", "") ?: "") }
+    var quoteLine1 by remember { mutableStateOf(homePrefs.getString("quote_line_1", "留一点空白，给今天的心情。") ?: "") }
+    var quoteLine2 by remember { mutableStateOf(homePrefs.getString("quote_line_2", "Somewhere, we keep choosing each other.") ?: "") }
+    var quoteImage1 by remember { mutableStateOf(homePrefs.getString("quote_image_1", "") ?: "") }
+    var quoteImage2 by remember { mutableStateOf(homePrefs.getString("quote_image_2", "") ?: "") }
+    var quoteImage3 by remember { mutableStateOf(homePrefs.getString("quote_image_3", "") ?: "") }
+    var imessageTitle by remember { mutableStateOf(homePrefs.getString("imessage_title", "iMessage") ?: "") }
+    var imessageSubtitle by remember { mutableStateOf(homePrefs.getString("imessage_subtitle", "对话预览 · 点击编辑") ?: "") }
+    var imessage1 by remember { mutableStateOf(homePrefs.getString("imessage_1", "到家了吗？") ?: "") }
+    var imessage2 by remember { mutableStateOf(homePrefs.getString("imessage_2", "刚到，放心。") ?: "") }
+    var imessage3 by remember { mutableStateOf(homePrefs.getString("imessage_3", "那就好，早点休息。") ?: "") }
+    var imessage4 by remember { mutableStateOf(homePrefs.getString("imessage_4", "好，晚安。") ?: "") }
+    var lyricLine1 by remember { mutableStateOf(homePrefs.getString("lyric_line_1", "水循環｜下一秒接住的 會是你上世紀的淚嗎") ?: "") }
+    var lyricLine2 by remember { mutableStateOf(homePrefs.getString("lyric_line_2", "Were I your tear, I would glide down your cheek until I reached your lips, for I long to kiss you") ?: "") }
+    var editSearches by remember { mutableStateOf(false) }
+    var editQuote by remember { mutableStateOf(false) }
+    var editIMessage by remember { mutableStateOf(false) }
+    var editLyrics by remember { mutableStateOf(false) }
+    var imageSlot by remember { mutableStateOf(0) }
+    val desktopImagePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            runCatching { context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            val value = uri.toString()
+            when (imageSlot) {
+                1 -> { quoteImage1 = value; homePrefs.edit().putString("quote_image_1", value).apply() }
+                2 -> { quoteImage2 = value; homePrefs.edit().putString("quote_image_2", value).apply() }
+                3 -> { quoteImage3 = value; homePrefs.edit().putString("quote_image_3", value).apply() }
+            }
+        }
+    }
     var now by remember { mutableStateOf(java.time.LocalDateTime.now()) }
     LaunchedEffect(Unit) { while (true) { now = java.time.LocalDateTime.now(); kotlinx.coroutines.delay(15_000) } }
     val ink = Color(0xFF0F1419)
