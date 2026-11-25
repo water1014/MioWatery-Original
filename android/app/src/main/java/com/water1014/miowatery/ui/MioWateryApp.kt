@@ -919,21 +919,38 @@ private fun HomeScreen(
                             }
                         }
                         if (page == 3) {
-                            HomePanel("音乐与歌词", Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                    Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) { Text("♫", color = ink, fontSize = 26.sp) }
-                                    Column(Modifier.weight(1f).padding(start = 12.dp)) {
-                                        Text(if (musicPlaying) "正在播放" else "未在播放", color = sub, style = MaterialTheme.typography.labelSmall)
-                                        Text(musicTitle, color = ink, style = MaterialTheme.typography.titleSmall)
+                            Card(
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onOpen("music") },
+                                shape = RoundedCornerShape(22.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                            ) {
+                                Column(Modifier.fillMaxWidth().padding(14.dp)) {
+                                    Box(
+                                        Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(15.dp)).background(panel),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (!musicCover.isNullOrBlank()) {
+                                            AsyncImage(model = musicCover, contentDescription = "音乐封面", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                        } else {
+                                            Text("♫", color = Color(0xFF8B8B90), fontSize = 54.sp)
+                                        }
                                     }
-                                    androidx.compose.material3.TextButton(onClick = { onOpen("music") }) { Text("音乐") }
+                                    Row(Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Text("0:00", color = sub, fontSize = 9.sp)
+                                        Box(Modifier.weight(1f).padding(horizontal = 8.dp).height(3.dp).background(Color(0xFFE5E7EA), CircleShape)) {
+                                            Box(Modifier.fillMaxWidth(0.36f).fillMaxSize().background(Color(0xFF8B8B90), CircleShape))
+                                        }
+                                        Text("−5:20", color = sub, fontSize = 9.sp)
+                                    }
+                                    Text(lyricLine1.ifBlank { "水循環｜下一秒接住的會是你上世紀的淚嗎" }, color = ink, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 12.dp))
+                                    Text(lyricLine2.ifBlank { "Were I your tear, I would glide down your cheek until I reached your lips, for I long to kiss you" }, color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 5.dp), lineHeight = 16.sp)
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                                        androidx.compose.material3.TextButton(onClick = { editLyrics = true }) { Text("编辑歌词与封面文案") }
+                                    }
                                 }
-                                Text(lyricLine1, color = ink, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
-                                Text(lyricLine2, color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 5.dp))
-                                androidx.compose.material3.TextButton(onClick = { editLyrics = true }) { Text("编辑歌词与封面文案") }
                             }
-                        }
-                    }
+                        }                    }
                 }
             }
         }
