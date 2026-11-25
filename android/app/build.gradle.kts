@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.okhttp)
+    implementation(libs.gson)
+    testImplementation(libs.gson)
     implementation(libs.coil.compose)
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.session)
