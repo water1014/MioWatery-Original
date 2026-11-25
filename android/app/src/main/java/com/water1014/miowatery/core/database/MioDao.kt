@@ -20,6 +20,9 @@ interface MioDao {
     @Query("SELECT * FROM personas WHERE profileId = :profileId ORDER BY name COLLATE NOCASE")
     fun observePersonas(profileId: String): Flow<List<PersonaEntity>>
 
+    @Query("SELECT * FROM personas WHERE profileId = :profileId AND personaId = :personaId LIMIT 1")
+    suspend fun getPersona(profileId: String, personaId: String): PersonaEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertConversation(conversation: ConversationEntity)
 

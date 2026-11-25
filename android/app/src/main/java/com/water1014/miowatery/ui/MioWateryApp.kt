@@ -112,6 +112,8 @@ fun MioWateryApp() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var selectedPage by remember { mutableStateOf("home") }
+    var selectedPersonaId by remember { mutableStateOf("default") }
+    var chatReturnPage by remember { mutableStateOf("home") }
     val selectedEntry = appEntries.firstOrNull { it.id == selectedPage }
 
     ModalNavigationDrawer(
@@ -149,7 +151,7 @@ fun MioWateryApp() {
     ) {
         Scaffold(
             topBar = {
-                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs") TopAppBar(
+                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas") TopAppBar(
                     title = {
                         Column {
                             Text(selectedEntry?.title ?: "MioWatery")
@@ -186,8 +188,22 @@ fun MioWateryApp() {
                     modifier = Modifier.padding(innerPadding),
                     onOpen = { selectedPage = it }
                 )
+            } else if (selectedPage == "personas") {
+                PersonaScreen(
+                    onBack = { selectedPage = "home" },
+                    onOpenChat = { id ->
+                        selectedPersonaId = id
+                        chatReturnPage = "personas"
+                        selectedPage = "app"
+                    },
+                    modifier = Modifier.padding(innerPadding)
+                )
             } else if (selectedPage == "app" || selectedPage == "msgs") {
-                ChatScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
+                ChatScreen(
+                    onBack = { selectedPage = chatReturnPage },
+                    personaId = selectedPersonaId,
+                    modifier = Modifier.padding(innerPadding)
+                )
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {

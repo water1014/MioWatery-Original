@@ -66,7 +66,7 @@ import kotlinx.coroutines.withContext
 import java.util.UUID
 
 private const val CHAT_PROFILE_ID = "default"
-private const val CHAT_PERSONA_ID = "default"
+private const val personaId = "default"
 private const val CHAT_CONVERSATION_ID = "native-default-chat"
 
 @Composable
@@ -96,7 +96,7 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 ConversationEntity(
                     id = conversationId,
                     profileId = CHAT_PROFILE_ID,
-                    personaId = CHAT_PERSONA_ID,
+                    personaId = personaId,
                     title = "新对话",
                     createdAt = createdAt,
                     updatedAt = createdAt
@@ -143,7 +143,7 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 ConversationEntity(
                     id = conversationId,
                     profileId = CHAT_PROFILE_ID,
-                    personaId = CHAT_PERSONA_ID,
+                    personaId = personaId,
                     title = text.take(36),
                     createdAt = originalCreatedAt,
                     updatedAt = now
@@ -155,8 +155,9 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 return@launch
             }
             try {
-                val history = (messages.map { it } + userMessage).map {
-                    ChatMessagePayload.text(it.role, it.content)
+                val history = buildList {
+                    if (personaPrompt.isNotBlank()) add(ChatMessagePayload.text("system", personaPrompt))
+                    addAll((messages.map { it } + userMessage).map { ChatMessagePayload.text(it.role, it.content) })
                 }
                 val result = withContext(Dispatchers.IO) {
                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
@@ -201,7 +202,7 @@ fun ChatScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                         ConversationEntity(
                             id = conversationId,
                             profileId = CHAT_PROFILE_ID,
-                            personaId = CHAT_PERSONA_ID,
+                            personaId = personaId,
                             title = text.take(36),
                             createdAt = originalCreatedAt,
                             updatedAt = assistantNow
