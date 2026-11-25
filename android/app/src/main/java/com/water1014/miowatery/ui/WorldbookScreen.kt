@@ -1,5 +1,12 @@
 package com.water1014.miowatery.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONTokener
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -66,6 +73,104 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var entryPersonaId by remember { mutableStateOf<String?>(null) }
     var showPersonaMenu by remember { mutableStateOf(false) }
     var editorError by remember { mutableStateOf<String?>(null) }
+    var searchOpen by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
+    var showActions by remember { mutableStateOf(false) }
+    var screenMessage by remember { mutableStateOf<String?>(null) }
+
+    val importWorldbook = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) scope.launch {
+            try {
+                val source = withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                        ?: error("无法读取所选文件")
+                }
+                val parsed = JSONTokener(source.trimStart('\uFEFF')).nextValue()
+                val rows = mutableListOf<JSONObject>()
+                when (parsed) {
+                    is JSONArray -> for (i in 0 until parsed.length()) parsed.optJSONObject(i)?.let(rows::add)
+                    is JSONObject -> {
+                        val characterBook = parsed.optJSONObject("character_book")
+                        val entriesValue = characterBook?.opt("entries") ?: parsed.opt("entries")
+                            ?: parsed.opt("worlds")
+                        when (entriesValue) {
+                            is JSONArray -> for (i in 0 until entriesValue.length()) entriesValue.optJSONObject(i)?.let(rows::add)
+                            is JSONObject -> {
+                                val keys = entriesValue.keys()
+                                while (keys.hasNext()) entriesValue.optJSONObject(keys.next())?.let(rows::add)
+                            }
+                        }
+                    }
+                }
+                val imported = rows.mapNotNull { row ->
+                    val keyValue = row.opt("keys") ?: row.opt("key") ?: row.opt("keywords")
+                    val keywordText = when (keyValue) {
+                        is JSONArray -> (0 until keyValue.length()).mapNotNull { keyValue.optString(it).takeIf(String::isNotBlank) }.joinToString(",")
+                        else -> keyValue?.toString().orEmpty()
+                    }
+                    val content = row.optString("content", row.optString("text", ""))
+                    if (content.isBlank()) return@mapNotNull null
+                    val scope = row.optString("scope", "global")
+                    val personaName = row.optString("personaName", "")
+                    val matchedPersona = if (scope == "contact") personas.firstOrNull { it.name == personaName } else null
+                    val safeScope = if (scope == "contact" && matchedPersona != null) "contact" else "global"
+                    val raw = JSONObject(row.toString())
+                        .put("keys", keywordText)
+                        .put("trigger", row.optString("trigger", if (keywordText.isBlank()) "global" else "keyword"))
+                        .put("position", row.optString("position", "after"))
+                        .put("scope", safeScope)
+                    WorldbookEntryEntity(
+                        id = UUID.randomUUID().toString(),
+                        profileId = WORLDBOOK_PROFILE_ID,
+                        personaId = matchedPersona?.personaId,
+                        bookId = row.optString("bookId", row.optString("category", "默认分类")).ifBlank { "默认分类" },
+                        title = row.optString("title", row.optString("comment", row.optString("name", "导入词条"))).ifBlank { "导入词条" },
+                        content = content,
+                        enabled = row.optBoolean("enabled", row.optBoolean("on", true)) && !row.optBoolean("disable", false),
+                        rawLegacyJson = raw.toString(),
+                        updatedAt = System.currentTimeMillis()
+                    )
+                }
+                if (imported.isEmpty()) {
+                    screenMessage = "没有识别到可导入的世界书词条"
+                } else {
+                    dao.upsertWorldbookEntries(imported)
+                    screenMessage = "已导入 ${imported.size} 条词条"
+                }
+            } catch (failure: Exception) {
+                screenMessage = "导入失败：${failure.message ?: "文件格式无法识别"}"
+            }
+        }
+    }
+
+    val exportWorldbook = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        if (uri != null) scope.launch {
+            try {
+                val exportRows = entries.map { entry ->
+                    val raw = runCatching { JSONObject(entry.rawLegacyJson) }.getOrElse { JSONObject() }
+                    raw.put("title", entry.title)
+                        .put("bookId", entry.bookId)
+                        .put("content", entry.content)
+                        .put("enabled", entry.enabled)
+                        .put("scope", if (entry.personaId == null) "global" else "contact")
+                        .put("personaName", personas.firstOrNull { it.personaId == entry.personaId }?.name.orEmpty())
+                        .put("keys", raw.optString("keys"))
+                }
+                val payload = JSONObject()
+                    .put("app", "xsj-worlds")
+                    .put("v", 1)
+                    .put("worlds", JSONArray(exportRows))
+                    .toString(2)
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { it.write(payload) }
+                        ?: error("无法写入目标文件")
+                }
+                screenMessage = "世界书已导出"
+            } catch (failure: Exception) {
+                screenMessage = "导出失败：${failure.message ?: "写入文件失败"}"
+            }
+        }
+    }
 
     fun openEditor(item: WorldbookEntryEntity?) {
         editing = item
@@ -84,19 +189,36 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     }
 
     Column(modifier.fillMaxSize().background(Color.White).padding(horizontal = 18.dp)) {
-        Row(Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("‹", Modifier.clickable(onClick = onBack).padding(end = 14.dp), color = Color(0xFF111111), fontSize = 28.sp)
-            Column(Modifier.weight(1f)) {
-                Text("世界书", color = Color(0xFF111111), fontSize = 21.sp, fontWeight = FontWeight.SemiBold)
-                Text("故事背景、人物关系与规则设定", color = Color(0xFF8A929B), fontSize = 11.sp)
+        Row(Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 18.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("WORLDBOOK", Modifier.weight(1f).clickable(onClick = onBack), color = Color(0xFF111111), fontSize = 15.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.4.sp)
+            Box {
+                Text("•••", Modifier.clickable { showActions = true }.padding(horizontal = 8.dp, vertical = 4.dp), color = Color(0xFF111111), fontSize = 19.sp)
+                DropdownMenu(expanded = showActions, onDismissRequest = { showActions = false }) {
+                    DropdownMenuItem(text = { Text("导入世界书") }, onClick = { showActions = false; importWorldbook.launch(arrayOf("application/json", "text/plain")) })
+                    DropdownMenuItem(text = { Text("导出世界书") }, onClick = { showActions = false; exportWorldbook.launch("MioWatery-世界书.json") })
+                    DropdownMenuItem(text = { Text("新增世界书") }, onClick = { showActions = false; openEditor(null) })
+                }
             }
-            Text("＋", Modifier.clickable { openEditor(null) }.padding(horizontal = 12.dp), color = Color(0xFF111111), fontSize = 27.sp)
         }
-        Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TextButton(onClick = { globalOnly = true }) { Text(if (globalOnly) "● 全局" else "全局", color = Color(0xFF111111)) }
-            TextButton(onClick = { globalOnly = false }) { Text(if (!globalOnly) "● 联系人" else "联系人", color = Color(0xFF111111)) }
+        if (searchOpen) {
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = { searchText = it },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                label = { Text("搜索已加入的世界书") },
+                singleLine = true,
+                trailingIcon = { Text("×", Modifier.clickable { searchText = ""; searchOpen = false }.padding(6.dp)) }
+            )
         }
-        val visible = entries.filter { if (globalOnly) it.personaId == null else it.personaId != null }
+        Column(Modifier.padding(bottom = 10.dp)) {
+            Text("YOUR LIBRARY", color = Color(0xFF9299A1), fontSize = 10.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.8.sp)
+            Text("世界书", color = Color(0xFF111111), fontSize = 25.sp, fontWeight = FontWeight.Bold)
+            Text("收纳世界背景、人物关系与故事规则。", color = Color(0xFF8A929B), fontSize = 12.sp)
+        }
+        val visible = entries.filter {
+            (if (globalOnly) it.personaId == null else it.personaId != null) &&
+                (searchText.isBlank() || it.title.contains(searchText, true) || it.content.contains(searchText, true) || it.bookId.contains(searchText, true))
+        }
         if (visible.isEmpty()) {
             Column(Modifier.fillMaxWidth().weight(1f), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("这里还没有世界书", color = Color(0xFF111111), fontSize = 17.sp, fontWeight = FontWeight.Medium)
@@ -125,6 +247,23 @@ fun WorldbookScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     }
                 }
             }
+        }
+        screenMessage?.let { message ->
+            Text(message, Modifier.fillMaxWidth().padding(vertical = 6.dp), color = Color(0xFF6B7480), fontSize = 11.sp)
+        }
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(onClick = { globalOnly = true; searchText = "" }) {
+                Text(if (globalOnly) "● 全局世界书" else "全局世界书", color = Color(0xFF111111))
+            }
+            TextButton(onClick = { globalOnly = false; searchText = "" }) {
+                Text(if (!globalOnly) "● 局部世界书" else "局部世界书", color = Color(0xFF111111))
+            }
+            Spacer(Modifier.weight(1f))
+            Text("⌕", Modifier.clickable { searchOpen = !searchOpen; if (!searchOpen) searchText = "" }.padding(horizontal = 10.dp), color = Color(0xFF111111), fontSize = 23.sp)
         }
     }
 
