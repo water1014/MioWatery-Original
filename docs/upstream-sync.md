@@ -29,11 +29,15 @@ Upstream changes since the common ancestor of the web fork:
 
 ## Native Android port status
 
-- Keep all native work on `native-android`; do not merge web HTML/JavaScript into the native app.
-- Port desktop theme packs as a validated JSON format and native configuration UI.
-- Import/export should include wallpaper references, icon overrides, supported native widget definitions, hidden-widget state and placement/order.
-- Do not execute imported HTML, CSS or JavaScript. Native custom widgets must use a constrained declarative schema with explicit supported widget types and bounded fields.
-- Preview imported packs before applying them. Applying a pack must be an explicit user action and should preserve a restorable snapshot of the current desktop configuration.
+- All native work stays on `native-android`; web HTML/JavaScript is never merged into the native app.
+- Implemented a validated reader for upstream `xsj-desktop-theme` v1 packs. It extracts safe HTTPS/data-image assets, icon overrides, supported clock/text/image widgets, hidden IDs and placement metadata.
+- Implemented native file import, preview, explicit apply confirmation, and safe JSON export. Export strips unsupported web custom-widget code rather than copying it into the native package.
+- Applied desktop wallpaper and icon overrides are persisted in the app-private files directory using atomic replacement and loaded off the main thread.
+- Supported native clock/text/image widgets render on the home page; imported wallpaper and app icons also render there.
+- Worldbook now has an explicit back action, supports selecting the target contact for persona-scoped entries, and merges edited fields into the original raw JSON so unknown legacy metadata survives.
+- Persona avatar picker attempts to retain read permission so selected images remain available after process restart.
+- Not yet ported: exact desktop drag/drop placement and the full hidden built-in widget map. Placement/hidden metadata is preserved in the pack, but current native home layout does not yet reproduce the web grid positions.
+- Do not execute imported HTML, CSS or JavaScript. Native custom widgets use only explicitly supported declarative types with bounded fields.
 - The upstream CSS specificity fix is a behavior requirement, not code to copy: native widget visibility must be derived from one authoritative state so hidden widgets cannot reappear from layout recomposition.
 
 ## Ongoing rule
