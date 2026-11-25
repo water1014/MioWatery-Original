@@ -385,6 +385,7 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
 
 @Composable
 private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, personaAvatar: String?) {
+    var showReasoning by remember(message.id) { mutableStateOf(false) }
     val fromUser = message.role == "user"
     val avatar = @Composable {
         Box(
@@ -422,12 +423,30 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
                 .background(if (fromUser) Color(0xFF111111) else Color(0xFFECEEF0))
                 .padding(horizontal = 11.dp, vertical = 7.dp)
         ) {
-            Text(
-                message.content,
-                color = if (fromUser) Color.White else Color(0xFF0F1419),
-                fontSize = 14.sp,
-                lineHeight = 21.sp
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    message.content,
+                    color = if (fromUser) Color.White else Color(0xFF0F1419),
+                    fontSize = 14.sp,
+                    lineHeight = 21.sp
+                )
+                if (!fromUser && !message.reasoning.isNullOrBlank()) {
+                    Text(
+                        if (showReasoning) "收起思考过程 ▴" else "查看思考过程 ▾",
+                        modifier = Modifier.clickable { showReasoning = !showReasoning },
+                        color = Color(0xFF7A838D),
+                        fontSize = 10.sp
+                    )
+                    if (showReasoning) {
+                        Text(
+                            message.reasoning.orEmpty(),
+                            color = Color(0xFF737B84),
+                            fontSize = 11.sp,
+                            lineHeight = 17.sp
+                        )
+                    }
+                }
+            }
         }
         if (fromUser) {
             Spacer(Modifier.width(8.dp))
