@@ -28,6 +28,7 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.pager.rememberPagerState
@@ -67,6 +68,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -400,6 +402,8 @@ private fun HomeScreen(
     onOpen: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val homeDao = remember(context) { MioDatabase.getInstance(context).mioDao() }
+    val recentMessages by homeDao.observeRecentMessagePreviews().collectAsState(initial = emptyList())
     val desktopOverrides = remember(desktopPackJson) {
         runCatching {
             val desktop = JSONObject(desktopPackJson ?: "{}").optJSONObject("desktop")
@@ -435,6 +439,14 @@ private fun HomeScreen(
     val pager = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
     val homePrefs = remember(context) { context.getSharedPreferences("mio_home_widgets", Context.MODE_PRIVATE) }
+    var memoImage by remember { mutableStateOf(homePrefs.getString("memo_image", null)) }
+    val memoImagePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            runCatching { context.contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            memoImage = uri.toString()
+            homePrefs.edit().putString("memo_image", memoImage).apply()
+        }
+    }
     var recent1 by remember { mutableStateOf(homePrefs.getString("recent_1", "") ?: "") }
     var recent2 by remember { mutableStateOf(homePrefs.getString("recent_2", "") ?: "") }
     var recent3 by remember { mutableStateOf(homePrefs.getString("recent_3", "") ?: "") }
@@ -498,22 +510,37 @@ private fun HomeScreen(
                         Text(now.format(java.time.format.DateTimeFormatter.ofPattern("M月d日  EEEE", java.util.Locale.SIMPLIFIED_CHINESE)), color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 7.dp))
                     }
                     Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
-                        Text("备忘录图片", color = ink, style = MaterialTheme.typography.labelMedium)
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("备忘录图片", color = ink, style = MaterialTheme.typography.labelMedium)
+                            Text("更换", Modifier.clickable { memoImagePicker.launch(arrayOf("image/*")) }, color = sub, style = MaterialTheme.typography.labelSmall)
+                        }
                         Spacer(Modifier.height(9.dp))
-                        Box(Modifier.fillMaxWidth().height(140.dp).background(Color(0xFFE2E4E7), RoundedCornerShape(14.dp)).clickable { onOpen("diary") }, contentAlignment = Alignment.Center) { Text("点击添加图片", color = sub, style = MaterialTheme.typography.labelSmall) }
+                        Box(Modifier.fillMaxWidth().height(140.dp).background(Color(0xFFE2E4E7), RoundedCornerShape(14.dp)).clip(RoundedCornerShape(14.dp)).clickable { memoImagePicker.launch(arrayOf("image/*")) }, contentAlignment = Alignment.Center) {
+                            if (!memoImage.isNullOrBlank()) AsyncImage(model = memoImage, contentDescription = "备忘录图片", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                            else Text("点击选择一张图片", color = sub, style = MaterialTheme.typography.labelSmall)
+                        }
                         Spacer(Modifier.height(12.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Column { Text("Set city", color = sub, style = MaterialTheme.typography.labelSmall); Text("--°", color = ink, fontSize = 32.sp, fontWeight = FontWeight.Light); Text("Tap to set city", color = sub, style = MaterialTheme.typography.labelSmall) }
-                            Text("天气", color = sub, style = MaterialTheme.typography.labelSmall)
+                            Column { Text("天气", color = sub, style = MaterialTheme.typography.labelSmall); Text("--°", color = ink, fontSize = 32.sp, fontWeight = FontWeight.Light); Text("尚未设置城市", color = sub, style = MaterialTheme.typography.labelSmall) }
+                            Text("天气信息待接入", color = sub, style = MaterialTheme.typography.labelSmall)
                         }
                     }
                     Column(Modifier.fillMaxWidth().background(panel, RoundedCornerShape(22.dp)).padding(16.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Messages", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                            Text("See all", Modifier.clickable { onOpen("app") }, color = sub, style = MaterialTheme.typography.labelSmall)
+                            Text("最近消息", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text("查看聊天", Modifier.clickable { onOpen("app") }, color = sub, style = MaterialTheme.typography.labelSmall)
                         }
                         Spacer(Modifier.height(10.dp))
-                        Text("还没有最近聊天", color = sub, style = MaterialTheme.typography.bodySmall)
+                        if (recentMessages.isEmpty()) {
+                            Text("还没有最近聊天", color = sub, style = MaterialTheme.typography.bodySmall)
+                        } else {
+                            recentMessages.forEach { message ->
+                                Column(Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable { onOpen("app") }) {
+                                    Text(message.conversationTitle.ifBlank { "聊天" }, color = ink, style = MaterialTheme.typography.labelMedium)
+                                    Text((if (message.role == "user") "我：" else "角色：") + message.content, color = sub, style = MaterialTheme.typography.bodySmall, maxLines = 2)
+                                }
+                            }
+                        }
                     }
                 }
                 else -> {
