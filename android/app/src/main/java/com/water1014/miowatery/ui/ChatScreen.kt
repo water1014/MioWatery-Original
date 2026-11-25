@@ -86,6 +86,7 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
         } else "native-chat-" + personaId
     }
     val worldbookEntries by dao.observeWorldbookEntries(CHAT_PROFILE_ID, personaId).collectAsState(initial = emptyList())
+    val memoryEntries by dao.observeMemoryEntries(CHAT_PROFILE_ID, personaId).collectAsState(initial = emptyList())
     val personaPrompt = remember(persona?.rawLegacyJson) {
         runCatching { JSONObject(persona?.rawLegacyJson ?: "{}").optString("prompt") }.getOrDefault("")
     }
@@ -189,9 +190,18 @@ fun ChatScreen(onBack: () -> Unit, personaId: String = "default", modifier: Modi
                     runCatching { JSONObject(it.rawLegacyJson).optString("position", "after") }.getOrDefault("after") == "before"
                 }
                 val afterWorldbook = activeWorldbook - beforeWorldbook.toSet()
+                val activeMemories = memoryEntries.take(20)
                 val systemPrompt = buildString {
                     beforeWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                     if (personaPrompt.isNotBlank()) append(personaPrompt).append("\n\n")
+                    if (activeMemories.isNotEmpty()) {
+                        append("【长期记忆】以下内容是用户主动保存的长期记忆，请在相关话题中自然参考，不要逐条复述：\n")
+                        activeMemories.forEach { memory ->
+                            append("· ").append(memory.title.ifBlank { memory.category }).append("：")
+                                .append(memory.content.take(2000)).append("\n")
+                        }
+                        append("\n")
+                    }
                     afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                 }.trim()
                 val history = buildList {
