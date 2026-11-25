@@ -50,6 +50,9 @@ interface MioDao {
     @Query("SELECT * FROM worldbook_entries WHERE profileId = :profileId AND (personaId IS NULL OR personaId = :personaId) ORDER BY bookId, title COLLATE NOCASE")
     fun observeWorldbookEntries(profileId: String, personaId: String): Flow<List<WorldbookEntryEntity>>
 
+    @Query("SELECT * FROM worldbook_entries WHERE profileId = :profileId ORDER BY bookId, title COLLATE NOCASE")
+    fun observeAllWorldbookEntries(profileId: String): Flow<List<WorldbookEntryEntity>>
+
     @Query("SELECT COUNT(*) FROM messages")
     suspend fun messageCount(): Int
 }
