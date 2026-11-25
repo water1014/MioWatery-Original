@@ -583,6 +583,7 @@ private fun HomeScreen(
                 1 -> { quoteImage1 = value; homePrefs.edit().putString("quote_image_1", value).apply() }
                 2 -> { quoteImage2 = value; homePrefs.edit().putString("quote_image_2", value).apply() }
                 3 -> { quoteImage3 = value; homePrefs.edit().putString("quote_image_3", value).apply() }
+                4 -> { musicCover = value; musicPrefs.edit().putString("cover_uri", value).apply() }
             }
         }
     }
@@ -929,7 +930,9 @@ private fun HomeScreen(
                             ) {
                                 Column(Modifier.fillMaxWidth().padding(14.dp)) {
                                     Box(
-                                        Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(15.dp)).background(panel),
+                                        Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(15.dp))
+                                            .background(panel)
+                                            .clickable { imageSlot = 4; desktopImagePicker.launch(arrayOf("image/*")) },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (!musicCover.isNullOrBlank()) {
@@ -937,6 +940,15 @@ private fun HomeScreen(
                                         } else {
                                             Text("♫", color = Color(0xFF8B8B90), fontSize = 54.sp)
                                         }
+                                        Text(
+                                            "更换封面",
+                                            Modifier.align(Alignment.BottomEnd).padding(8.dp)
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(Color.Black.copy(alpha = 0.56f))
+                                                .padding(horizontal = 8.dp, vertical = 5.dp),
+                                            color = Color.White,
+                                            fontSize = 10.sp
+                                        )
                                     }
                                     Row(Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                                         Text("0:00", color = sub, fontSize = 9.sp)
