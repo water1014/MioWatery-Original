@@ -180,3 +180,13 @@ Visual parity is still a work in progress across the entire app. The upstream gl
 - Reduced message-list vertical spacing to the upstream 4 dp rhythm and aligned list insets to 14 dp horizontal / 12 dp vertical.
 - Added the upstream first-message-in-group top separation while retaining grouped bubble corner treatment.
 - Remaining parity work includes exact toolbar actions, profile/avatar handling, search UI, attachments, and full interaction coverage.
+
+
+## Native settings screen (2026-11-25)
+
+- Replaced the settings placeholder route with a working native settings screen.
+- Added editable API base URL, model ID, API key, and custom JSON headers.
+- API keys continue to be encrypted through the existing Android Keystore-backed DataStore implementation.
+- The settings page links to the existing legacy backup inspection/import flow.
+- OpenCode-compatible endpoints continue to receive the automatically generated per-conversation session header from the existing header resolver.
+- This is the first native settings slice; appearance, quota, and other upstream settings sections still require parity work.
