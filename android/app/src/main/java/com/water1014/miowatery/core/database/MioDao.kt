@@ -44,6 +44,9 @@ interface MioDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWorldbookEntries(entries: List<WorldbookEntryEntity>)
 
+    @Query("DELETE FROM worldbook_entries WHERE id = :entryId")
+    suspend fun deleteWorldbookEntry(entryId: String)
+
     @Query("SELECT * FROM worldbook_entries WHERE profileId = :profileId AND (personaId IS NULL OR personaId = :personaId) ORDER BY bookId, title COLLATE NOCASE")
     fun observeWorldbookEntries(profileId: String, personaId: String): Flow<List<WorldbookEntryEntity>>
 
