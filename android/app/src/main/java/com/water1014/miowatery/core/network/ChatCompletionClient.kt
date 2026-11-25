@@ -22,6 +22,22 @@ data class ChatMessagePayload(
     companion object {
         fun text(role: String, content: String) =
             ChatMessagePayload(role, com.google.gson.JsonPrimitive(content))
+
+        fun image(role: String, content: String, dataUrl: String): ChatMessagePayload {
+            val parts = JsonArray()
+            parts.add(JsonObject().apply {
+                addProperty("type", "text")
+                addProperty("text", content.ifBlank { "请查看这张图片并描述其中的内容。" })
+            })
+            parts.add(JsonObject().apply {
+                addProperty("type", "image_url")
+                add("image_url", JsonObject().apply {
+                    addProperty("url", dataUrl)
+                    addProperty("detail", "auto")
+                })
+            })
+            return ChatMessagePayload(role, parts)
+        }
     }
 }
 
