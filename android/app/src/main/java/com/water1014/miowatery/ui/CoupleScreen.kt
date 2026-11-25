@@ -19,6 +19,8 @@ import org.json.JSONObject
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+private data class CoupleNote(val id: String, val kind: String, val date: String, val text: String)
+
 @Composable
 fun CoupleScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -96,16 +98,16 @@ fun CoupleScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 }
                 Button(onClick = { noteKind = "每日回忆"; noteDraft = ""; noteDialog = true }, modifier = Modifier.fillMaxWidth()) { Text("记录今天的回忆") }
                 if (notes.isEmpty()) Text("这里还空着，第一条共同回忆等你们来写。", color = Color.Gray, fontSize = 12.sp)
-                notes.sortedByDescending { it.first }.forEachIndexed { index, entry ->
+                notes.sortedByDescending { it.date }.forEach { entry ->
                     Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F8FB)), shape = RoundedCornerShape(14.dp)) {
                         Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text(entry.second, color = Color(0xFF6B7C99), fontSize = 11.sp, fontWeight = FontWeight.Medium)
-                                Text(entry.third, color = Color.Gray, fontSize = 10.sp)
+                                Text(entry.kind, color = Color(0xFF6B7C99), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                                Text(entry.date, color = Color.Gray, fontSize = 10.sp)
                             }
-                            Text(entry.fourth, color = Color(0xFF343B46), fontSize = 13.sp, lineHeight = 20.sp)
+                            Text(entry.text, color = Color(0xFF343B46), fontSize = 13.sp, lineHeight = 20.sp)
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                                TextButton(onClick = { notes = notes.filterNot { it.first == entry.first }; saveCoupleNotes(prefs, notes) }) { Text("删除") }
+                                TextButton(onClick = { notes = notes.filterNot { it.id == entry.id }; saveCoupleNotes(prefs, notes) }) { Text("删除") }
                             }
                         }
                     }
@@ -140,7 +142,7 @@ fun CoupleScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 if (value.isNotEmpty()) {
                     val now = java.time.LocalDateTime.now()
                     val stamp = now.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                    notes = notes + Triple(System.currentTimeMillis().toString(), noteKind, stamp) .let { it.first to (it.second to (it.third to value)) }
+                    notes = notes + CoupleNote(System.currentTimeMillis().toString(), noteKind, stamp, value)
                     saveCoupleNotes(prefs, notes)
                     noteDialog = false
                 }
@@ -165,19 +167,19 @@ private fun saveWishes(prefs: android.content.SharedPreferences, wishes: List<Pa
 }
 
 
-private fun loadCoupleNotes(prefs: android.content.SharedPreferences): List<Triple<String, String, Pair<String, String>>> = runCatching {
+private fun loadCoupleNotes(prefs: android.content.SharedPreferences): List<CoupleNote> = runCatching {
     val array = JSONArray(prefs.getString("couple_notes", "[]") ?: "[]")
     (0 until array.length()).mapNotNull { i ->
         val item = array.optJSONObject(i) ?: return@mapNotNull null
         val id = item.optString("id").takeIf { it.isNotBlank() } ?: return@mapNotNull null
-        Triple(id, item.optString("kind", "树洞"), item.optString("date") to item.optString("text"))
+        CoupleNote(id, item.optString("kind", "树洞"), item.optString("date"), item.optString("text"))
     }
 }.getOrDefault(emptyList())
 
-private fun saveCoupleNotes(prefs: android.content.SharedPreferences, notes: List<Triple<String, String, Pair<String, String>>>) {
+private fun saveCoupleNotes(prefs: android.content.SharedPreferences, notes: List<CoupleNote>) {
     val array = JSONArray()
-    notes.forEach { (id, kind, detail) ->
-        array.put(JSONObject().put("id", id).put("kind", kind).put("date", detail.first).put("text", detail.second))
+    notes.forEach { item ->
+        array.put(JSONObject().put("id", item.id).put("kind", item.kind).put("date", item.date).put("text", item.text))
     }
     prefs.edit().putString("couple_notes", array.toString()).apply()
 }
