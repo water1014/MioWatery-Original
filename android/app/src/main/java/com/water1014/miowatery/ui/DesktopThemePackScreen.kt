@@ -89,7 +89,7 @@ fun DesktopThemePackScreen(
             onDismissRequest = { showApplyConfirm = false },
             title = { Text("应用这套桌面美化？") },
             text = {
-                Text("将保存壁纸、\${preview!!.iconCount} 个图标、\${preview!!.widgets.size} 个受支持的小组件及摆放信息。不会修改聊天、角色、世界书或 API 配置。网页自定义代码不会被执行。")
+                Text("将保存壁纸、${preview!!.iconCount} 个图标、${preview!!.widgets.size} 个受支持的小组件及摆放信息。不会修改聊天、角色、世界书或 API 配置。网页自定义代码不会被执行。")
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -185,10 +185,10 @@ fun DesktopThemePackScreen(
                         }
                     }
                     if (data.hiddenWidgetIds.isNotEmpty()) {
-                        Text("隐藏的内置组件：\${data.hiddenWidgetIds.size} 项", style = MaterialTheme.typography.bodySmall)
+                        Text("隐藏的内置组件：${data.hiddenWidgetIds.size} 项", style = MaterialTheme.typography.bodySmall)
                     }
                     if (data.placementGroups.isNotEmpty()) {
-                        Text("检测到 \${data.placementGroups.values.sumOf { it.size }} 个摆放位置记录", style = MaterialTheme.typography.bodySmall)
+                        Text("检测到 ${data.placementGroups.values.sumOf { it.size }} 个摆放位置记录", style = MaterialTheme.typography.bodySmall)
                     }
                     if (data.unsupportedCustomWidgetCount > 0 || data.warnings.isNotEmpty()) {
                         Text("安全与兼容提示", style = MaterialTheme.typography.titleSmall)
@@ -199,7 +199,7 @@ fun DesktopThemePackScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Button(onClick = { showApplyConfirm = true }, enabled = !busy) { Text("确认应用") }
                         OutlinedButton(
-                            onClick = { createDocument.launch("\${data.name.replace(Regex("[\\\\\\\\/:*?\\\"<>|]"), "_")}.json") },
+                            onClick = { createDocument.launch(safePackFileName(data.name)) },
                             enabled = !busy
                         ) { Text("导出安全版") }
                     }
@@ -264,4 +264,10 @@ private fun readPack(
             onBusy(false)
         }
     }
+}
+
+private fun safePackFileName(name: String): String {
+    val invalid = charArrayOf('/', '\\', ':', '*', '?', '"', '<', '>', '|')
+    val safe = name.map { if (it in invalid) '_' else it }.joinToString("").trim()
+    return (safe.ifBlank { "MioWatery-桌面美化" }).take(60) + ".json"
 }
