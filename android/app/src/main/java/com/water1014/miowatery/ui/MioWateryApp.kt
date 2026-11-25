@@ -410,9 +410,21 @@ private fun HomeScreen(
                 ?.takeIf { !it.isNullOrBlank() && it != "null" }
         }.getOrNull()
     }
-    val nativeWidgets = remember(desktopPackJson) {
+    val hiddenDesktopIds = remember(desktopPackJson) {
         runCatching {
-            desktopPackJson?.let { DesktopThemePackInspector.inspect(it).widgets }.orEmpty()
+            val desktop = JSONObject(desktopPackJson ?: "{}").optJSONObject("desktop")
+            val hidden = desktop?.optJSONArray("hidden") ?: org.json.JSONArray()
+            buildSet {
+                for (index in 0 until hidden.length()) {
+                    hidden.optString(index).takeIf { it.matches(Regex("[A-Za-z0-9_:.\\-]{1,80}")) }?.let(::add)
+                }
+            }
+        }.getOrDefault(emptySet())
+    }
+    val nativeWidgets = remember(desktopPackJson, hiddenDesktopIds) {
+        runCatching {
+            desktopPackJson?.let { DesktopThemePackInspector.inspect(it).widgets }
+                .orEmpty().filterNot { it.id in hiddenDesktopIds }
         }.getOrDefault(emptyList())
     }
     val pager = rememberPagerState(pageCount = { 3 })
@@ -422,7 +434,7 @@ private fun HomeScreen(
     val ink = Color(0xFF0F1419)
     val sub = Color(0xFF6B7480)
     val panel = Color(0xFFF3F4F5)
-    val dock = listOf("app", "worlds", "personas", "settings").map { id -> appEntries.first { it.id == id } }
+    val dock = listOf("app", "worlds", "personas", "settings").filterNot { it in hiddenDesktopIds }.map { id -> appEntries.first { it.id == id } }
     Box(modifier.fillMaxSize()) {
         desktopWallpaper?.let { image ->
             AsyncImage(
@@ -480,7 +492,7 @@ private fun HomeScreen(
                 1 -> Column(Modifier.fillMaxSize().widthIn(max = 560.dp).padding(horizontal = 8.dp).padding(top = 18.dp)) {
                     Text("应用", Modifier.padding(start = 10.dp, bottom = 10.dp), color = ink, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                     LazyVerticalGrid(columns = GridCells.Fixed(4), modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-                        items(appEntries) { entry -> Column(Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        items(appEntries.filterNot { it.id in hiddenDesktopIds }) { entry -> Column(Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 29.dp) }
                             Spacer(Modifier.height(7.dp)); Text(entry.title, color = ink, fontSize = 11.sp, lineHeight = 15.sp, textAlign = TextAlign.Center, maxLines = 2)
                         } }
