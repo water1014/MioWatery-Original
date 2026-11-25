@@ -1,5 +1,20 @@
 package com.water1014.miowatery.ui
 
+import android.content.Context
+import android.net.Uri
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.platform.LocalContext
+import com.water1014.miowatery.core.migration.LegacyBackupInspector
+import com.water1014.miowatery.core.migration.LegacyBackupPreview
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -85,7 +100,8 @@ private val appEntries = listOf(
     AppEntry("desktopcustom", "桌面美化", "壁纸、图标与组件", Icons.Default.Image),
     AppEntry("css", "美化", "外观与样式预设", Icons.Default.Settings),
     AppEntry("stickers", "表情包", "贴纸与表情管理", Icons.Default.Image),
-    AppEntry("settings", "设置", "模型、语音、生图与数据", Icons.Default.Settings)
+    AppEntry("settings", "设置", "模型、语音、生图与数据", Icons.Default.Settings),
+    AppEntry("backup", "数据迁移", "旧版备份只读检查", Icons.Default.FolderOpen)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -168,6 +184,8 @@ fun MioWateryApp() {
                     modifier = Modifier.padding(innerPadding),
                     onOpen = { selectedPage = it }
                 )
+            } else if (selectedPage == "backup") {
+                BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
             } else {
                 FeaturePlaceholder(
                     title = selectedEntry?.title ?: "功能",
@@ -177,6 +195,67 @@ fun MioWateryApp() {
             }
         }
     }
+}
+
+@Composable
+private fun BackupPreviewScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var preview by remember { mutableStateOf<LegacyBackupPreview?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) { loading = true; preview = null; error = null
+            scope.launch { try { preview = withContext(Dispatchers.IO) {
+                val name = queryBackupName(context, uri)
+                val stream = context.contentResolver.openInputStream(uri) ?: throw IllegalArgumentException("无法打开所选文件")
+                LegacyBackupInspector.inspect(stream, name)
+            } } catch (failure: Exception) { error = failure.message ?: "读取备份失败，请检查文件是否完整"
+            } finally { loading = false } }
+        }
+    }
+    Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).verticalScroll(rememberScrollState()).padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Card(shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(Icons.Default.FolderOpen, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(30.dp))
+                Text("检查旧版备份", style = MaterialTheme.typography.titleLarge)
+                Text("选择 MioWatery 旧版导出的 JSON 或 ZIP 文件，先查看可识别的数据数量。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Button(onClick = { picker.launch(arrayOf("application/json", "application/zip", "application/octet-stream", "*/*")) }, enabled = !loading) { Text("选择备份文件") }
+            }
+        }
+        if (loading) { Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+            Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp); Text("正在读取备份…") } } }
+        error?.let { message -> Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+            Text(message, Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onErrorContainer) } }
+        preview?.let { data ->
+            Text("备份概览", style = MaterialTheme.typography.titleMedium)
+            Text(data.sourceFormat + " · " + data.jsonFileName + " · " + (data.jsonBytes / 1024) + " KB", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { BackupCountCard("用户资料", data.profileCount, Modifier.weight(1f)); BackupCountCard("角色", data.personaCount, Modifier.weight(1f)); BackupCountCard("世界书", data.worldbookCount, Modifier.weight(1f)) }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { BackupCountCard("聊天归属", data.chatOwnerCount, Modifier.weight(1f)); BackupCountCard("会话", data.conversationCount, Modifier.weight(1f)); BackupCountCard("消息", data.messageCount, Modifier.weight(1f)) }
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text("检查提示", style = MaterialTheme.typography.titleSmall)
+                    data.warnings.forEach { warning -> Text("• " + warning, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } } }
+            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant), shape = RoundedCornerShape(20.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) { Text("识别到的顶层字段", style = MaterialTheme.typography.titleSmall)
+                    val extra = if (data.topLevelKeys.size > 18) " …（共 " + data.topLevelKeys.size + " 项）" else ""
+                    Text(data.topLevelKeys.take(18).joinToString(" · ") + extra, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+        }
+        Text("安全说明：当前版本只读取并展示预览，不会写入原生数据库，也不会修改所选备份。正式迁移前还会补齐旧版字段映射与敏感信息检查。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun BackupCountCard(label: String, count: Int, modifier: Modifier = Modifier) {
+    Card(modifier = modifier, shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) { Text(count.toString(), style = MaterialTheme.typography.headlineSmall)
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+}
+
+private fun queryBackupName(context: Context, uri: Uri): String {
+    val name = context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+    return name ?: uri.lastPathSegment ?: "backup.json"
 }
 
 @Composable
