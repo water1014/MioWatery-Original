@@ -261,6 +261,8 @@ fun MioWateryApp() {
                 )
             } else if (selectedPage == "diary") {
                 DiaryScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
+            } else if (selectedPage == "rolephones") {
+                RolePhoneScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "chatmemory") {
                 MemoryScreen(onBack = { selectedPage = "app" }, conversationId = selectedConversationId, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "settings") {
