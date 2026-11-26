@@ -461,13 +461,13 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         searchOpen = !searchOpen
                         if (!searchOpen) searchQuery = ""
                     }.padding(horizontal = 9.dp, vertical = 7.dp),
-                    color = Color(0xFF0F1419),
+                    color = chatText,
                     fontSize = 22.sp
                 )
                 Text(
                     "⋯",
                     modifier = Modifier.clip(RoundedCornerShape(12.dp)).clickable { showMoreMenu = true }.padding(horizontal = 8.dp, vertical = 7.dp),
-                    color = Color(0xFF0F1419),
+                    color = chatText,
                     fontSize = 12.sp
                 )
             }
@@ -603,6 +603,9 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 
     if (showAttachmentMenu) {
         AlertDialog(
+            containerColor = chatSurface,
+            titleContentColor = chatText,
+            textContentColor = chatText,
             onDismissRequest = { showAttachmentMenu = false },
             title = { Text("添加内容") },
             text = { Text("选择一张图片添加到当前聊天。图片会保存在本机聊天记录中。") },
@@ -615,6 +618,9 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 
     if (showMoreMenu) {
         AlertDialog(
+            containerColor = chatSurface,
+            titleContentColor = chatText,
+            textContentColor = chatText,
             onDismissRequest = { showMoreMenu = false },
             title = { Text("聊天操作") },
             text = {
@@ -630,6 +636,9 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 
     if (showClearConfirm) {
         AlertDialog(
+            containerColor = chatSurface,
+            titleContentColor = chatText,
+            textContentColor = chatText,
             onDismissRequest = { showClearConfirm = false },
             title = { Text("清空当前对话？") },
             text = { Text("这会删除当前角色的全部聊天消息，无法撤销。记忆和世界书不会被删除。") },
@@ -652,6 +661,9 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 
     selectedMessage?.let { message ->
         AlertDialog(
+            containerColor = chatSurface,
+            titleContentColor = chatText,
+            textContentColor = chatText,
             onDismissRequest = { selectedMessage = null },
             title = { Text("消息操作") },
             text = { Text(if (message.content.isBlank()) "图片消息" else message.content.take(240)) },
@@ -675,6 +687,9 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 
     if (showSettings) {
         AlertDialog(
+            containerColor = chatSurface,
+            titleContentColor = chatText,
+            textContentColor = chatText,
             onDismissRequest = { showSettings = false },
             title = { Text("聊天设置") },
             text = {
@@ -682,7 +697,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     Text("记忆", color = chatText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Row(
                         Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFF3F4F5))
+                            .background(chatSurface)
                             .clickable { showSettings = false; onOpenMemory(conversationId) }
                             .padding(horizontal = 12.dp, vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -693,7 +708,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         }
                         Text("›", color = Color(0xFF8A929B), fontSize = 20.sp)
                     }
-                    Text("模型 API", color = Color(0xFF0F1419), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text("模型 API", color = chatText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     OutlinedTextField(editBaseUrl, { editBaseUrl = it }, label = { Text("API 地址") }, placeholder = { Text("https://example.com/v1") }, singleLine = true)
                     OutlinedTextField(editModel, { editModel = it }, label = { Text("模型名称") }, singleLine = true)
                     OutlinedTextField(editApiKey, { editApiKey = it }, label = { Text("API 密钥") }, visualTransformation = PasswordVisualTransformation(), singleLine = true)
