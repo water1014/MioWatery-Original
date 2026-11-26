@@ -103,7 +103,19 @@ fun SettingsScreen(
         "数据与备份" to "data"
     )
 
-    if (section == "imageapi") {\n        Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {\n            Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {\n                TextButton(onClick = { section = null }) { Text("‹ 设置") }\n                Text("生图 API", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)\n                Spacer(Modifier.height(1.dp))\n            }\n            ImageApiSettingsScreen(modifier = Modifier.weight(1f))\n        }\n        return\n    }\n\n    if (section == "api") {
+    if (section == "imageapi") {
+        Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = { section = null }) { Text("‹ 设置") }
+                Text("生图 API", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(1.dp))
+            }
+            ImageApiSettingsScreen(modifier = Modifier.weight(1f))
+        }
+        return
+    }
+
+    if (section == "api") {
         Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = { section = null }) { Text("‹ 设置") }
