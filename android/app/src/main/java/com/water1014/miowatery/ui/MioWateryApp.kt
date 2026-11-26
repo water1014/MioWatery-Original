@@ -34,6 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.pager.rememberPagerState
@@ -41,6 +44,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -76,6 +80,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -96,6 +101,37 @@ private data class AppEntry(
     val subtitle: String,
     val icon: Int
 )
+
+/** Long-press an app, drag it over another app, then release to exchange their positions. */
+private fun Modifier.desktopSortable(
+    id: String,
+    bounds: MutableMap<String, Rect>,
+    activeDragId: MutableState<String?>,
+    dragPosition: MutableState<Offset>,
+    onDrop: (String, String) -> Unit
+): Modifier = this
+    .onGloballyPositioned { bounds[id] = it.boundsInRoot() }
+    .pointerInput(id) {
+        detectDragGesturesAfterLongPress(
+            onDragStart = { local ->
+                val rect = bounds[id]
+                activeDragId.value = id
+                dragPosition.value = rect?.let { Offset(it.left + local.x, it.top + local.y) } ?: Offset.Zero
+            },
+            onDrag = { change, amount ->
+                dragPosition.value += amount
+                change.consume()
+            },
+            onDragEnd = {
+                val target = bounds.entries.firstOrNull { (key, rect) ->
+                    key != id && rect.contains(dragPosition.value)
+                }?.key
+                if (target != null) onDrop(id, target)
+                activeDragId.value = null
+            },
+            onDragCancel = { activeDragId.value = null }
+        )
+    }
 
 // Desktop shortcuts mirror the original Mio small-phone pages.
 // The four fixed dock entries are also present here for route lookup, but are not repeated in page grids.
@@ -150,7 +186,8 @@ fun MioWateryApp() {
             "home" -> HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 desktopPackJson = desktopPackJson,
-                onOpen = { selectedPage = it }
+                onOpen = { selectedPage = it },
+                onOrderChanged = { updated -> desktopPackJson = updated }
             )
             "personas" -> PersonaScreen(
                 onBack = { selectedPage = "home" },
@@ -399,7 +436,8 @@ private suspend fun fetchHomeWeather(city: String): Pair<String, String> = withC
 private fun HomeScreen(
     modifier: Modifier = Modifier,
     desktopPackJson: String? = null,
-    onOpen: (String) -> Unit
+    onOpen: (String) -> Unit,
+    onOrderChanged: (String) -> Unit
 ) {
     val context = LocalContext.current
     val homeDao = remember(context) { MioDatabase.getInstance(context).mioDao() }
@@ -455,6 +493,50 @@ private fun HomeScreen(
     }
     val pager = rememberPagerState(pageCount = { 4 })
     val scope = rememberCoroutineScope()
+    val sortableBounds = remember { mutableMapOf<String, Rect>() }
+    val activeDragId = remember { mutableStateOf<String?>(null) }
+    val dragPosition = remember { mutableStateOf(Offset.Zero) }
+    val groupDefaults = mapOf(
+        "second" to listOf("diary", "rolephones", "desktopcustom", "music"),
+        "p3" to listOf("couple", "coread", "offline", "msgs"),
+        "p4" to listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube"),
+        "dock" to listOf("app", "worlds", "personas", "settings")
+    )
+    val groupForApp = groupDefaults.flatMap { (group, ids) -> ids.map { it to group } }.toMap()
+    fun idsInGroup(group: String): List<String> {
+        val ids = groupDefaults[group].orEmpty().filterNot { it in hiddenDesktopIds }
+        val rank = desktopOrder[group].orEmpty().withIndex().associate { it.value to it.index }
+        return ids.sortedBy { rank[it] ?: Int.MAX_VALUE }
+    }
+    fun swapDesktopApps(first: String, second: String) {
+        val firstGroup = groupForApp[first] ?: return
+        val secondGroup = groupForApp[second] ?: return
+        if (firstGroup == secondGroup) {
+            val ids = idsInGroup(firstGroup).toMutableList()
+            val a = ids.indexOf(first)
+            val b = ids.indexOf(second)
+            if (a < 0 || b < 0) return
+            ids[a] = second
+            ids[b] = first
+            val updated = DesktopThemePackStore.updateOrder(desktopPackJson, mapOf(firstGroup to ids))
+            onOrderChanged(updated)
+            scope.launch(Dispatchers.IO) { runCatching { DesktopThemePackStore.save(context, updated) } }
+        } else {
+            val firstIds = idsInGroup(firstGroup).toMutableList()
+            val secondIds = idsInGroup(secondGroup).toMutableList()
+            val a = firstIds.indexOf(first)
+            val b = secondIds.indexOf(second)
+            if (a < 0 || b < 0) return
+            firstIds[a] = second
+            secondIds[b] = first
+            val updated = DesktopThemePackStore.updateOrder(
+                desktopPackJson,
+                mapOf(firstGroup to firstIds, secondGroup to secondIds)
+            )
+            onOrderChanged(updated)
+            scope.launch(Dispatchers.IO) { runCatching { DesktopThemePackStore.save(context, updated) } }
+        }
+    }
     val homePrefs = remember(context) { context.getSharedPreferences("mio_home_widgets", Context.MODE_PRIVATE) }
     var weatherCity by remember { mutableStateOf(homePrefs.getString("weather_city", "") ?: "") }
     var weatherTemperature by remember { mutableStateOf("--°") }
@@ -818,7 +900,10 @@ private fun HomeScreen(
                                 ) {
                                     items(visibleApps) { entry ->
                                         Column(
-                                            Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
+                                            Modifier.fillMaxWidth()
+                                                .clickable { if (activeDragId.value == null) onOpen(entry.id) }
+                                                .desktopSortable(entry.id, sortableBounds, activeDragId, dragPosition, ::swapDesktopApps)
+                                                .padding(vertical = 2.dp),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
@@ -947,7 +1032,21 @@ private fun HomeScreen(
         }
         Row(Modifier.fillMaxWidth().height(24.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) { repeat(4) { index -> Box(Modifier.padding(horizontal = 5.dp).size(if (pager.currentPage == index) 7.dp else 5.dp).background(if (pager.currentPage == index) ink else Color(0xFFD5D8DC), CircleShape).clickable { scope.launch { pager.animateScrollToPage(index) } }) } }
         Row(Modifier.fillMaxWidth().padding(start = 18.dp, end = 18.dp, top = 5.dp, bottom = 12.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
-            dock.forEach { entry -> Column(Modifier.weight(1f).clickable { onOpen(entry.id) }.padding(vertical = 3.dp), horizontalAlignment = Alignment.CenterHorizontally) { Box(Modifier.size(54.dp).background(panel, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) { AppEntryIcon(entry, desktopOverrides, 24.dp) }; Spacer(Modifier.height(5.dp)); Text(if (entry.id == "app") "聊天" else if (entry.id == "personas") "联系人设定" else entry.title, color = ink, fontSize = 11.sp) } }
+            dock.forEach { entry ->
+                Column(
+                    Modifier.weight(1f)
+                        .clickable { if (activeDragId.value == null) onOpen(entry.id) }
+                        .desktopSortable(entry.id, sortableBounds, activeDragId, dragPosition, ::swapDesktopApps)
+                        .padding(vertical = 3.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(Modifier.size(54.dp).background(panel, RoundedCornerShape(17.dp)), contentAlignment = Alignment.Center) {
+                        AppEntryIcon(entry, desktopOverrides, 24.dp)
+                    }
+                    Spacer(Modifier.height(5.dp))
+                    Text(if (entry.id == "app") "聊天" else if (entry.id == "personas") "联系人设定" else entry.title, color = ink, fontSize = 11.sp)
+                }
+            }
         }
         }
     }
