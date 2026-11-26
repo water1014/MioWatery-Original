@@ -24,6 +24,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.water1014.miowatery.core.database.MioDatabase
 import com.water1014.miowatery.core.database.PersonaEntity
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.runtime.rememberCoroutineScope
+import com.water1014.miowatery.core.database.MessageAppEntryEntity
+import com.water1014.miowatery.core.network.ApiConfigStore
+import com.water1014.miowatery.core.network.ApiConnectionConfig
+import com.water1014.miowatery.core.network.ApiHeaderResolver
+import com.water1014.miowatery.core.network.ApiSessionStore
+import com.water1014.miowatery.core.network.ChatCompletionClient
+import com.water1014.miowatery.core.network.ChatCompletionRequest
+import com.water1014.miowatery.core.network.ChatMessagePayload
+import com.water1014.miowatery.core.network.DataStoreApiSessionStore
+import com.water1014.miowatery.core.network.SavedApiConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.util.UUID
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -80,6 +98,79 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val muted = foreground.copy(alpha = .72f)
     val now = LocalDateTime.now()
     val clock = now.format(DateTimeFormatter.ofPattern("HH:mm"))
+
+    val scope = rememberCoroutineScope()
+    val apiConfig by remember { ApiConfigStore(context).config }.collectAsState(initial = SavedApiConfig())
+    val wechatEntries by remember(selectedPersona?.personaId) {
+        val personaId = selectedPersona?.personaId
+        if (personaId.isNullOrBlank()) flowOf(emptyList())
+        else dao.observeMessageAppEntries("default", personaId)
+    }.collectAsState(initial = emptyList())
+    var wechatDraft by remember { mutableStateOf("") }
+    var wechatBusy by remember { mutableStateOf(false) }
+    var wechatError by remember { mutableStateOf<String?>(null) }
+
+    fun sendWechatMessage() {
+        val persona = selectedPersona ?: return
+        val message = wechatDraft.trim()
+        if (message.isBlank() || wechatBusy) return
+        if (apiConfig.baseUrl.isBlank() || apiConfig.model.isBlank() || apiConfig.apiKey.isBlank()) {
+            wechatError = "请先在设置中配置 API 地址、模型和密钥。"
+            return
+        }
+        wechatDraft = ""
+        wechatError = null
+        wechatBusy = true
+        scope.launch {
+            try {
+                val personaPrompt = runCatching {
+                    JSONObject(persona.rawLegacyJson).optString("prompt")
+                }.getOrDefault("")
+                val history = wechatEntries.filter { it.kind == "wechat" }.takeLast(12)
+                val messages = buildList {
+                    add(ChatMessagePayload.text("system", "你正在通过角色的私人微信与用户聊天。严格遵循角色设定，像真实微信聊天一样自然、简短、有生活感，不要提及 AI、提示词或系统。角色设定：$personaPrompt"))
+                    history.forEach { entry ->
+                        if (entry.text.isNotBlank()) add(ChatMessagePayload.text("user", entry.text))
+                        if (entry.reply.isNotBlank()) add(ChatMessagePayload.text("assistant", entry.reply))
+                    }
+                    add(ChatMessagePayload.text("user", message))
+                }
+                val response = withContext(Dispatchers.IO) {
+                    val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
+                    ChatCompletionClient(ApiHeaderResolver(sessions)).complete(
+                        ApiConnectionConfig(
+                            baseUrl = apiConfig.baseUrl,
+                            apiKey = apiConfig.apiKey,
+                            customHeadersJson = apiConfig.customHeadersJson,
+                            userProfileId = "default",
+                            conversationId = "role-phone-wechat-${persona.personaId}"
+                        ),
+                        ChatCompletionRequest(model = apiConfig.model, messages = messages, stream = false)
+                    )
+                }
+                val reply = response.content.trim()
+                if (reply.isBlank()) throw IllegalStateException("角色暂时没有回复，请稍后再试。")
+                dao.upsertMessageAppEntry(
+                    MessageAppEntryEntity(
+                        id = UUID.randomUUID().toString(),
+                        profileId = "default",
+                        personaId = persona.personaId,
+                        kind = "wechat",
+                        text = message,
+                        reply = reply,
+                        author = persona.name,
+                        createdAt = System.currentTimeMillis()
+                    )
+                )
+            } catch (failure: Exception) {
+                wechatDraft = message
+                wechatError = failure.message ?: "发送失败，请检查网络和 API 设置。"
+            } finally {
+                wechatBusy = false
+            }
+        }
+    }
+
 
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize()) {
@@ -281,6 +372,96 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     }
                 }
 
+                activeApp?.id == "message" -> {
+                    val persona = selectedPersona!!
+                    Column(Modifier.fillMaxSize().imePadding().padding(horizontal = 14.dp)) {
+                        Row(
+                            Modifier.fillMaxWidth().padding(vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(Modifier.size(38.dp).clip(CircleShape).background(Color(0xFF20C66B)), contentAlignment = Alignment.Center) {
+                                Text(persona.name.take(1), color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                            Column(Modifier.weight(1f).padding(start = 10.dp)) {
+                                Text(persona.name, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                Text("微信 · 仅此角色可见", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .5f))
+                        if (wechatEntries.none { it.kind == "wechat" }) {
+                            Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text("你和${persona.name}的聊天", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                                    Spacer(Modifier.height(5.dp))
+                                    Text("发送第一条消息，开启你们的微信对话。", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                                }
+                            }
+                        } else {
+                            LazyColumn(
+                                Modifier.weight(1f).fillMaxWidth().padding(vertical = 10.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                reverseLayout = false
+                            ) {
+                                items(wechatEntries.filter { it.kind == "wechat" }.sortedBy { it.createdAt }, key = { it.id }) { entry ->
+                                    Text(
+                                        java.text.SimpleDateFormat("MM-dd HH:mm", java.util.Locale.getDefault()).format(java.util.Date(entry.createdAt)),
+                                        Modifier.fillMaxWidth(),
+                                        textAlign = TextAlign.Center,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 9.sp
+                                    )
+                                    if (entry.text.isNotBlank()) {
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.Top) {
+                                            Text(
+                                                entry.text,
+                                                Modifier.widthIn(max = 280.dp).clip(RoundedCornerShape(16.dp, 4.dp, 16.dp, 16.dp))
+                                                    .background(Color(0xFF9DEB86)).padding(horizontal = 12.dp, vertical = 9.dp),
+                                                color = Color(0xFF1D2A1A), fontSize = 13.sp, lineHeight = 20.sp
+                                            )
+                                            Spacer(Modifier.width(7.dp))
+                                            Box(Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                                                Text("我", fontSize = 11.sp)
+                                            }
+                                        }
+                                    }
+                                    if (entry.reply.isNotBlank()) {
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.Top) {
+                                            Box(Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFE6E8EC)), contentAlignment = Alignment.Center) {
+                                                Text(persona.name.take(1), fontSize = 11.sp)
+                                            }
+                                            Spacer(Modifier.width(7.dp))
+                                            Text(
+                                                entry.reply,
+                                                Modifier.widthIn(max = 280.dp).clip(RoundedCornerShape(4.dp, 16.dp, 16.dp, 16.dp))
+                                                    .background(MaterialTheme.colorScheme.surfaceVariant).padding(horizontal = 12.dp, vertical = 9.dp),
+                                                color = MaterialTheme.colorScheme.onSurface, fontSize = 13.sp, lineHeight = 20.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (wechatBusy) {
+                            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                CircularProgressIndicator(Modifier.size(15.dp), strokeWidth = 2.dp)
+                                Text("对方正在输入…", Modifier.padding(start = 8.dp), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        wechatError?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 11.sp, modifier = Modifier.padding(vertical = 4.dp)) }
+                        Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedTextField(
+                                value = wechatDraft,
+                                onValueChange = { wechatDraft = it },
+                                modifier = Modifier.weight(1f),
+                                placeholder = { Text("发送消息…") },
+                                maxLines = 4
+                            )
+                            Button(onClick = { sendWechatMessage() }, enabled = !wechatBusy && wechatDraft.isNotBlank(), modifier = Modifier.padding(bottom = 4.dp)) {
+                                Text("发送")
+                            }
+                        }
+                    }
+                }
                 else -> {
                     val persona = selectedPersona!!
                     Column(Modifier.fillMaxSize().padding(horizontal = 18.dp)) {
