@@ -184,7 +184,7 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 }.getOrDefault("")
                 val history = wechatEntries.filter { it.kind == "wechat" }.takeLast(12)
                 val messages = buildList {
-                    add(ChatMessagePayload.text("system", "今天是\${java.time.LocalDate.now()}。你正在模拟角色「\${persona.name}」的私人微信。请完全依据角色设定、角色简介和已有聊天上下文来回复，保持角色口吻与双方关系，像真实微信聊天一样自然、简短、有生活感，不要提及 AI、提示词或系统。\\n角色简介：\${persona.description.orEmpty()}\\n角色人设：$personaPrompt"))
+                    add(ChatMessagePayload.text("system", "今天是${java.time.LocalDate.now()}。你正在模拟角色「${persona.name}」的私人微信。请完全依据角色设定、角色简介和已有聊天上下文来回复，保持角色口吻与双方关系，像真实微信聊天一样自然、简短、有生活感，不要提及 AI、提示词或系统。\n角色简介：${persona.description.orEmpty()}\n角色人设：$personaPrompt"))
                     history.forEach { entry ->
                         if (entry.text.isNotBlank()) add(ChatMessagePayload.text("user", entry.text))
                         if (entry.reply.isNotBlank()) add(ChatMessagePayload.text("assistant", entry.reply))
