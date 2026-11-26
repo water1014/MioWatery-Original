@@ -44,7 +44,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    onOpenBackup: () -> Unit = {}
+    onOpenBackup: () -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     var section by remember { mutableStateOf<String?>(null) }
     BackHandler(enabled = section != null) { section = null }
@@ -64,7 +65,14 @@ fun SettingsScreen(
     )
 
     if (section == "api") {
-        ApiSettingsScreen(modifier = modifier, onOpenBackup = onOpenBackup)
+        Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = { section = null }) { Text("‹ 设置") }
+                Text("模型与 API", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(1.dp))
+            }
+            ApiSettingsScreen(modifier = Modifier.weight(1f), onOpenBackup = onOpenBackup)
+        }
         return
     }
 
@@ -125,14 +133,18 @@ fun SettingsScreen(
             .padding(horizontal = 18.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("设置", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            TextButton(onClick = onBack) { Text("‹ 返回") }
+            Text("设置", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(1.dp))
+        }
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(18.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Row(
-                Modifier.fillMaxWidth().padding(16.dp),
+                Modifier.fillMaxWidth().clickable { section = "profile" }.padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
