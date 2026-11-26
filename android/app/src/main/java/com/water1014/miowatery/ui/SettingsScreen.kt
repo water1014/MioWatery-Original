@@ -1,6 +1,13 @@
 package com.water1014.miowatery.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import coil3.compose.AsyncImage
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +58,34 @@ fun SettingsScreen(
     var section by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val themeMode = LocalMioThemeMode.current
+    var profileName by remember { mutableStateOf("") }
+    var profileHandle by remember { mutableStateOf("") }
+    var profileBio by remember { mutableStateOf("") }
+    var profileAvatar by remember { mutableStateOf("") }
+    var profileSaved by remember { mutableStateOf(false) }
+    val profilePicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            profileAvatar = uri.toString()
+            profileSaved = false
+        }
+    }
     BackHandler(enabled = section != null) { section = null }
+
+    LaunchedEffect(section) {
+        if (section == "profile") {
+            val prefs = context.getSharedPreferences("miowatery_profile", 0)
+            profileName = prefs.getString("name", "") ?: ""
+            profileHandle = prefs.getString("handle", "") ?: ""
+            profileBio = prefs.getString("bio", "") ?: ""
+            profileAvatar = prefs.getString("avatar", "") ?: ""
+            profileSaved = false
+        }
+    }
 
     val sections = listOf(
         "我的资料" to "profile",
@@ -75,6 +109,100 @@ fun SettingsScreen(
                 Spacer(Modifier.height(1.dp))
             }
             ApiSettingsScreen(modifier = Modifier.weight(1f), onOpenBackup = onOpenBackup)
+        }
+        return
+    }
+
+    if (section == "profile") {
+        Column(
+            modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = { section = null }) { Text("‹ 设置") }
+                Text("我的资料", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(1.dp))
+            }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth().clickable {
+                            profilePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Box(
+                            Modifier.size(68.dp).clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (profileAvatar.isNotBlank()) {
+                                AsyncImage(
+                                    model = profileAvatar,
+                                    contentDescription = "个人头像",
+                                    modifier = Modifier.fillMaxSize().clip(CircleShape)
+                                )
+                            } else {
+                                Text(profileName.take(1).ifBlank { "我" }, style = MaterialTheme.typography.headlineSmall)
+                            }
+                        }
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text("更换头像", fontWeight = FontWeight.SemiBold)
+                            Text("点击从相册选择", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    OutlinedTextField(
+                        value = profileName,
+                        onValueChange = { profileName = it; profileSaved = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("名字") },
+                        placeholder = { Text("我的名字") },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = profileHandle,
+                        onValueChange = { profileHandle = it; profileSaved = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("用户名（@）") },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = profileBio,
+                        onValueChange = { profileBio = it; profileSaved = false },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("个人简介") },
+                        minLines = 3,
+                        maxLines = 5
+                    )
+                    Text(
+                        "个人简介用于个人资料展示，并可与角色共享。",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    if (profileSaved) {
+                        Text("资料已保存", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Button(
+                        onClick = {
+                            context.getSharedPreferences("miowatery_profile", 0).edit()
+                                .putString("name", profileName.trim())
+                                .putString("handle", profileHandle.trim().removePrefix("@"))
+                                .putString("bio", profileBio.trim())
+                                .putString("avatar", profileAvatar)
+                                .apply()
+                            profileSaved = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("保存资料") }
+                }
+            }
         }
         return
     }
