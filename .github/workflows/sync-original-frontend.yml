@@ -1,0 +1,52 @@
+name: Sync original MioWatery frontend
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mio-original-frontend-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync frontend from the maintained fork
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout native Android branch
+        uses: actions/checkout@v4
+        with:
+          ref: native-android
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download current frontend files
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/water1014/MioWatery/main"
+          mkdir -p android/app/src/main/assets
+          curl -fsSL "$base/index.html" -o android/app/src/main/assets/index.html
+          curl -fsSL "$base/icon-192.png" -o android/app/src/main/assets/icon-192.png
+          curl -fsSL "$base/manifest.json" -o android/app/src/main/assets/manifest.json
+          curl -fsSL "$base/sw.js" -o android/app/src/main/assets/sw.js
+          test -s android/app/src/main/assets/index.html
+          grep -q '<!DOCTYPE html\|<html' android/app/src/main/assets/index.html
+          test -s android/app/src/main/assets/icon-192.png
+          test -s android/app/src/main/assets/manifest.json
+          test -s android/app/src/main/assets/sw.js
+
+      - name: Commit frontend changes if needed
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- android/app/src/main/assets; then
+            echo "Frontend assets already match the fork."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android/app/src/main/assets/index.html android/app/src/main/assets/icon-192.png android/app/src/main/assets/manifest.json android/app/src/main/assets/sw.js
+          git commit -m "Sync MioWatery frontend from fork"
+          git push origin HEAD:native-android
