@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.gson.JsonParser
+import com.water1014.miowatery.ui.theme.LocalMioThemeMode
 import com.water1014.miowatery.core.network.ApiConfigStore
 import com.water1014.miowatery.core.network.SavedApiConfig
 import kotlinx.coroutines.launch
@@ -48,6 +49,8 @@ fun SettingsScreen(
     onBack: () -> Unit = {}
 ) {
     var section by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val themeMode = LocalMioThemeMode.current
     BackHandler(enabled = section != null) { section = null }
 
     val sections = listOf(
@@ -72,6 +75,57 @@ fun SettingsScreen(
                 Spacer(Modifier.height(1.dp))
             }
             ApiSettingsScreen(modifier = Modifier.weight(1f), onOpenBackup = onOpenBackup)
+        }
+        return
+    }
+
+    if (section == "appearance") {
+        val options = listOf("light" to "浅色", "dark" to "深色", "auto" to "跟随系统")
+        Column(
+            modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = { section = null }) { Text("‹ 设置") }
+                Text("外观", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(1.dp))
+            }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("外观模式", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        options.forEach { (value, label) ->
+                            val selected = themeMode.value == value
+                            if (selected) {
+                                Button(onClick = {}) { Text(label) }
+                            } else {
+                                OutlinedButton(
+                                    onClick = {
+                                        themeMode.value = value
+                                        context.getSharedPreferences("miowatery_appearance", 0)
+                                            .edit().putString("theme_mode", value).apply()
+                                    }
+                                ) { Text(label) }
+                            }
+                        }
+                    }
+                    Text(
+                        when (themeMode.value) {
+                            "dark" -> "当前使用深色外观"
+                            "auto" -> "外观会跟随 Android 系统的深浅色设置"
+                            else -> "当前使用浅色外观"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            Text("主题选择会立即应用，并保存在本机。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         return
     }
@@ -166,7 +220,16 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(item.first, style = MaterialTheme.typography.bodyLarge)
-                        Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (item.second == "appearance") {
+                                Text(
+                                    when (themeMode.value) { "dark" -> "深色"; "auto" -> "跟随系统"; else -> "浅色" },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                     }
                     if (index != sections.size - 2) {
                         androidx.compose.material3.Divider()
