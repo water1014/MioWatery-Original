@@ -71,6 +71,9 @@ import com.water1014.miowatery.core.network.ChatCompletionClient
 import com.water1014.miowatery.core.network.ChatCompletionRequest
 import com.water1014.miowatery.core.network.ChatMessagePayload
 import com.water1014.miowatery.core.network.DataStoreApiSessionStore
+import com.water1014.miowatery.core.network.ImageApiConfigStore
+import com.water1014.miowatery.core.network.ImageGenerationClient
+import com.water1014.miowatery.core.network.StructuredChatReplyParser
 import com.water1014.miowatery.core.network.SavedApiConfig
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -256,6 +259,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 }
                 val afterWorldbook = activeWorldbook - beforeWorldbook.toSet()
                 val activeMemories = memoryEntries
+                val imageConfig = ImageApiConfigStore(context).load()
                 val systemPrompt = buildString {
                     beforeWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
                     if (personaPrompt.isNotBlank()) append(personaPrompt).append("\n\n")
@@ -281,6 +285,13 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         append("记于 ").append(recalledDate).append("：").append(recalled.text.take(300)).append("\n\n")
                     }
                     afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
+                    append("在保持角色人设和自然对话的前提下，请一次性输出严格 JSON，不要 Markdown 代码块，格式为 {\\"messages\\":[\\"第一条独立聊天消息\\",\\"第二条独立聊天消息\\"],\\"reply\\":\\"兼容字段\\",\\"thought\\":\\"角色此刻未说出口的内心想法\\",\\"image_prompt\\":\\"\\"}。messages 是角色按真实聊天节奏连续发送的消息数组：结合语境，适合分开发的内容就拆成 2-5 条短消息，每条只放一个自然聊天气泡；不要把几句话用换行或一大段塞进同一个气泡。只有确实一句就能说清时才只输出一条。不要机械地每次都拆成多条。reply 可作为 messages 的兼容备用字段。thought 是简短内心活动。")
+                    append(if (imageConfig.enabled) {
+                        val base = "【发图规则】只要用户想看你的照片、自拍或某个画面（比如“发张照片”“给我看看”“拍给我”“你现在什么样”），或者你自己决定发图/发自拍，就必须填写 image_prompt，系统才会真的生成并发出图片；绝不能只在 messages 或旁白里写“发了一张照片”却把 image_prompt 留空。同时 messages 里正常接话，不要在文字里描述图片内容。没有这类场景时 image_prompt 留空。"
+                        if (imageConfig.provider == "novelai") base + "当前生图引擎是 NovelAI：image_prompt 必须写成英文 Danbooru 风格标签，用英文逗号分隔，例如“1boy, solo, messy hair, half-closed eyes, selfie, indoors, upper body”；按角色人设写人数/性别、发型发色、表情、动作、场景、镜头；不要写中文、不要写完整句子、不要写 masterpiece 之类质量词（系统会自动加前缀）。"
+                        else base + "image_prompt 用自然语言详细描述画面：人物外貌、表情、动作、场景、镜头、光线。"
+                    } else "若用户明确要求生成/发图片，image_prompt 填画面描述，否则留空。")
+                    append("如果某条回复是针对对话里某一条具体消息的回应，可以偶尔把这一条写成对象 {\\"text\\":\\"回复内容\\",\\"quote\\":\\"被引用消息的原文片段，原样摘抄，不超过30字\\"}，其余条目仍写成普通字符串。")
                 }.trim()
                 val memoryPrefs = context.getSharedPreferences("mio_memory_settings", android.content.Context.MODE_PRIVATE)
                 val configuredContextCount = memoryPrefs.getInt("context_count_$conversationId", 0)
@@ -341,23 +352,29 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     )
                 }
                 val reply = result.content.trim()
-                if (reply.isBlank()) {
+                val structuredReply = StructuredChatReplyParser.parse(reply)
+                if (structuredReply.messages.isEmpty()) {
                     errorText = "模型返回了空内容，请检查模型配置或服务商响应。"
                 } else {
                     val assistantNow = System.currentTimeMillis()
-                    val assistantMessage = MessageEntity(
-                        id = UUID.randomUUID().toString(),
-                        conversationId = conversationId,
-                        position = messages.size.toLong() + 1,
-                        role = "assistant",
-                        content = reply,
-                        timestamp = assistantNow,
-                        reasoning = result.reasoning.takeIf { it.isNotBlank() },
-                        attachmentJson = null,
-                        metadataJson = null,
-                        rawLegacyJson = "{}"
-                    )
-                    dao.insertMessages(listOf(assistantMessage))
+                    val assistantMessages = structuredReply.messages.mapIndexed { index, item ->
+                        val thought = if (index == 0 && !item.isNarration) {
+                            result.reasoning.ifBlank { structuredReply.thought }.takeIf { it.isNotBlank() }
+                        } else null
+                        MessageEntity(
+                            id = UUID.randomUUID().toString(),
+                            conversationId = conversationId,
+                            position = messages.size.toLong() + 1 + index,
+                            role = "assistant",
+                            content = item.text,
+                            timestamp = assistantNow + index,
+                            reasoning = thought,
+                            attachmentJson = null,
+                            metadataJson = null,
+                            rawLegacyJson = "{}"
+                        )
+                    }
+                    dao.insertMessages(assistantMessages)
                     dao.upsertConversation(
                         ConversationEntity(
                             id = conversationId,
@@ -365,10 +382,45 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                             personaId = personaId,
                             title = text.take(36),
                             createdAt = originalCreatedAt,
-                            updatedAt = assistantNow
+                            updatedAt = assistantNow + assistantMessages.size
                         )
                     )
-
+                    if (imageConfig.enabled && structuredReply.imagePrompt.isNotBlank()) {
+                        try {
+                            val generatedUri = withContext(Dispatchers.IO) {
+                                ImageGenerationClient(context).generate(structuredReply.imagePrompt, imageConfig)
+                            }
+                            dao.insertMessages(listOf(
+                                MessageEntity(
+                                    id = UUID.randomUUID().toString(),
+                                    conversationId = conversationId,
+                                    position = messages.size.toLong() + 1 + assistantMessages.size,
+                                    role = "assistant",
+                                    content = "",
+                                    timestamp = System.currentTimeMillis(),
+                                    reasoning = "我把刚才描述的画面生成出来了。",
+                                    attachmentJson = JSONObject().put("type", "image").put("uri", generatedUri).toString(),
+                                    metadataJson = null,
+                                    rawLegacyJson = "{}"
+                                )
+                            ))
+                        } catch (imageError: Exception) {
+                            dao.insertMessages(listOf(
+                                MessageEntity(
+                                    id = UUID.randomUUID().toString(),
+                                    conversationId = conversationId,
+                                    position = messages.size.toLong() + 1 + assistantMessages.size,
+                                    role = "assistant",
+                                    content = "图片生成失败：" + (imageError.message ?: "未知错误"),
+                                    timestamp = System.currentTimeMillis(),
+                                    reasoning = null,
+                                    attachmentJson = null,
+                                    metadataJson = null,
+                                    rawLegacyJson = "{}"
+                                )
+                            ))
+                        }
+                    }
                     // Optional per-chat automatic memory generation. Failures never block the reply.
                     val memoryPrefs = context.getSharedPreferences("mio_memory_settings", android.content.Context.MODE_PRIVATE)
                     val autoEnabled = memoryPrefs.getBoolean("auto_summary_$conversationId", false)
