@@ -5,6 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -55,6 +59,7 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     val personas by dao.observePersonas("default").collectAsState(initial = emptyList())
     val prefs = remember { context.getSharedPreferences("role_phone_native_v1", Context.MODE_PRIVATE) }
     var selectedPersona by remember { mutableStateOf<PersonaEntity?>(null) }
+    var unlocked by remember { mutableStateOf(false) }
     var activeApp by remember { mutableStateOf<RolePhoneApp?>(null) }
     var unlocked by remember { mutableStateOf(false) }
     var wallpaperIndex by remember { mutableIntStateOf(prefs.getInt("wallpaper_home", 0).coerceIn(phoneWallpapers.indices)) }
@@ -207,6 +212,9 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     }
                 }
 
+                activeApp == null && !unlocked -> {
+                    RolePhoneLockScreen(persona = selectedPersona!!, prefs = prefs, onUnlock = { unlocked = true })
+                }
                 activeApp == null -> {
                     val persona = selectedPersona!!
                     Box(
@@ -335,6 +343,117 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 }) { Text("保存") }
             },
             dismissButton = { TextButton(onClick = { showEditor = false }) { Text("取消") } }
+        )
+    }
+}
+
+@Composable
+private fun RolePhoneLockScreen(
+    persona: PersonaEntity,
+    prefs: android.content.SharedPreferences,
+    onUnlock: () -> Unit
+) {
+    val palettes = listOf(
+        listOf(Color(0xFF334B91), Color(0xFF7779B9), Color(0xFFE4BFCB)),
+        listOf(Color(0xFF292B32), Color(0xFF111318), Color(0xFF08090C)),
+        listOf(Color(0xFFB9C8D9), Color(0xFFE8EDF2), Color(0xFFF5F6F8)),
+        listOf(Color(0xFFEAD9DF), Color(0xFFF3E8EA), Color(0xFFFFF8F7)),
+        listOf(Color(0xFF183653), Color(0xFF10243A), Color(0xFF091421)),
+        listOf(Color(0xFF7B9C91), Color(0xFFB9C9B6), Color(0xFFE7E8D8))
+    )
+    var wallpaper by remember { mutableIntStateOf(prefs.getInt("lock_wallpaper", 0).coerceIn(palettes.indices)) }
+    var pickerOpen by remember { mutableStateOf(false) }
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var dragDistance by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(30_000)
+            now = System.currentTimeMillis()
+        }
+    }
+    val time = remember(now) { SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(now)) }
+    val date = remember(now) { SimpleDateFormat("M月d日 EEEE", Locale.SIMPLIFIED_CHINESE).format(Date(now)) }
+
+    Box(
+        Modifier.fillMaxSize()
+            .background(Brush.verticalGradient(palettes[wallpaper]))
+            .pointerInput(persona.personaId) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { _, amount -> dragDistance += amount },
+                    onDragEnd = {
+                        if (dragDistance < -90f) onUnlock()
+                        dragDistance = 0f
+                    },
+                    onDragCancel = { dragDistance = 0f }
+                )
+            }
+            .padding(horizontal = 22.dp)
+    ) {
+        Column(Modifier.align(Alignment.TopCenter).padding(top = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text("无 SIM 卡  ·  Wi-Fi", color = Color.White.copy(alpha = .92f), fontSize = 11.sp)
+                Text("88%  ▰", color = Color.White.copy(alpha = .92f), fontSize = 11.sp)
+            }
+            Spacer(Modifier.height(52.dp))
+            Text(date, color = Color.White.copy(alpha = .96f), fontSize = 17.sp, fontWeight = FontWeight.Medium)
+            Text(time, color = Color.White, fontSize = 76.sp, fontWeight = FontWeight.Light, letterSpacing = (-3).sp)
+            Spacer(Modifier.height(18.dp))
+            Box(Modifier.size(76.dp).clip(CircleShape).background(Color.White.copy(alpha = .22f)), contentAlignment = Alignment.Center) {
+                Text(persona.name.take(1), color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Medium)
+            }
+            Spacer(Modifier.height(10.dp))
+            Text(persona.name, color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+            Text("向左滑动，进入这部手机", color = Color.White.copy(alpha = .82f), fontSize = 12.sp)
+        }
+        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(bottom = 22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                "‹  滑动解锁  ‹",
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp))
+                    .background(Color.White.copy(alpha = .2f))
+                    .clickable(onClick = onUnlock)
+                    .padding(vertical = 15.dp),
+                color = Color.White,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium
+            )
+            Spacer(Modifier.height(14.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(onClick = { pickerOpen = true }) { Text("更换锁屏壁纸", color = Color.White) }
+                Text("●", color = Color.White.copy(alpha = .8f), fontSize = 9.sp)
+                TextButton(onClick = onUnlock) { Text("进入手机", color = Color.White) }
+            }
+        }
+    }
+    if (pickerOpen) {
+        AlertDialog(
+            onDismissRequest = { pickerOpen = false },
+            title = { Text("选择锁屏壁纸") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    palettes.forEachIndexed { index, colors ->
+                        Row(
+                            Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
+                                .background(Brush.horizontalGradient(colors))
+                                .clickable {
+                                    wallpaper = index
+                                    prefs.edit().putInt("lock_wallpaper", index).apply()
+                                    pickerOpen = false
+                                }.padding(13.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                listOf("暮光蓝紫", "石墨黑", "雾蓝", "低饱和粉", "深海", "雾绿")[index],
+                                color = if (index == 2 || index == 3 || index == 5) Color(0xFF30343A) else Color.White,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Spacer(Modifier.weight(1f))
+                            if (wallpaper == index) Text("✓", color = if (index == 2 || index == 3 || index == 5) Color.DarkGray else Color.White)
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { pickerOpen = false }) { Text("完成") } }
         )
     }
 }
