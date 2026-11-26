@@ -93,7 +93,7 @@ fun DiaryScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             LazyColumn(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(entries, key = { it.id }) { entry ->
                     Card(
-                        Modifier.fillMaxWidth().clickable { beginEdit(entry) },
+                        Modifier.fillMaxWidth().clickable(enabled = !entry.isLocked) { beginEdit(entry) },
                         shape = RoundedCornerShape(20.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                     ) {
@@ -105,8 +105,14 @@ fun DiaryScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                             )
                             Text(entry.title.ifBlank { "无标题" }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                             Text(entry.content, maxLines = 4, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                                TextButton(onClick = { showDeleteConfirm = entry }) { Text("删除") }
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                                TextButton(onClick = {
+                                    scope.launch { dao.upsertDiaryEntry(entry.copy(isFavorite = !entry.isFavorite, updatedAt = System.currentTimeMillis())) }
+                                }) { Text(if (entry.isFavorite) "★ 已收藏" else "☆ 收藏") }
+                                TextButton(onClick = {
+                                    scope.launch { dao.upsertDiaryEntry(entry.copy(isLocked = !entry.isLocked, updatedAt = System.currentTimeMillis())) }
+                                }) { Text(if (entry.isLocked) "🔒 已锁定" else "🔓 锁定") }
+                                TextButton(onClick = { showDeleteConfirm = entry }, enabled = !entry.isLocked) { Text("删除") }
                             }
                         }
                     }
@@ -118,7 +124,7 @@ fun DiaryScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     if (showEditor) {
         AlertDialog(
             onDismissRequest = { showEditor = false },
-            title = { Text(if (editing == null) "新建日记" else "编辑日记") },
+            title = { Text(if (editing == null) "新建日记" else if (editing?.isLocked == true) "日记已锁定" else "编辑日记") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("标题") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
@@ -128,7 +134,7 @@ fun DiaryScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             },
             confirmButton = {
                 TextButton(
-                    enabled = content.isNotBlank() && runCatching { LocalDate.parse(entryDate); true }.getOrDefault(false),
+                    enabled = editing?.isLocked != true && content.isNotBlank() && runCatching { LocalDate.parse(entryDate); true }.getOrDefault(false),
                     onClick = {
                         val now = System.currentTimeMillis()
                         val old = editing
@@ -139,9 +145,9 @@ fun DiaryScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                                     title = title.trim(),
                                     content = content.trim(),
                                     entryDate = entryDate,
-                                    mood = "",
-                                    isFavorite = false,
-                                    isLocked = false,
+                                    mood = old?.mood.orEmpty(),
+                                    isFavorite = old?.isFavorite ?: false,
+                                    isLocked = old?.isLocked ?: false,
                                     createdAt = old?.createdAt ?: now,
                                     updatedAt = now
                                 )
@@ -151,19 +157,19 @@ fun DiaryScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     }
                 ) { Text("保存") }
             },
-            dismissButton = { TextButton(onClick = { showEditor = false }) { Text("取消") } }
+            dismissButton = { TextButton(onClick = { showEditor = false }) { Text("关闭") } }
         )
     }
     showDeleteConfirm?.let { entry ->
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = null },
             title = { Text("删除这篇日记？") },
-            text = { Text("删除后无法恢复。") },
+            text = { Text(if (entry.isLocked) "这篇日记已锁定，请先解除锁定。" else "删除后无法恢复。") },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch { dao.deleteDiaryEntry(entry.id) }
+                    if (!entry.isLocked) scope.launch { dao.deleteDiaryEntry(entry.id) }
                     showDeleteConfirm = null
-                }) { Text("确认删除") }
+                }, enabled = !entry.isLocked) { Text("确认删除") }
             },
             dismissButton = { TextButton(onClick = { showDeleteConfirm = null }) { Text("取消") } }
         )
