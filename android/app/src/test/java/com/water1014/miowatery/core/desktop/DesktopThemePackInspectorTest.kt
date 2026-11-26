@@ -140,4 +140,23 @@ class DesktopThemePackInspectorTest {
         assertEquals(imported.hiddenWidgetIds, restored.hiddenWidgetIds)
         assertEquals(imported.placementGroups, restored.placementGroups)
     }
+
+    @Test
+    fun warnsWhenWebOnlyFreeLayoutAndGlassSettingsCannotBeApplied() {
+        val json = """
+            {
+              "app": "xsj-desktop-theme",
+              "v": 1,
+              "desktop": {
+                "free": {"1": {"app:music": {"x": 0.1, "y": 120, "w": 0.4}}},
+                "glass": {"blur": 18, "alpha": 0.45}
+              }
+            }
+        """.trimIndent()
+
+        val preview = DesktopThemePackInspector.inspect(json)
+
+        assertTrue(preview.warnings.any { it.contains("自由摆放坐标") })
+        assertTrue(preview.warnings.any { it.contains("磨砂玻璃") })
+    }
 }

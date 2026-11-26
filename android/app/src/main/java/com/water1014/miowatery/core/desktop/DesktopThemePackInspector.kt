@@ -107,6 +107,15 @@ object DesktopThemePackInspector {
             warnings += "包含 $customWidgets 个网页自定义组件。为保护数据与设备安全，原生版不会运行其中的代码"
         }
 
+        val freeLayout = desktop.optJSONObject("free")
+        if (freeLayout != null && freeLayout.length() > 0) {
+            warnings += "包含网页端自由摆放坐标。原生版目前使用原生桌面网格，组件位置和尺寸不会按网页端坐标还原"
+        }
+        val glass = desktop.optJSONObject("glass")
+        if (glass != null && glass.length() > 0) {
+            warnings += "包含网页端磨砂玻璃主题参数，原生版暂不应用这些外观参数"
+        }
+
         val hidden = linkedSetOf<String>()
         desktop.optJSONArray("hidden")?.let { array ->
             for (index in 0 until array.length()) {
