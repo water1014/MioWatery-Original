@@ -52,6 +52,9 @@ fun SettingsScreen(
     var model by remember { mutableStateOf("") }
     var apiKey by remember { mutableStateOf("") }
     var headers by remember { mutableStateOf("") }
+    var secondaryBaseUrl by remember { mutableStateOf("") }
+    var secondaryModel by remember { mutableStateOf("") }
+    var secondaryApiKey by remember { mutableStateOf("") }
     var saving by remember { mutableStateOf(false) }
     var savedMessage by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -61,6 +64,9 @@ fun SettingsScreen(
         model = saved.model
         apiKey = saved.apiKey
         headers = saved.customHeadersJson
+        secondaryBaseUrl = saved.secondaryBaseUrl
+        secondaryModel = saved.secondaryModel
+        secondaryApiKey = saved.secondaryApiKey
     }
 
     Column(
@@ -183,7 +189,10 @@ fun SettingsScreen(
                                     baseUrl = baseUrl.trim(),
                                     model = model.trim(),
                                     apiKey = apiKey.trim(),
-                                    customHeadersJson = headers.trim()
+                                    customHeadersJson = headers.trim(),
+                                    secondaryBaseUrl = secondaryBaseUrl.trim(),
+                                    secondaryModel = secondaryModel.trim(),
+                                    secondaryApiKey = secondaryApiKey.trim()
                                 ))
                                 savedMessage = "设置已保存"
                             } catch (failure: Exception) {
@@ -197,6 +206,51 @@ fun SettingsScreen(
                 ) {
                     Text(if (saving) "正在保存…" else "保存 API 设置")
                 }
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("副 API（可选）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "按照 MioWatery 原版逻辑，角色手机内容生成优先使用副 API。某一项留空时，会自动回退到主 API 对应配置。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                OutlinedTextField(
+                    value = secondaryBaseUrl,
+                    onValueChange = { secondaryBaseUrl = it; savedMessage = null; errorMessage = null },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("副 API 地址") },
+                    placeholder = { Text("留空则使用主 API 地址") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = secondaryModel,
+                    onValueChange = { secondaryModel = it; savedMessage = null; errorMessage = null },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("副 API 模型 ID") },
+                    placeholder = { Text("留空则使用主 API 模型") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = secondaryApiKey,
+                    onValueChange = { secondaryApiKey = it; savedMessage = null; errorMessage = null },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("副 API Key") },
+                    placeholder = { Text("留空则使用主 API Key") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true
+                )
+                Text(
+                    "副 API 密钥使用 Android Keystore 加密保存。自定义请求头沿用主 API 的请求头设置。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 
