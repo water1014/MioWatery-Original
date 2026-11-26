@@ -141,4 +141,28 @@ interface MioDao {
 
     @Query("SELECT COUNT(*) FROM messages")
     suspend fun messageCount(): Int
+
+    @Query("SELECT * FROM sticker_groups WHERE profileId = :profileId ORDER BY position ASC, name COLLATE NOCASE")
+    fun observeStickerGroups(profileId: String): Flow<List<StickerGroupEntity>>
+
+    @Query("SELECT * FROM stickers WHERE profileId = :profileId ORDER BY groupName COLLATE NOCASE, name COLLATE NOCASE")
+    fun observeStickers(profileId: String): Flow<List<StickerEntity>>
+
+    @Query("SELECT * FROM stickers WHERE profileId = :profileId AND groupName IN (:groups) ORDER BY name COLLATE NOCASE")
+    suspend fun getStickersInGroups(profileId: String, groups: List<String>): List<StickerEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertStickerGroups(groups: List<StickerGroupEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertStickers(stickers: List<StickerEntity>)
+
+    @Query("DELETE FROM stickers WHERE profileId = :profileId AND groupName = :groupName")
+    suspend fun deleteStickersInGroup(profileId: String, groupName: String)
+
+    @Query("DELETE FROM stickers WHERE profileId = :profileId AND id = :stickerId")
+    suspend fun deleteSticker(profileId: String, stickerId: String): Int
+
+    @Query("DELETE FROM sticker_groups WHERE profileId = :profileId AND name = :groupName")
+    suspend fun deleteStickerGroup(profileId: String, groupName: String)
 }

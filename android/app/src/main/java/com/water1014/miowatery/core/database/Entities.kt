@@ -137,3 +137,34 @@ data class WorldbookCategoryEntity(
     val createdAt: Long,
     val updatedAt: Long
 )
+
+
+@Entity(
+    tableName = "sticker_groups",
+    primaryKeys = ["profileId", "name"],
+    indices = [Index("profileId")]
+)
+data class StickerGroupEntity(
+    val profileId: String,
+    val name: String,
+    val position: Int,
+    val createdAt: Long,
+    val updatedAt: Long
+)
+
+@Entity(
+    tableName = "stickers",
+    indices = [Index("profileId"), Index(value = ["profileId", "groupName"])]
+)
+data class StickerEntity(
+    @PrimaryKey val id: String,
+    val profileId: String,
+    val groupName: String,
+    val name: String,
+    val description: String,
+    /** Data URL or HTTP(S) URL, matching the original MioWatery sticker source field. */
+    val src: String,
+    val rawLegacyJson: String = "{}",
+    val createdAt: Long,
+    val updatedAt: Long
+)

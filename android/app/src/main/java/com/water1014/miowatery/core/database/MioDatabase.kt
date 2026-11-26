@@ -15,9 +15,11 @@ import androidx.room.RoomDatabase
         DiaryEntryEntity::class,
         MessageAppEntryEntity::class,
         MemoryEntryEntity::class,
-        WorldbookCategoryEntity::class
+        WorldbookCategoryEntity::class,
+        StickerGroupEntity::class,
+        StickerEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class MioDatabase : RoomDatabase() {
@@ -110,6 +112,39 @@ abstract class MioDatabase : RoomDatabase() {
             }
         }
 
+
+
+        private val MIGRATION_5_6 = object : androidx.room.migration.Migration(5, 6) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS sticker_groups (
+                        profileId TEXT NOT NULL,
+                        name TEXT NOT NULL,
+                        position INTEGER NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL,
+                        PRIMARY KEY(profileId, name)
+                    )""".trimIndent()
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_sticker_groups_profileId ON sticker_groups(profileId)")
+                database.execSQL(
+                    """CREATE TABLE IF NOT EXISTS stickers (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        profileId TEXT NOT NULL,
+                        groupName TEXT NOT NULL,
+                        name TEXT NOT NULL,
+                        description TEXT NOT NULL,
+                        src TEXT NOT NULL,
+                        rawLegacyJson TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL
+                    )""".trimIndent()
+                )
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_stickers_profileId ON stickers(profileId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_stickers_profileId_groupName ON stickers(profileId, groupName)")
+            }
+        }
+
         @Volatile private var instance: MioDatabase? = null
 
         fun getInstance(context: Context): MioDatabase =
@@ -118,7 +153,7 @@ abstract class MioDatabase : RoomDatabase() {
                     context.applicationContext,
                     MioDatabase::class.java,
                     "miowatery-native.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build().also { instance = it }
             }
     }
 }
