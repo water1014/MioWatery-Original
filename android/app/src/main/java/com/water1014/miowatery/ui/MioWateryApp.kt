@@ -188,7 +188,7 @@ fun MioWateryApp() {
     ) {
         Scaffold(
             topBar = {
-                if (selectedPage != "home" && selectedPage != "app" && selectedPage != "msgs" && selectedPage != "personas" && selectedPage != "worlds" && selectedPage != "music" && selectedPage != "memory" && selectedPage != "chatmemory") TopAppBar(
+                if (selectedPage in setOf("diary", "settings", "backup", "offline", "wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube")) TopAppBar(
                     title = {
                         Column {
                             Text(selectedEntry?.title ?: if (selectedPage == "backup") "备份与旧版数据迁移" else "MioWatery")
