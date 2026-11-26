@@ -245,6 +245,8 @@ fun MioWateryApp() {
                 )
             } else if (selectedPage == "music") {
                 MusicScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
+            } else if (selectedPage == "wallet") {
+                WalletScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "msgs") {
                 MessageAppScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
             } else if (selectedPage == "couple") {

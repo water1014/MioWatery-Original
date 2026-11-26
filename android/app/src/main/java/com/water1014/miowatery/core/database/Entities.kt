@@ -168,3 +168,5 @@ data class StickerEntity(
     val createdAt: Long,
     val updatedAt: Long
 )
+@Entity(tableName = "wallet_states", primaryKeys = ["profileId", "ownerId"], indices = [Index("profileId"), Index("ownerId")])
+data class WalletStateEntity(val profileId: String, val ownerId: String, val dataJson: String, val updatedAt: Long)

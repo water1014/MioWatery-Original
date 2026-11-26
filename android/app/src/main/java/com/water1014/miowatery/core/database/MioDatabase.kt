@@ -17,9 +17,10 @@ import androidx.room.RoomDatabase
         MemoryEntryEntity::class,
         WorldbookCategoryEntity::class,
         StickerGroupEntity::class,
-        StickerEntity::class
+        StickerEntity::class,
+        WalletStateEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 abstract class MioDatabase : RoomDatabase() {
@@ -145,7 +146,18 @@ abstract class MioDatabase : RoomDatabase() {
             }
         }
 
-        @Volatile private var instance: MioDatabase? = null
+
+        private val MIGRATION_6_7 = object : androidx.room.migration.Migration(6, 7) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("""CREATE TABLE IF NOT EXISTS wallet_states (
+                    profileId TEXT NOT NULL, ownerId TEXT NOT NULL, dataJson TEXT NOT NULL,
+                    updatedAt INTEGER NOT NULL, PRIMARY KEY(profileId, ownerId)
+                )""".trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_wallet_states_profileId ON wallet_states(profileId)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS index_wallet_states_ownerId ON wallet_states(ownerId)")
+            }
+        }
+\n        @Volatile private var instance: MioDatabase? = null
 
         fun getInstance(context: Context): MioDatabase =
             instance ?: synchronized(this) {
@@ -153,7 +165,7 @@ abstract class MioDatabase : RoomDatabase() {
                     context.applicationContext,
                     MioDatabase::class.java,
                     "miowatery-native.db"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build().also { instance = it }
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7).build().also { instance = it }
             }
     }
 }
