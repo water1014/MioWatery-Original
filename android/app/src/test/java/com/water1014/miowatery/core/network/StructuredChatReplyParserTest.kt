@@ -33,6 +33,13 @@ class StructuredChatReplyParserTest {
     }
 
     @Test
+    fun acceptsTopLevelRecallLastWithoutCreatingFallbackText() {
+        val parsed = StructuredChatReplyParser.parse("""{"recall_last":true,"thought":"撤回上一条"}""")
+        assertTrue(parsed.recallLast)
+        assertTrue(parsed.messages.isEmpty())
+    }
+
+    @Test
     fun supportsNarrationAndReplyFallback() {
         val narration = StructuredChatReplyParser.parse("""{"messages":[{"narr":"她轻轻笑了笑。"}]}""")
         assertTrue(narration.messages.single().isNarration)

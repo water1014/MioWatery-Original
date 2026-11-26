@@ -353,7 +353,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 }
                 val reply = result.content.trim()
                 val structuredReply = StructuredChatReplyParser.parse(reply)
-                if (structuredReply.messages.isEmpty()) {
+                if (structuredReply.messages.isEmpty() && !structuredReply.recallLast) {
                     errorText = "模型返回了空内容，请检查模型配置或服务商响应。"
                 } else {
                     val assistantNow = System.currentTimeMillis()
@@ -363,7 +363,8 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                             .firstOrNull { candidate ->
                                 if (candidate.role != "assistant") return@firstOrNull false
                                 val metadata = runCatching { JSONObject(candidate.metadataJson ?: "{}") }.getOrDefault(JSONObject())
-                                !metadata.optBoolean("recall") && metadata.optString("narr").isBlank()
+                                !metadata.optBoolean("recall") && metadata.optString("narr").isBlank() &&
+                                    (candidate.content.isNotBlank() || !candidate.attachmentJson.isNullOrBlank() || metadata.has("stk"))
                             }
                         if (previousAssistant != null) {
                             val metadata = runCatching { JSONObject(previousAssistant.metadataJson ?: "{}") }.getOrDefault(JSONObject())

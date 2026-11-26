@@ -42,7 +42,7 @@ object StructuredChatReplyParser {
         )
 
         val messages = mutableListOf<StructuredChatMessage>()
-        var recallLast = false
+        var recallLast = root.booleanValue("recall_last") || root.booleanValue("recallLast")
         val array = root.get("messages")
         if (array != null && array.isJsonArray) {
             array.asJsonArray.forEach { item ->
