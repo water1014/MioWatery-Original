@@ -2,6 +2,7 @@ package com.water1014.miowatery.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -156,7 +157,7 @@ fun SettingsScreen(
                         Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     if (index != sections.size - 2) {
-                        androidx.compose.material3.HorizontalDivider()
+                        androidx.compose.material3.Divider()
                     }
                 }
             }
