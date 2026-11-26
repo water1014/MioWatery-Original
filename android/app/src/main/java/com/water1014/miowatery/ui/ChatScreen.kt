@@ -54,6 +54,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -88,6 +89,13 @@ private const val CHAT_PROFILE_ID = "default"
 @Composable
 fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaId: String = "default", modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val darkTheme = isSystemInDarkTheme()
+    val chatBackground = if (darkTheme) Color(0xFF101112) else Color.White
+    val chatSurface = if (darkTheme) Color(0xFF1B1D1F) else Color(0xFFF3F4F5)
+    val chatText = if (darkTheme) Color(0xFFF2F2F2) else Color(0xFF0F1419)
+    val chatSecondary = if (darkTheme) Color(0xFF9AA1A9) else Color(0xFF7B848E)
+    val chatDivider = if (darkTheme) Color(0xFF2F3336) else Color(0xFFEAECEE)
+    val chatIncoming = if (darkTheme) Color(0xFF292C2F) else Color(0xFFECEEF0)
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val dao = remember { MioDatabase.getInstance(context).mioDao() }
@@ -420,10 +428,10 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
     }
 
     Column(
-        modifier = modifier.fillMaxSize().background(Color.White).imePadding()
+        modifier = modifier.fillMaxSize().background(chatBackground).imePadding()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().height(58.dp).padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().height(58.dp).background(chatBackground).padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -438,7 +446,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(persona?.name?.takeIf { it.isNotBlank() } ?: "聊天", color = Color(0xFF0F1419), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                Text(persona?.name?.takeIf { it.isNotBlank() } ?: "聊天", color = chatText, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
                 Text(
                     if (apiConfig.model.isBlank()) "尚未配置模型" else apiConfig.model,
                     color = Color(0xFF8A929B),
@@ -464,7 +472,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 )
             }
         }
-        Box(Modifier.fillMaxWidth().height(1.dp).background(Color(0xFFEAECEE)))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(chatDivider))
         if (searchOpen) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
@@ -485,20 +493,20 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 verticalArrangement = Arrangement.Center
             ) {
                 Box(
-                    modifier = Modifier.size(66.dp).clip(RoundedCornerShape(22.dp)).background(Color(0xFFF3F4F5)),
+                    modifier = Modifier.size(66.dp).clip(RoundedCornerShape(22.dp)).background(chatSurface),
                     contentAlignment = Alignment.Center
-                ) { Text("M", color = Color(0xFF0F1419), fontSize = 27.sp, fontWeight = FontWeight.Light) }
+                ) { Text("M", color = chatText, fontSize = 27.sp, fontWeight = FontWeight.Light) }
                 Spacer(Modifier.height(18.dp))
                 Text(
                     if (personaGreeting.isNotBlank()) persona?.name ?: "开场白" else "开始一段对话",
-                    color = Color(0xFF0F1419), fontSize = 18.sp, fontWeight = FontWeight.SemiBold
+                    color = chatText, fontSize = 18.sp, fontWeight = FontWeight.SemiBold
                 )
                 Spacer(Modifier.height(7.dp))
                 Text(
                     personaGreeting.ifBlank {
                         if (apiConfig.model.isBlank()) "先配置兼容 OpenAI 的 API，再发送第一条消息。" else "发送消息，开启你们的故事。"
                     },
-                    color = Color(0xFF7B848E), fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 20.sp
+                    color = chatSecondary, fontSize = 13.sp, textAlign = TextAlign.Center, lineHeight = 20.sp
                 )
                 if (apiConfig.model.isBlank()) {
                     Spacer(Modifier.height(14.dp))
@@ -538,28 +546,28 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
         }
 
         Column(
-            modifier = Modifier.fillMaxWidth().background(Color.White).padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 8.dp)
+            modifier = Modifier.fillMaxWidth().background(chatBackground).padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 8.dp)
         ) {
             attachedImageUri?.let { uri ->
                 Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     AsyncImage(model = uri, contentDescription = "待发送图片", modifier = Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
                     Spacer(Modifier.width(10.dp))
-                    Text("已选择图片", color = Color(0xFF59616B), fontSize = 12.sp, modifier = Modifier.weight(1f))
+                    Text("已选择图片", color = chatSecondary, fontSize = 12.sp, modifier = Modifier.weight(1f))
                     Text("移除", color = Color(0xFF7B848E), fontSize = 12.sp, modifier = Modifier.clickable { attachedImageUri = null }.padding(8.dp))
                 }
             }
             Row(
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(Color(0xFFF3F4F5)).padding(horizontal = 13.dp, vertical = 9.dp),
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp)).background(chatSurface).padding(horizontal = 13.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
-                Text("＋", color = Color(0xFF59616B), fontSize = 23.sp, modifier = Modifier.clip(CircleShape).clickable { showAttachmentMenu = true }.padding(horizontal = 5.dp, vertical = 2.dp))
+                Text("＋", color = chatSecondary, fontSize = 23.sp, modifier = Modifier.clip(CircleShape).clickable { showAttachmentMenu = true }.padding(horizontal = 5.dp, vertical = 2.dp))
                 Spacer(Modifier.width(9.dp))
                 BasicTextField(
                     value = draft,
                     onValueChange = { draft = it },
                     modifier = Modifier.weight(1f).padding(vertical = 7.dp),
-                    textStyle = TextStyle(color = Color(0xFF0F1419), fontSize = 14.sp, lineHeight = 20.sp),
-                    cursorBrush = androidx.compose.ui.graphics.SolidColor(Color(0xFF0F1419)),
+                    textStyle = TextStyle(color = chatText, fontSize = 14.sp, lineHeight = 20.sp),
+                    cursorBrush = androidx.compose.ui.graphics.SolidColor(chatText),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = { sendMessage() }),
                     decorationBox = { inner ->
@@ -671,7 +679,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
             title = { Text("聊天设置") },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("记忆", color = Color(0xFF0F1419), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                    Text("记忆", color = chatText, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     Row(
                         Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp))
                             .background(Color(0xFFF3F4F5))
@@ -680,8 +688,8 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text("记忆管理", color = Color(0xFF0F1419), fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                            Text("生成总结条目、编辑和删除记忆", color = Color(0xFF7B848E), fontSize = 11.sp)
+                            Text("记忆管理", color = chatText, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text("生成总结条目、编辑和删除记忆", color = chatSecondary, fontSize = 11.sp)
                         }
                         Text("›", color = Color(0xFF8A929B), fontSize = 20.sp)
                     }
@@ -690,7 +698,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     OutlinedTextField(editModel, { editModel = it }, label = { Text("模型名称") }, singleLine = true)
                     OutlinedTextField(editApiKey, { editApiKey = it }, label = { Text("API 密钥") }, visualTransformation = PasswordVisualTransformation(), singleLine = true)
                     OutlinedTextField(editHeaders, { editHeaders = it }, label = { Text("自定义请求头（JSON，可选）") }, placeholder = { Text("{\"x-opencode-session\": \"\$SESSION_ID\"}") }, minLines = 2, maxLines = 4)
-                    Text("OpenCode Go 可在自定义请求头中添加服务商要求的请求头。会话占位符会按当前对话生成稳定 ID。", color = Color(0xFF7B848E), fontSize = 11.sp, lineHeight = 16.sp)
+                    Text("OpenCode Go 可在自定义请求头中添加服务商要求的请求头。会话占位符会按当前对话生成稳定 ID。", color = chatSecondary, fontSize = 11.sp, lineHeight = 16.sp)
                 }
             },
             confirmButton = {
@@ -743,7 +751,7 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
         Box(
             modifier = Modifier.widthIn(max = 270.dp)
                 .clip(bubbleShape)
-                .background(if (fromUser) Color(0xFF111111) else Color(0xFFECEEF0))
+                .background(if (fromUser) Color(0xFF111111) else if (darkTheme) Color(0xFF292C2F) else Color(0xFFECEEF0))
                 .combinedClickable(onClick = {}, onLongClick = { onMessageLongPress(message) })
                 .padding(horizontal = 11.dp, vertical = 7.dp)
         ) {
@@ -756,7 +764,7 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
                 }
                 if (message.content.isNotBlank() && message.content != "[图片]") Text(
                     message.content,
-                    color = if (fromUser) Color.White else Color(0xFF0F1419),
+                    color = if (fromUser) Color.White else if (darkTheme) Color(0xFFF2F2F2) else Color(0xFF0F1419),
                     fontSize = 14.sp,
                     lineHeight = 21.sp
                 )
