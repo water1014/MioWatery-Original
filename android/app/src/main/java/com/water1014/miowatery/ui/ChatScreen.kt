@@ -528,7 +528,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 }
                 itemsIndexed(visibleMessages, key = { _, message -> message.id }) { index, message ->
                     val firstInGroup = index == 0 || visibleMessages[index - 1].role != message.role
-                    ChatMessageBubble(message, firstInGroup, persona?.avatar) { selectedMessage = it }
+                    ChatMessageBubble(message, firstInGroup, persona?.avatar, darkTheme) { selectedMessage = it }
                 }
                 if (sending) {
                     item {
@@ -730,7 +730,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 }
 
 @Composable
-private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, personaAvatar: String?, onMessageLongPress: (MessageEntity) -> Unit) {
+private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, personaAvatar: String?, darkTheme: Boolean, onMessageLongPress: (MessageEntity) -> Unit) {
     var showReasoning by remember(message.id) { mutableStateOf(false) }
     val fromUser = message.role == "user"
     val avatar = @Composable {
