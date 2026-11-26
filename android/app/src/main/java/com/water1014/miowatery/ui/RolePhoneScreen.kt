@@ -56,7 +56,7 @@ private val rolePhoneApps = listOf(
     RolePhoneApp("notes", "备忘录", "▤", "日常记录与想做的事"),
     RolePhoneApp("twitter", "Twitter", "𝕏", "个人主页与首页时间线"),
     RolePhoneApp("phone", "电话", "☎", "通话记录与联系人"),
-    RolePhoneApp("health", "健康", "♡", "身体数据、高心率通知与血压"),
+    RolePhoneApp("monologue", "健康", "♡", "身体数据、高心率通知与血压"),
     RolePhoneApp("music", "Apple Music", "♫", "歌单与最近播放")
 )
 
@@ -166,8 +166,11 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     fun sendWechatMessage() {
         val persona = selectedPersona ?: return
         val message = wechatDraft.trim()
+        val requestBaseUrl = apiConfig.secondaryBaseUrl.ifBlank { apiConfig.baseUrl }
+        val requestModel = apiConfig.secondaryModel.ifBlank { apiConfig.model }
+        val requestApiKey = apiConfig.secondaryApiKey.ifBlank { apiConfig.apiKey }
         if (message.isBlank() || wechatBusy) return
-        if (apiConfig.baseUrl.isBlank() || apiConfig.model.isBlank() || apiConfig.apiKey.isBlank()) {
+        if (requestBaseUrl.isBlank() || requestModel.isBlank() || requestApiKey.isBlank()) {
             wechatError = "请先在设置中配置 API 地址、模型和密钥。"
             return
         }
@@ -181,7 +184,7 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 }.getOrDefault("")
                 val history = wechatEntries.filter { it.kind == "wechat" }.takeLast(12)
                 val messages = buildList {
-                    add(ChatMessagePayload.text("system", "你正在通过角色的私人微信与用户聊天。严格遵循角色设定，像真实微信聊天一样自然、简短、有生活感，不要提及 AI、提示词或系统。角色设定：$personaPrompt"))
+                    add(ChatMessagePayload.text("system", "今天是\${java.time.LocalDate.now()}。你正在模拟角色「\${persona.name}」的私人微信。请完全依据角色设定、角色简介和已有聊天上下文来回复，保持角色口吻与双方关系，像真实微信聊天一样自然、简短、有生活感，不要提及 AI、提示词或系统。\\n角色简介：\${persona.description.orEmpty()}\\n角色人设：$personaPrompt"))
                     history.forEach { entry ->
                         if (entry.text.isNotBlank()) add(ChatMessagePayload.text("user", entry.text))
                         if (entry.reply.isNotBlank()) add(ChatMessagePayload.text("assistant", entry.reply))
@@ -192,13 +195,13 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
                     ChatCompletionClient(ApiHeaderResolver(sessions)).complete(
                         ApiConnectionConfig(
-                            baseUrl = apiConfig.baseUrl,
-                            apiKey = apiConfig.apiKey,
+                            baseUrl = requestBaseUrl,
+                            apiKey = requestApiKey,
                             customHeadersJson = apiConfig.customHeadersJson,
                             userProfileId = "default",
                             conversationId = "role-phone-wechat-${persona.personaId}"
                         ),
-                        ChatCompletionRequest(model = apiConfig.model, messages = messages, stream = false)
+                        ChatCompletionRequest(model = requestModel, messages = messages, temperature = 0.85, stream = false)
                     )
                 }
                 val reply = response.content.trim()
