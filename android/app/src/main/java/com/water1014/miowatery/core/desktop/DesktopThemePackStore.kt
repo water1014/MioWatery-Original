@@ -39,6 +39,21 @@ object DesktopThemePackStore {
         }
     }
 
+    /** Update only desktop placement order while preserving every other imported theme-pack field. */
+    fun updateOrder(json: String?, groups: Map<String, List<String>>): String {
+        val root = runCatching { JSONObject(json ?: "{}") }.getOrElse { JSONObject() }
+        val desktop = root.optJSONObject("desktop") ?: JSONObject().also { root.put("desktop", it) }
+        val order = desktop.optJSONObject("order") ?: JSONObject().also { desktop.put("order", it) }
+        groups.forEach { (group, ids) ->
+            order.put(group, JSONArray(ids.distinct().filter { it.matches(Regex("[A-Za-z0-9_:.\\\\-]{1,80}")) }))
+        }
+        if (!root.has("app")) root.put("app", "xsj-desktop-theme")
+        if (!root.has("v")) root.put("v", 1)
+        if (!root.has("created")) root.put("created", java.time.LocalDate.now().toString())
+        if (!root.has("name")) root.put("name", "我的桌面")
+        return root.toString(2)
+    }
+
     fun serialize(preview: DesktopThemePackPreview): String {
         val desktop = JSONObject()
         preview.wallpaper?.let { desktop.put("wallpaper", it) }
