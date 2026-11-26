@@ -58,7 +58,6 @@ class MainActivity : ComponentActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
-            settings.geolocationEnabled = true
             settings.allowFileAccess = false
             settings.allowContentAccess = true
             settings.javaScriptCanOpenWindowsAutomatically = true
@@ -332,7 +331,7 @@ class MainActivity : ComponentActivity() {
     @Deprecated("Required for WebView runtime permissions")
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<String>,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
