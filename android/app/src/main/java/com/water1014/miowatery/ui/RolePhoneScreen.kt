@@ -110,6 +110,55 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var wechatBusy by remember { mutableStateOf(false) }
     var wechatError by remember { mutableStateOf<String?>(null) }
 
+    var noteSearch by remember { mutableStateOf("") }
+    var selectedNoteId by remember { mutableStateOf<String?>(null) }
+    var noteEditorOpen by remember { mutableStateOf(false) }
+    var noteTitleDraft by remember { mutableStateOf("") }
+    var noteBodyDraft by remember { mutableStateOf("") }
+    var noteEditingId by remember { mutableStateOf<String?>(null) }
+    var noteError by remember { mutableStateOf<String?>(null) }
+    val noteEntries = wechatEntries.filter { it.kind == "notes" }.sortedByDescending { it.createdAt }
+    val visibleNotes = noteEntries.filter {
+        noteSearch.isBlank() || it.text.contains(noteSearch, true) || it.reply.contains(noteSearch, true)
+    }
+    val selectedNote = noteEntries.firstOrNull { it.id == selectedNoteId }
+
+    fun beginNoteEditor(entry: MessageAppEntryEntity? = null) {
+        noteEditingId = entry?.id
+        noteTitleDraft = entry?.text.orEmpty()
+        noteBodyDraft = entry?.reply.orEmpty()
+        noteError = null
+        noteEditorOpen = true
+    }
+
+    fun saveNote() {
+        val persona = selectedPersona ?: return
+        val title = noteTitleDraft.trim()
+        val body = noteBodyDraft.trim()
+        if (title.isBlank() && body.isBlank()) {
+            noteError = "至少写下一点内容再保存。"
+            return
+        }
+        val old = noteEntries.firstOrNull { it.id == noteEditingId }
+        scope.launch {
+            dao.upsertMessageAppEntry(
+                MessageAppEntryEntity(
+                    id = old?.id ?: UUID.randomUUID().toString(),
+                    profileId = "default",
+                    personaId = persona.personaId,
+                    kind = "notes",
+                    text = title.ifBlank { body.lineSequence().firstOrNull().orEmpty().take(32) },
+                    reply = body,
+                    author = persona.name,
+                    createdAt = old?.createdAt ?: System.currentTimeMillis()
+                )
+            )
+            selectedNoteId = old?.id ?: noteEntries.firstOrNull { it.id == noteEditingId }?.id
+            noteEditorOpen = false
+        }
+    }
+
+
     fun sendWechatMessage() {
         val persona = selectedPersona ?: return
         val message = wechatDraft.trim()
@@ -372,6 +421,132 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     }
                 }
 
+                activeApp?.id == "notes" -> {
+                    val persona = selectedPersona!!
+                    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                        if (selectedNote != null) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextButton(onClick = { selectedNoteId = null }) { Text("‹ 备忘录") }
+                                Spacer(Modifier.weight(1f))
+                                TextButton(onClick = { beginNoteEditor(selectedNote) }) { Text("编辑") }
+                                TextButton(onClick = {
+                                    scope.launch {
+                                        dao.deleteMessageAppEntry(selectedNote.id, "default")
+                                        selectedNoteId = null
+                                    }
+                                }) { Text("删除", color = MaterialTheme.colorScheme.error) }
+                            }
+                            Text(
+                                java.text.SimpleDateFormat("yyyy年M月d日  HH:mm", java.util.Locale.CHINA)
+                                    .format(java.util.Date(selectedNote.createdAt)),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 11.sp,
+                                modifier = Modifier.padding(start = 4.dp, bottom = 10.dp)
+                            )
+                            Text(
+                                selectedNote.text,
+                                fontSize = 23.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                            )
+                            Text(
+                                selectedNote.reply,
+                                fontSize = 15.sp,
+                                lineHeight = 25.sp,
+                                modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 4.dp, vertical = 8.dp)
+                            )
+                        } else {
+                            Row(
+                                Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text("备忘录", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                                    Text("${noteEntries.size} 则备忘录", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                TextButton(onClick = { beginNoteEditor() }) { Text("＋ 新建") }
+                            }
+                            OutlinedTextField(
+                                value = noteSearch,
+                                onValueChange = { noteSearch = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = true,
+                                placeholder = { Text("搜索备忘录") },
+                                leadingIcon = { Text("⌕", fontSize = 20.sp) }
+                            )
+                            Spacer(Modifier.height(10.dp))
+                            if (visibleNotes.isEmpty()) {
+                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(if (noteSearch.isBlank()) "还没有备忘录" else "没有找到相关内容", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                                        Spacer(Modifier.height(6.dp))
+                                        Text(
+                                            if (noteSearch.isBlank()) "点右上角「新建」，记录角色手机里的日常。" else "试试其他关键词。",
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontSize = 12.sp
+                                        )
+                                    }
+                                }
+                            } else {
+                                val monthGroups = visibleNotes.groupBy {
+                                    java.text.SimpleDateFormat("yyyy年M月", java.util.Locale.CHINA).format(java.util.Date(it.createdAt))
+                                }
+                                LazyColumn(
+                                    Modifier.weight(1f).fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    monthGroups.forEach { (month, entries) ->
+                                        item(key = "month_$month") {
+                                            Text(
+                                                month,
+                                                Modifier.fillMaxWidth().padding(start = 4.dp, top = 10.dp, bottom = 2.dp),
+                                                fontSize = 13.sp,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        }
+                                        items(entries, key = { it.id }) { entry ->
+                                            Surface(
+                                                onClick = { selectedNoteId = entry.id },
+                                                shape = RoundedCornerShape(14.dp),
+                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .62f),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
+                                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                                        Text(
+                                                            entry.text.ifBlank { "无标题" },
+                                                            Modifier.weight(1f),
+                                                            fontSize = 14.sp,
+                                                            fontWeight = FontWeight.SemiBold,
+                                                            maxLines = 1
+                                                        )
+                                                        Text(
+                                                            java.text.SimpleDateFormat("M/d", java.util.Locale.CHINA).format(java.util.Date(entry.createdAt)),
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                            fontSize = 10.sp
+                                                        )
+                                                    }
+                                                    Spacer(Modifier.height(5.dp))
+                                                    Text(
+                                                        entry.reply.ifBlank { entry.text },
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                        fontSize = 12.sp,
+                                                        maxLines = 2,
+                                                        lineHeight = 18.sp
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                 activeApp?.id == "message" -> {
                     val persona = selectedPersona!!
                     Column(Modifier.fillMaxSize().imePadding().padding(horizontal = 14.dp)) {
@@ -493,6 +668,41 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 }
             }
         }
+    }
+
+    if (noteEditorOpen) {
+        AlertDialog(
+            onDismissRequest = { noteEditorOpen = false },
+            title = { Text(if (noteEditingId == null) "新建备忘录" else "编辑备忘录") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = noteTitleDraft,
+                        onValueChange = { noteTitleDraft = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text("标题") },
+                        placeholder = { Text("给这则备忘录起个名字") }
+                    )
+                    OutlinedTextField(
+                        value = noteBodyDraft,
+                        onValueChange = { noteBodyDraft = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 6,
+                        maxLines = 10,
+                        label = { Text("内容") },
+                        placeholder = { Text("写下想记住的事情…") }
+                    )
+                    noteError?.let { Text(it, color = MaterialTheme.colorScheme.error, fontSize = 11.sp) }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { saveNote() }) { Text("保存") }
+            },
+            dismissButton = {
+                TextButton(onClick = { noteEditorOpen = false }) { Text("取消") }
+            }
+        )
     }
 
     if (showEditor) {
