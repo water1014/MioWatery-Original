@@ -507,7 +507,7 @@ private fun HomeScreen(
     fun idsInGroup(group: String): List<String> {
         val saved = desktopOrder[group].orEmpty()
         val ids = (if (saved.isNotEmpty()) saved else groupDefaults[group].orEmpty()).distinct()
-        return ids.filterNot { it in hiddenDesktopIds && appEntries.any { entry -> entry.id == it } }
+        return ids.filterNot { it in hiddenDesktopIds }
             .filter { id -> appEntries.any { it.id == id } }
     }
     fun currentGroupFor(id: String): String? =
