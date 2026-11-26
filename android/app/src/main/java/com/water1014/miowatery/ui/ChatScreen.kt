@@ -285,7 +285,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                         append("记于 ").append(recalledDate).append("：").append(recalled.text.take(300)).append("\n\n")
                     }
                     afterWorldbook.forEach { append("【世界书：").append(it.title).append("】\n").append(it.content).append("\n\n") }
-                    append("在保持角色人设和自然对话的前提下，请一次性输出严格 JSON，不要 Markdown 代码块，格式为 {\"messages\":[\"第一条独立聊天消息\",\"第二条独立聊天消息\"],\"reply\":\"兼容字段\",\"thought\":\"角色此刻未说出口的内心想法\",\"image_prompt\":\"\"}。messages 是角色按真实聊天节奏连续发送的消息数组：结合语境，适合分开发的内容就拆成 2-5 条短消息，每条只放一个自然聊天气泡；不要把几句话用换行或一大段塞进同一个气泡。只有确实一句就能说清时才只输出一条。不要机械地每次都拆成多条。reply 可作为 messages 的兼容备用字段。thought 是简短内心活动。")
+                    append("在保持角色人设和自然对话的前提下，请一次性输出严格 JSON，不要 Markdown 代码块，格式为 {\"thought\":\"角色此刻未说出口的内心想法（必填，不能为空）\",\"messages\":[\"第一条独立聊天消息\",\"第二条独立聊天消息\"],\"reply\":\"兼容字段\",\"image_prompt\":\"\"}。thought 是必填字段：每一次回复都必须写，不能省略、不能留空；即使对话很短、气氛平淡或只回复一两个字，也要写一两句与本次回复对应的简短内心活动，不要复述对外说的话。messages 是角色按真实聊天节奏连续发送的消息数组：结合语境，适合分开发的内容就拆成 2-5 条短消息，每条只放一个自然聊天气泡；不要把几句话用换行或一大段塞进同一个气泡。只有确实一句就能说清时才只输出一条。不要机械地每次都拆成多条。reply 可作为 messages 的兼容备用字段。")
                     append(if (imageConfig.enabled) {
                         val base = "【发图规则】只要用户想看你的照片、自拍或某个画面（比如“发张照片”“给我看看”“拍给我”“你现在什么样”），或者你自己决定发图/发自拍，就必须填写 image_prompt，系统才会真的生成并发出图片；绝不能只在 messages 或旁白里写“发了一张照片”却把 image_prompt 留空。同时 messages 里正常接话，不要在文字里描述图片内容。没有这类场景时 image_prompt 留空。"
                         if (imageConfig.provider == "novelai") base + "当前生图引擎是 NovelAI：image_prompt 必须写成英文 Danbooru 风格标签，用英文逗号分隔，例如“1boy, solo, messy hair, half-closed eyes, selfie, indoors, upper body”；按角色人设写人数/性别、发型发色、表情、动作、场景、镜头；不要写中文、不要写完整句子、不要写 masterpiece 之类质量词（系统会自动加前缀）。"
