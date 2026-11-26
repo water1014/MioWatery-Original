@@ -33,6 +33,7 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -113,6 +114,12 @@ private fun Modifier.desktopSortable(
     onDrop: (String, String) -> Unit
 ): Modifier = this
     .onGloballyPositioned { bounds[id] = it.boundsInRoot() }
+    .graphicsLayer {
+        val dragging = activeDragId.value == id
+        alpha = if (dragging) 0.72f else 1f
+        scaleX = if (dragging) 1.06f else 1f
+        scaleY = if (dragging) 1.06f else 1f
+    }
     .pointerInput(id) {
         detectDragGesturesAfterLongPress(
             onDragStart = { local ->
