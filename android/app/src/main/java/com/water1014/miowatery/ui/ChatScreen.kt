@@ -799,7 +799,15 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
 @Composable
 private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, personaAvatar: String?, darkTheme: Boolean, incomingColor: Color, messageTextColor: Color, secondaryTextColor: Color, onMessageLongPress: (MessageEntity) -> Unit) {
     var showReasoning by remember(message.id) { mutableStateOf(false) }
+    var showTranslation by remember(message.id) { mutableStateOf(false) }
     val fromUser = message.role == "user"
+    val metadata = remember(message.metadataJson) {
+        runCatching { JSONObject(message.metadataJson ?: "{}") }.getOrElse { JSONObject() }
+    }
+    val narration = metadata.optString("narr").trim()
+    val quote = metadata.optString("quote").trim()
+    val translation = metadata.optString("tr").ifBlank { metadata.optString("translation") }.trim()
+    val isNarration = !fromUser && narration.isNotBlank()
     val avatar = @Composable {
         Box(
             Modifier.size(40.dp).clip(CircleShape)
@@ -821,60 +829,92 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
         bottomEnd = 16.dp,
         bottomStart = 16.dp
     )
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(top = if (firstInGroup) 10.dp else 0.dp),
-        horizontalArrangement = if (fromUser) Arrangement.End else Arrangement.Start,
-        verticalAlignment = Alignment.Top
-    ) {
-        if (!fromUser) {
-            avatar()
-            Spacer(Modifier.width(8.dp))
-        }
-        Box(
-            modifier = Modifier.widthIn(max = 270.dp)
-                .clip(bubbleShape)
-                .background(if (fromUser) Color(0xFF111111) else incomingColor)
-                .combinedClickable(onClick = {}, onLongClick = { onMessageLongPress(message) })
-                .padding(horizontal = 11.dp, vertical = 7.dp)
+    if (isNarration) {
+        Text(
+            message.content,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 8.dp),
+            color = secondaryTextColor,
+            fontSize = 12.sp,
+            lineHeight = 18.sp,
+            textAlign = TextAlign.Center
+        )
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = if (firstInGroup) 10.dp else 0.dp),
+            horizontalArrangement = if (fromUser) Arrangement.End else Arrangement.Start,
+            verticalAlignment = Alignment.Top
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                val attachmentUri = remember(message.attachmentJson) {
-                    runCatching { JSONObject(message.attachmentJson ?: "{}").optString("uri").takeIf { it.isNotBlank() } }.getOrNull()
-                }
-                if (attachmentUri != null) {
-                    AsyncImage(model = attachmentUri, contentDescription = "聊天图片", modifier = Modifier.widthIn(max = 210.dp).height(150.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
-                }
-                if (message.content.isNotBlank() && message.content != "[图片]") Text(
-                    message.content,
-                    color = if (fromUser) Color.White else messageTextColor,
-                    fontSize = 14.sp,
-                    lineHeight = 21.sp
-                )
-                if (!fromUser && !message.reasoning.isNullOrBlank()) {
-                    Text(
-                        if (showReasoning) "收起思考过程 ▴" else "查看思考过程 ▾",
-                        modifier = Modifier.clickable { showReasoning = !showReasoning },
-                        color = secondaryTextColor,
-                        fontSize = 10.sp
+            if (!fromUser) {
+                avatar()
+                Spacer(Modifier.width(8.dp))
+            }
+            Box(
+                modifier = Modifier.widthIn(max = 270.dp)
+                    .clip(bubbleShape)
+                    .background(if (fromUser) Color(0xFF111111) else incomingColor)
+                    .combinedClickable(onClick = {}, onLongClick = { onMessageLongPress(message) })
+                    .padding(horizontal = 11.dp, vertical = 7.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (quote.isNotBlank()) {
+                        Column(
+                            Modifier.fillMaxWidth()
+                                .clip(RoundedCornerShape(7.dp))
+                                .background(if (fromUser) Color.White.copy(alpha = 0.12f) else if (darkTheme) Color.White.copy(alpha = 0.07f) else Color.Black.copy(alpha = 0.045f))
+                                .padding(start = 8.dp, end = 7.dp, top = 5.dp, bottom = 5.dp)
+                        ) {
+                            Text("引用", color = if (fromUser) Color.White.copy(alpha = 0.68f) else secondaryTextColor, fontSize = 9.sp)
+                            Text(quote, color = if (fromUser) Color.White.copy(alpha = 0.82f) else secondaryTextColor, fontSize = 11.sp, lineHeight = 15.sp, maxLines = 3)
+                        }
+                    }
+                    val attachmentUri = remember(message.attachmentJson) {
+                        runCatching { JSONObject(message.attachmentJson ?: "{}").optString("uri").takeIf { it.isNotBlank() } }.getOrNull()
+                    }
+                    if (attachmentUri != null) {
+                        AsyncImage(model = attachmentUri, contentDescription = "聊天图片", modifier = Modifier.widthIn(max = 210.dp).height(150.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+                    }
+                    if (message.content.isNotBlank() && message.content != "[图片]") Text(
+                        message.content,
+                        color = if (fromUser) Color.White else messageTextColor,
+                        fontSize = 14.sp,
+                        lineHeight = 21.sp
                     )
-                    if (showReasoning) {
+                    if (!fromUser && translation.isNotBlank()) {
                         Text(
-                            message.reasoning.orEmpty(),
+                            if (showTranslation) "收起译文 ▴" else "查看译文 ▾",
+                            modifier = Modifier.clickable { showTranslation = !showTranslation },
                             color = secondaryTextColor,
-                            fontSize = 11.sp,
-                            lineHeight = 17.sp
+                            fontSize = 10.sp
                         )
+                        if (showTranslation) {
+                            Text(translation, color = secondaryTextColor, fontSize = 11.sp, lineHeight = 17.sp)
+                        }
+                    }
+                    if (!fromUser && !message.reasoning.isNullOrBlank()) {
+                        Text(
+                            if (showReasoning) "收起思考过程 ▴" else "查看思考过程 ▾",
+                            modifier = Modifier.clickable { showReasoning = !showReasoning },
+                            color = secondaryTextColor,
+                            fontSize = 10.sp
+                        )
+                        if (showReasoning) {
+                            Text(
+                                message.reasoning.orEmpty(),
+                                color = secondaryTextColor,
+                                fontSize = 11.sp,
+                                lineHeight = 17.sp
+                            )
+                        }
                     }
                 }
             }
-        }
-        if (fromUser) {
-            Spacer(Modifier.width(8.dp))
-            avatar()
+            if (fromUser) {
+                Spacer(Modifier.width(8.dp))
+                avatar()
+            }
         }
     }
 }
-
 
 private fun nativeSafeId(value: String): String =
     value.lowercase(java.util.Locale.ROOT)
