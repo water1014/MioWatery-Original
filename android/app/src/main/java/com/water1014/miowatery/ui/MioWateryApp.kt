@@ -430,6 +430,23 @@ private fun HomeScreen(
             }
         }.getOrDefault(emptySet())
     }
+    val desktopOrder = remember(desktopPackJson) {
+        runCatching {
+            val order = JSONObject(desktopPackJson ?: "{}").optJSONObject("desktop")?.optJSONObject("order")
+                ?: JSONObject()
+            buildMap<String, List<String>> {
+                listOf("first", "second", "dock", "p3", "p4").forEach { group ->
+                    val values = order.optJSONArray(group) ?: return@forEach
+                    val ids = buildList {
+                        for (index in 0 until values.length()) {
+                            values.optString(index).takeIf { it.matches(Regex("[A-Za-z0-9_:.\\-]{1,80}")) }?.let(::add)
+                        }
+                    }
+                    if (ids.isNotEmpty()) put(group, ids)
+                }
+            }
+        }.getOrDefault(emptyMap())
+    }
     val nativeWidgets = remember(desktopPackJson, hiddenDesktopIds) {
         runCatching {
             desktopPackJson?.let { DesktopThemePackInspector.inspect(it).widgets }
@@ -540,7 +557,13 @@ private fun HomeScreen(
     val ink = Color(0xFF0F1419)
     val sub = Color(0xFF6B7480)
     val panel = Color(0xFFF3F4F5)
-    val dock = listOf("app", "worlds", "personas", "settings").filterNot { it in hiddenDesktopIds }.map { id -> appEntries.first { it.id == id } }
+    fun orderedDesktopApps(ids: List<String>, group: String): List<AppEntry> {
+        val visible = ids.filterNot { it in hiddenDesktopIds }
+            .mapNotNull { id -> appEntries.firstOrNull { it.id == id } }
+        val rank = desktopOrder[group].orEmpty().withIndex().associate { it.value to it.index }
+        return visible.sortedBy { rank[it.id] ?: Int.MAX_VALUE }
+    }
+    val dock = orderedDesktopApps(listOf("app", "worlds", "personas", "settings"), "dock")
     Box(modifier.fillMaxSize()) {
         desktopWallpaper?.let { image ->
             AsyncImage(
@@ -601,7 +624,12 @@ private fun HomeScreen(
                         2 -> listOf("couple", "coread", "offline", "msgs")
                         else -> listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube")
                     }
-                    val visibleApps = pageApps.filterNot { it in hiddenDesktopIds }.mapNotNull { id -> appEntries.firstOrNull { it.id == id } }
+                    val orderGroup = when (page) {
+                        1 -> "second"
+                        2 -> "p3"
+                        else -> "p4"
+                    }
+                    val visibleApps = orderedDesktopApps(pageApps, orderGroup)
                     Column(
                         Modifier.fillMaxSize().widthIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(horizontal = 8.dp)
                     ) {
