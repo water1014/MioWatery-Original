@@ -156,6 +156,7 @@ abstract class MioDatabase : RoomDatabase() {
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_wallet_states_profileId ON wallet_states(profileId)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_wallet_states_ownerId ON wallet_states(ownerId)")
             }
+        }
 
         @Volatile private var instance: MioDatabase? = null
 
