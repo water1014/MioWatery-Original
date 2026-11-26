@@ -612,7 +612,7 @@ private fun HomeScreen(
                                 colors = CardDefaults.cardColors(containerColor = Color.White),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                             ) {
-                                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp)) {
+                                Column(Modifier.fillMaxWidth().padding(start = 18.dp, top = 16.dp, end = 18.dp, bottom = 14.dp)) {
                                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                         Box(
                                             Modifier.size(104.dp).clip(RoundedCornerShape(14.dp)).background(
@@ -630,24 +630,31 @@ private fun HomeScreen(
                                             Text("播放中", color = Color(0xFF8A8D94), fontSize = 12.sp)
                                             Text(musicTitle.ifBlank { "未在播放" }, color = Color(0xFF171719), fontSize = 17.sp, lineHeight = 21.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                                             Text(musicArtist.ifBlank { "—" }, color = Color(0xFF8A8D94), fontSize = 15.sp, maxLines = 1)
-                                            Button(
-                                                onClick = {
-                                                    musicPrefs.edit().putBoolean("play_on_open", true).apply()
-                                                    onOpen("music")
-                                                },
-                                                modifier = Modifier.padding(top = 10.dp).height(32.dp),
-                                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                                                shape = RoundedCornerShape(16.dp)
-                                            ) { Text("▶  播放", fontSize = 13.sp) }
+                                            Row(
+                                                Modifier.padding(top = 10.dp).clip(RoundedCornerShape(16.dp))
+                                                    .background(Color(0xFFF0F1F3))
+                                                    .clickable {
+                                                        musicPrefs.edit().putBoolean("play_on_open", true).apply()
+                                                        onOpen("music")
+                                                    }
+                                                    .height(32.dp)
+                                                    .padding(horizontal = 12.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Text("▶", color = Color(0xFF171719), fontSize = 12.sp)
+                                                Text("播放", color = Color(0xFF171719), fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                            }
                                         }
                                         Box(Modifier.size(28.dp).clickable { onOpen("music") }, contentAlignment = Alignment.Center) {
                                             Text("♫", color = Color(0xFF171719), fontSize = 22.sp)
                                         }
                                     }
-                                    Column(Modifier.fillMaxWidth().padding(top = 14.dp).border(0.7.dp, Color(0xFFEEF0F2), RoundedCornerShape(1.dp)).padding(top = 12.dp)) {
-                                        Text("最近播放", color = Color(0xFF8A8D94), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
+                                    Column(Modifier.fillMaxWidth().padding(top = 14.dp)) {
+                                        Divider(color = Color(0xFFEEF0F2), thickness = 1.dp)
+                                        Text("最近播放", color = Color(0xFF8A8D94), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 12.dp, bottom = 8.dp))
                                         if (musicRecent.isEmpty()) {
-                                            Text("还没有播放记录", color = sub, style = MaterialTheme.typography.bodySmall)
+                                            Text("没有最近播放过的音乐", color = sub, fontSize = 12.sp, modifier = Modifier.padding(vertical = 4.dp))
                                         } else {
                                             musicRecent.forEach { track ->
                                                 Row(
