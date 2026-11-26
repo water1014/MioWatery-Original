@@ -1,5 +1,6 @@
 package com.water1014.miowatery.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -38,8 +39,134 @@ import com.water1014.miowatery.core.network.ApiConfigStore
 import com.water1014.miowatery.core.network.SavedApiConfig
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    onOpenBackup: () -> Unit = {}
+) {
+    var section by remember { mutableStateOf<String?>(null) }
+    BackHandler(enabled = section != null) { section = null }
+
+    val sections = listOf(
+        "我的资料" to "profile",
+        "外观" to "appearance",
+        "心声" to "innervoice",
+        "模型与 API" to "api",
+        "生图 API" to "imageapi",
+        "语音（MiniMax）" to "voice",
+        "AI 角色扮演提示词" to "prompt",
+        "记忆模式" to "memory",
+        "系统（后台保活与通知）" to "system",
+        "悬浮球" to "fball",
+        "数据与备份" to "data"
+    )
+
+    if (section == "api") {
+        ApiSettingsScreen(modifier = modifier, onOpenBackup = onOpenBackup)
+        return
+    }
+
+    if (section == "data") {
+        Column(
+            modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = { section = null }) { Text("‹ 设置") }
+                Text("数据与备份", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(1.dp))
+            }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text("数据与备份", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("检查旧版导出文件，并将原有资料迁移到原生 App。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    TextButton(onClick = onOpenBackup) { Text("备份与旧版数据迁移") }
+                }
+            }
+        }
+        return
+    }
+
+    if (section != null) {
+        Column(
+            modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = { section = null }) { Text("‹ 设置") }
+                Text(sections.firstOrNull { it.second == section }?.first ?: "设置", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(1.dp))
+            }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("尚未完成原生迁移", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text("这个分类会按照 MioWatery 原版的设置项和行为继续迁移。目前先保留原版入口，不用相似功能代替，也不会擅自改写设置内容。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+        return
+    }
+
+    Column(
+        modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 18.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text("设置", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Row(
+                Modifier.fillMaxWidth().padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("我的资料", fontWeight = FontWeight.SemiBold)
+                    Text("头像、账号与个人简介", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column {
+                sections.drop(1).forEachIndexed { index, item ->
+                    Row(
+                        Modifier.fillMaxWidth().clickable { section = item.second }.padding(horizontal = 16.dp, vertical = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(item.first, style = MaterialTheme.typography.bodyLarge)
+                        Text("›", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    if (index != sections.size - 2) {
+                        androidx.compose.material3.HorizontalDivider()
+                    }
+                }
+            }
+        }
+        Text("选择一个分类来配置相关设置。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun ApiSettingsScreen(
     modifier: Modifier = Modifier,
     onOpenBackup: () -> Unit = {}
 ) {
