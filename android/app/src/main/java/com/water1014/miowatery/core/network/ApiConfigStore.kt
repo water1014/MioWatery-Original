@@ -21,7 +21,10 @@ data class SavedApiConfig(
     val baseUrl: String = "",
     val model: String = "",
     val apiKey: String = "",
-    val customHeadersJson: String = ""
+    val customHeadersJson: String = "",
+    val secondaryBaseUrl: String = "",
+    val secondaryModel: String = "",
+    val secondaryApiKey: String = ""
 )
 
 class ApiConfigStore(context: Context) {
@@ -29,21 +32,29 @@ class ApiConfigStore(context: Context) {
 
     val config: Flow<SavedApiConfig> = store.data.map { prefs ->
         val encrypted = prefs[KEY_SECRET].orEmpty()
+        val encryptedSecondary = prefs[KEY_SECONDARY_SECRET].orEmpty()
         SavedApiConfig(
             baseUrl = prefs[KEY_BASE_URL].orEmpty(),
             model = prefs[KEY_MODEL].orEmpty(),
             apiKey = if (encrypted.isBlank()) "" else runCatching { ApiSecretCipher.decrypt(encrypted) }.getOrDefault(""),
-            customHeadersJson = prefs[KEY_HEADERS].orEmpty()
+            customHeadersJson = prefs[KEY_HEADERS].orEmpty(),
+            secondaryBaseUrl = prefs[KEY_SECONDARY_BASE_URL].orEmpty(),
+            secondaryModel = prefs[KEY_SECONDARY_MODEL].orEmpty(),
+            secondaryApiKey = if (encryptedSecondary.isBlank()) "" else runCatching { ApiSecretCipher.decrypt(encryptedSecondary) }.getOrDefault("")
         )
     }
 
     suspend fun save(value: SavedApiConfig) {
         val encrypted = if (value.apiKey.isBlank()) "" else ApiSecretCipher.encrypt(value.apiKey)
+        val encryptedSecondary = if (value.secondaryApiKey.isBlank()) "" else ApiSecretCipher.encrypt(value.secondaryApiKey)
         store.edit { prefs ->
             prefs[KEY_BASE_URL] = value.baseUrl.trim()
             prefs[KEY_MODEL] = value.model.trim()
             prefs[KEY_SECRET] = encrypted
             prefs[KEY_HEADERS] = value.customHeadersJson.trim()
+            prefs[KEY_SECONDARY_BASE_URL] = value.secondaryBaseUrl.trim()
+            prefs[KEY_SECONDARY_MODEL] = value.secondaryModel.trim()
+            prefs[KEY_SECONDARY_SECRET] = encryptedSecondary
         }
     }
 
@@ -52,6 +63,9 @@ class ApiConfigStore(context: Context) {
         val KEY_MODEL = stringPreferencesKey("model")
         val KEY_SECRET = stringPreferencesKey("api_key_encrypted")
         val KEY_HEADERS = stringPreferencesKey("custom_headers_json")
+        val KEY_SECONDARY_BASE_URL = stringPreferencesKey("secondary_base_url")
+        val KEY_SECONDARY_MODEL = stringPreferencesKey("secondary_model")
+        val KEY_SECONDARY_SECRET = stringPreferencesKey("secondary_api_key_encrypted")
     }
 }
 
