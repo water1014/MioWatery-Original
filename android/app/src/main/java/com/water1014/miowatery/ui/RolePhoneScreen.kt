@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -18,7 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -61,7 +59,6 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     var selectedPersona by remember { mutableStateOf<PersonaEntity?>(null) }
     var unlocked by remember { mutableStateOf(false) }
     var activeApp by remember { mutableStateOf<RolePhoneApp?>(null) }
-    var unlocked by remember { mutableStateOf(false) }
     var wallpaperIndex by remember { mutableIntStateOf(prefs.getInt("wallpaper_home", 0).coerceIn(phoneWallpapers.indices)) }
     var lockWallpaperIndex by remember { mutableIntStateOf(prefs.getInt("wallpaper_lock", 1).coerceIn(phoneWallpapers.indices)) }
     var showWallpaperMenu by remember { mutableStateOf(false) }
@@ -212,9 +209,6 @@ fun RolePhoneScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                     }
                 }
 
-                activeApp == null && !unlocked -> {
-                    RolePhoneLockScreen(persona = selectedPersona!!, prefs = prefs, onUnlock = { unlocked = true })
-                }
                 activeApp == null -> {
                     val persona = selectedPersona!!
                     Box(
