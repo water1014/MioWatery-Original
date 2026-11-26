@@ -580,8 +580,8 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 Spacer(Modifier.width(8.dp))
                 Box(
                     modifier = Modifier.size(34.dp).clip(CircleShape)
-                        .background(if (sending) Color(0xFF111111) else if (draft.isBlank()) Color(0xFFD9DDE1) else Color(0xFF111111))
-                        .clickable(enabled = sending || draft.isNotBlank()) {
+                        .background(if (sending) Color(0xFF111111) else if (draft.isBlank() && attachedImageUri == null) Color(0xFFD9DDE1) else Color(0xFF111111))
+                        .clickable(enabled = sending || draft.isNotBlank() || attachedImageUri != null) {
                             if (sending) {
                                 sendJob?.cancel()
                                 sendJob = null
