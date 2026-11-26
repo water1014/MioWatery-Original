@@ -77,7 +77,7 @@ object StructuredChatReplyParser {
                 }
             }
         }
-        if (messages.isEmpty()) {
+        if (messages.isEmpty() && !recallLast) {
             val fallback = root.stringValue("reply").ifBlank { source }
             if (fallback.isNotBlank()) messages.add(StructuredChatMessage(fallback))
         }

@@ -856,7 +856,7 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
                 "对方撤回了一条消息",
                 modifier = Modifier.clip(RoundedCornerShape(999.dp))
                     .background(incomingColor)
-                    .combinedClickable(onClick = { onMessageLongPress(message) }, onLongClick = { onMessageLongPress(message) })
+                    .combinedClickable(onClick = {}, onLongClick = { onMessageLongPress(message) })
                     .padding(horizontal = 13.dp, vertical = 5.dp),
                 color = secondaryTextColor,
                 fontSize = 12.sp
