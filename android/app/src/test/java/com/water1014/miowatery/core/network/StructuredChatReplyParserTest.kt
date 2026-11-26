@@ -23,6 +23,16 @@ class StructuredChatReplyParserTest {
     }
 
     @Test
+    fun parsesMessageRecallAndRecallLastMarkers() {
+        val parsed = StructuredChatReplyParser.parse(
+            """{"messages":[{"text":"说错了","recall":true},{"recall_last":true}]}"""
+        )
+        assertEquals(1, parsed.messages.size)
+        assertTrue(parsed.messages.single().isRecalled)
+        assertTrue(parsed.recallLast)
+    }
+
+    @Test
     fun supportsNarrationAndReplyFallback() {
         val narration = StructuredChatReplyParser.parse("""{"messages":[{"narr":"她轻轻笑了笑。"}]}""")
         assertTrue(narration.messages.single().isNarration)

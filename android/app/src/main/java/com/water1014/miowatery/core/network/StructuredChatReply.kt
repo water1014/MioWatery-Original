@@ -7,7 +7,8 @@ data class StructuredChatMessage(
     val text: String,
     val isNarration: Boolean = false,
     /** Original message object, including quote, translation, recall and sticker fields. */
-    val metadataJson: String? = null
+    val metadataJson: String? = null,
+    val isRecalled: Boolean = false
 )
 
 data class StructuredChatReply(
@@ -15,7 +16,8 @@ data class StructuredChatReply(
     val thought: String,
     val imagePrompt: String,
     /** Preserve the complete original response so unsupported legacy fields are not discarded. */
-    val rawJson: String = "{}"
+    val rawJson: String = "{}",
+    val recallLast: Boolean = false
 )
 
 /** Reads the JSON response shape used by the original MioWatery chat flow. */
@@ -40,6 +42,7 @@ object StructuredChatReplyParser {
         )
 
         val messages = mutableListOf<StructuredChatMessage>()
+        var recallLast = false
         val array = root.get("messages")
         if (array != null && array.isJsonArray) {
             array.asJsonArray.forEach { item ->
@@ -48,6 +51,11 @@ object StructuredChatReplyParser {
                         ?.let { messages.add(StructuredChatMessage(it)) }
                     item.isJsonObject -> {
                         val obj = item.asJsonObject
+                        if (obj.booleanValue("recall_last") && obj.stringValue("text").isBlank() &&
+                            obj.stringValue("content").isBlank() && obj.stringValue("narr").isBlank()
+                        ) {
+                            recallLast = true
+                        }
                         val narration = obj.stringValue("narr")
                         val text = narration.ifBlank {
                             obj.stringValue("text").ifBlank {
@@ -59,7 +67,9 @@ object StructuredChatReplyParser {
                                 StructuredChatMessage(
                                     text = text,
                                     isNarration = narration.isNotBlank(),
-                                    metadataJson = obj.toString()
+                                    metadataJson = obj.toString(),
+                                    isRecalled = obj.booleanValue("recall") || obj.stringValue("recall").equals("true", true) ||
+                                        obj.booleanValue("recalled")
                                 )
                             )
                         }
@@ -75,8 +85,14 @@ object StructuredChatReplyParser {
             messages = messages,
             thought = root.stringValue("thought"),
             imagePrompt = root.stringValue("image_prompt").trim(),
-            rawJson = root.toString()
+            rawJson = root.toString(),
+            recallLast = recallLast
         )
+    }
+
+    private fun com.google.gson.JsonObject.booleanValue(key: String): Boolean {
+        val value = get(key) ?: return false
+        return runCatching { value.asBoolean }.getOrDefault(false)
     }
 
     private fun com.google.gson.JsonObject.stringValue(key: String): String {

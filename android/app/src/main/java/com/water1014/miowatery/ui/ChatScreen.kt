@@ -357,6 +357,20 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     errorText = "模型返回了空内容，请检查模型配置或服务商响应。"
                 } else {
                     val assistantNow = System.currentTimeMillis()
+                    if (structuredReply.recallLast) {
+                        val previousAssistant = dao.getMessagesForConversation(conversationId)
+                            .asReversed()
+                            .firstOrNull { candidate ->
+                                if (candidate.role != "assistant") return@firstOrNull false
+                                val metadata = runCatching { JSONObject(candidate.metadataJson ?: "{}") }.getOrDefault(JSONObject())
+                                !metadata.optBoolean("recall") && metadata.optString("narr").isBlank()
+                            }
+                        if (previousAssistant != null) {
+                            val metadata = runCatching { JSONObject(previousAssistant.metadataJson ?: "{}") }.getOrDefault(JSONObject())
+                            metadata.put("recall", true)
+                            dao.insertMessages(listOf(previousAssistant.copy(metadataJson = metadata.toString())))
+                        }
+                    }
                     val assistantMessages = structuredReply.messages.mapIndexed { index, item ->
                         val thought = if (index == 0 && !item.isNarration) {
                             result.reasoning.ifBlank { structuredReply.thought }.takeIf { it.isNotBlank() }
@@ -370,7 +384,10 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                             timestamp = assistantNow + index,
                             reasoning = thought,
                             attachmentJson = null,
-                            metadataJson = item.metadataJson,
+                            metadataJson = if (item.isRecalled) {
+                                runCatching { JSONObject(item.metadataJson ?: "{}").put("recall", true).toString() }
+                                    .getOrDefault(item.metadataJson)
+                            } else item.metadataJson,
                             rawLegacyJson = if (index == 0) structuredReply.rawJson else "{}"
                         )
                     }
@@ -732,7 +749,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
             titleContentColor = chatText,
             textContentColor = chatText,
             onDismissRequest = { selectedMessage = null },
-            title = { Text("消息操作") },
+            title = { Text(if (runCatching { JSONObject(message.metadataJson ?: "{}").optBoolean("recall") }.getOrDefault(false)) "查看被撤回的内容" else "消息操作") },
             text = { Text(if (message.content.isBlank()) "图片消息" else message.content.take(240)) },
             confirmButton = {
                 TextButton(onClick = {
@@ -805,6 +822,7 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
         runCatching { JSONObject(message.metadataJson ?: "{}") }.getOrElse { JSONObject() }
     }
     val narration = metadata.optString("narr").trim()
+    val isRecalled = !fromUser && metadata.optBoolean("recall")
     val quote = metadata.optString("quote").trim()
     val translation = metadata.optString("tr").ifBlank { metadata.optString("translation") }.trim()
     val isNarration = !fromUser && narration.isNotBlank()
@@ -829,7 +847,22 @@ private fun ChatMessageBubble(message: MessageEntity, firstInGroup: Boolean, per
         bottomEnd = 16.dp,
         bottomStart = 16.dp
     )
-    if (isNarration) {
+    if (isRecalled) {
+        Box(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "对方撤回了一条消息",
+                modifier = Modifier.clip(RoundedCornerShape(999.dp))
+                    .background(incomingColor)
+                    .combinedClickable(onClick = { onMessageLongPress(message) }, onLongClick = { onMessageLongPress(message) })
+                    .padding(horizontal = 13.dp, vertical = 5.dp),
+                color = secondaryTextColor,
+                fontSize = 12.sp
+            )
+        }
+    } else if (isNarration) {
         Text(
             message.content,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 30.dp, vertical = 8.dp),
