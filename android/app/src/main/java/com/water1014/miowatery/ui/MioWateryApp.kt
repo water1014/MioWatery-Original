@@ -7,6 +7,7 @@ import androidx.compose.ui.layout.ContentScale
 import org.json.JSONObject
 import com.water1014.miowatery.core.desktop.DesktopThemePackStore
 import com.water1014.miowatery.core.desktop.DesktopThemePackInspector
+import com.water1014.miowatery.core.desktop.DesktopOrderResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
