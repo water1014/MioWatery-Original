@@ -113,8 +113,8 @@ fun ImageApiSettingsScreen(modifier: Modifier = Modifier) {
                 Field("CFG 重缩放", config.naiCfgRescale.toString(), { config = config.copy(naiCfgRescale = it.toFloatOrNull() ?: config.naiCfgRescale); saved = false }, "0")
                 Field("随机种子（留空为随机）", config.naiSeed, { config = config.copy(naiSeed = it); saved = false }, "随机")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    ToggleChoice("启用 SM", config.naiSm) { config = config.copy(naiSm = it); saved = false }
-                    ToggleChoice("启用 SM Dynamic", config.naiSmDynamic) { config = config.copy(naiSmDynamic = it); saved = false }
+                    ToggleChoice("启用 SM", config.naiSm, Modifier.weight(1f)) { config = config.copy(naiSm = it); saved = false }
+                    ToggleChoice("启用 SM Dynamic", config.naiSmDynamic, Modifier.weight(1f)) { config = config.copy(naiSmDynamic = it); saved = false }
                 }
                 Text("参数会发送给兼容的 NovelAI 接口；不同模型和中转站对参数的支持可能不同。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
