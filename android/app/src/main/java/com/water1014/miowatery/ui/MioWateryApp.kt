@@ -268,7 +268,8 @@ fun MioWateryApp() {
             } else if (selectedPage == "settings") {
                 SettingsScreen(
                     modifier = Modifier.padding(innerPadding),
-                    onOpenBackup = { selectedPage = "backup" }
+                    onOpenBackup = { selectedPage = "backup" },
+                    onBack = { selectedPage = "home" }
                 )
             } else if (selectedPage == "backup") {
                 BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
