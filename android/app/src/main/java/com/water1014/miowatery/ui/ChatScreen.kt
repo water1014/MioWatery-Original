@@ -370,8 +370,8 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                             timestamp = assistantNow + index,
                             reasoning = thought,
                             attachmentJson = null,
-                            metadataJson = null,
-                            rawLegacyJson = "{}"
+                            metadataJson = item.metadataJson,
+                            rawLegacyJson = if (index == 0) structuredReply.rawJson else "{}"
                         )
                     }
                     dao.insertMessages(assistantMessages)

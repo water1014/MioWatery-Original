@@ -3,12 +3,19 @@ package com.water1014.miowatery.core.network
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 
-data class StructuredChatMessage(val text: String, val isNarration: Boolean = false)
+data class StructuredChatMessage(
+    val text: String,
+    val isNarration: Boolean = false,
+    /** Original message object, including quote, translation, recall and sticker fields. */
+    val metadataJson: String? = null
+)
 
 data class StructuredChatReply(
     val messages: List<StructuredChatMessage>,
     val thought: String,
-    val imagePrompt: String
+    val imagePrompt: String,
+    /** Preserve the complete original response so unsupported legacy fields are not discarded. */
+    val rawJson: String = "{}"
 )
 
 /** Reads the JSON response shape used by the original MioWatery chat flow. */
@@ -47,7 +54,15 @@ object StructuredChatReplyParser {
                                 obj.stringValue("content").ifBlank { obj.stringValue("reply") }
                             }
                         }
-                        if (text.isNotBlank()) messages.add(StructuredChatMessage(text, narration.isNotBlank()))
+                        if (text.isNotBlank()) {
+                            messages.add(
+                                StructuredChatMessage(
+                                    text = text,
+                                    isNarration = narration.isNotBlank(),
+                                    metadataJson = obj.toString()
+                                )
+                            )
+                        }
                     }
                 }
             }
@@ -59,7 +74,8 @@ object StructuredChatReplyParser {
         return StructuredChatReply(
             messages = messages,
             thought = root.stringValue("thought"),
-            imagePrompt = root.stringValue("image_prompt").trim()
+            imagePrompt = root.stringValue("image_prompt").trim(),
+            rawJson = root.toString()
         )
     }
 
