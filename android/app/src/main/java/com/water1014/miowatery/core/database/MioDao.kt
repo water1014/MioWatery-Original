@@ -165,10 +165,10 @@ interface MioDao {
 
     @Query("DELETE FROM sticker_groups WHERE profileId = :profileId AND name = :groupName")
     suspend fun deleteStickerGroup(profileId: String, groupName: String)
-}
 
     @Query("SELECT * FROM wallet_states WHERE profileId = :profileId ORDER BY ownerId")
     fun observeWalletStates(profileId: String): Flow<List<WalletStateEntity>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWalletState(state: WalletStateEntity)
 }

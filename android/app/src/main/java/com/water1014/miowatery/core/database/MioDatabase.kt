@@ -156,8 +156,8 @@ abstract class MioDatabase : RoomDatabase() {
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_wallet_states_profileId ON wallet_states(profileId)")
                 database.execSQL("CREATE INDEX IF NOT EXISTS index_wallet_states_ownerId ON wallet_states(ownerId)")
             }
-        }
-\n        @Volatile private var instance: MioDatabase? = null
+
+        @Volatile private var instance: MioDatabase? = null
 
         fun getInstance(context: Context): MioDatabase =
             instance ?: synchronized(this) {
