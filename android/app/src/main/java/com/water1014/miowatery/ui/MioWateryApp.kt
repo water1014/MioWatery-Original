@@ -122,7 +122,6 @@ private val appEntries = listOf(
     AppEntry("settings", "设置", "应用设置", R.drawable.mio_ic_settings),
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MioWateryApp() {
     val context = LocalContext.current
@@ -130,8 +129,6 @@ fun MioWateryApp() {
     LaunchedEffect(context) {
         desktopPackJson = withContext(Dispatchers.IO) { DesktopThemePackStore.load(context) }
     }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
     var showSplash by remember { mutableStateOf(true) }
     var selectedPage by remember { mutableStateOf("home") }
     var selectedPersonaId by remember { mutableStateOf("default") }
@@ -139,159 +136,78 @@ fun MioWateryApp() {
     var chatReturnPage by remember { mutableStateOf("home") }
     val selectedEntry = appEntries.firstOrNull { it.id == selectedPage }
 
-    BackHandler(enabled = drawerState.isOpen || selectedPage != "home") {
-        if (drawerState.isOpen) {
-            scope.launch { drawerState.close() }
-        } else {
-            selectedPage = when (selectedPage) {
-                "chatmemory" -> "app"
-                "backup" -> "settings"
-                "app" -> chatReturnPage
-                else -> "home"
-            }
+    BackHandler(enabled = selectedPage != "home") {
+        selectedPage = when (selectedPage) {
+            "chatmemory" -> "app"
+            "backup" -> "settings"
+            "app" -> chatReturnPage
+            else -> "home"
         }
     }
 
     Box(Modifier.fillMaxSize()) {
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                Text(
-                    text = "MioWatery",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 28.dp)
-                )
-                NavigationDrawerItem(
-                    label = { Text("首页") },
-                    selected = selectedPage == "home",
-                    onClick = {
-                        selectedPage = "home"
-                        scope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-                appEntries.forEach { entry ->
-                    NavigationDrawerItem(
-                        label = { Text(entry.title) },
-                        selected = selectedPage == entry.id,
-                        onClick = {
-                            selectedPage = entry.id
-                            scope.launch { drawerState.close() }
-                        },
-                        modifier = Modifier.padding(horizontal = 12.dp),
-                        icon = { Icon(painterResource(entry.icon), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-                    )
-                }
-            }
+        when (selectedPage) {
+            "home" -> HomeScreen(
+                modifier = Modifier.fillMaxSize(),
+                desktopPackJson = desktopPackJson,
+                onOpen = { selectedPage = it }
+            )
+            "personas" -> PersonaScreen(
+                onBack = { selectedPage = "home" },
+                onOpenChat = { id ->
+                    selectedPersonaId = id
+                    chatReturnPage = "personas"
+                    selectedPage = "app"
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+            "app" -> ChatScreen(
+                onBack = { selectedPage = chatReturnPage },
+                onOpenMemory = { id -> selectedConversationId = id; selectedPage = "chatmemory" },
+                personaId = selectedPersonaId,
+                modifier = Modifier.fillMaxSize()
+            )
+            "music" -> MusicScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "wallet" -> WalletScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "msgs" -> MessageAppScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "couple" -> CoupleScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "coread" -> CoreadScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "worlds" -> WorldbookScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "desktopcustom" -> DesktopThemePackScreen(
+                onBack = { selectedPage = "home" },
+                onApplied = { json -> desktopPackJson = json; selectedPage = "home" },
+                modifier = Modifier.fillMaxSize()
+            )
+            "diary" -> DiaryScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "rolephones" -> RolePhoneScreen(onBack = { selectedPage = "home" }, modifier = Modifier.fillMaxSize())
+            "chatmemory" -> MemoryScreen(
+                onBack = { selectedPage = "app" },
+                conversationId = selectedConversationId,
+                modifier = Modifier.fillMaxSize()
+            )
+            "settings" -> SettingsScreen(
+                modifier = Modifier.fillMaxSize(),
+                onOpenBackup = { selectedPage = "backup" },
+                onBack = { selectedPage = "home" }
+            )
+            "backup" -> BackupPreviewScreen(
+                modifier = Modifier.fillMaxSize(),
+                onBack = { selectedPage = "settings" }
+            )
+            else -> FeaturePlaceholder(
+                title = selectedEntry?.title ?: "功能",
+                modifier = Modifier.fillMaxSize(),
+                onBack = { selectedPage = "home" }
+            )
         }
-    ) {
-        Scaffold(
-            topBar = {
-                if (selectedPage in setOf("diary", "backup", "offline", "wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube")) TopAppBar(
-                    title = {
-                        Column {
-                            Text(selectedEntry?.title ?: if (selectedPage == "backup") "备份与旧版数据迁移" else "MioWatery")
-                            if (selectedPage == "home") {
-                                Text(
-                                    "原生版 · 初始框架",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                if (selectedPage == "home") {
-                                    scope.launch { drawerState.open() }
-                                } else {
-                                    selectedPage = "home"
-                                }
-                            }
-                        ) {
-                            Icon(
-                                painter = painterResource(if (selectedPage == "home") R.drawable.mio_ic_menu else R.drawable.mio_ic_back),
-                                contentDescription = if (selectedPage == "home") "打开导航" else "返回首页"
-                            )
-                        }
-                    }
-                )
-            }
-        ) { innerPadding ->
-            if (selectedPage == "home") {
-                HomeScreen(
-                    modifier = Modifier.padding(innerPadding),
-                    desktopPackJson = desktopPackJson,
-                    onOpen = { selectedPage = it }
-                )
-            } else if (selectedPage == "personas") {
-                PersonaScreen(
-                    onBack = { selectedPage = "home" },
-                    onOpenChat = { id ->
-                        selectedPersonaId = id
-                        chatReturnPage = "personas"
-                        selectedPage = "app"
-                    },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            } else if (selectedPage == "app") {
-                ChatScreen(
-                    onBack = { selectedPage = chatReturnPage },
-                    onOpenMemory = { id -> selectedConversationId = id; selectedPage = "chatmemory" },
-                    personaId = selectedPersonaId,
-                    modifier = Modifier.padding(innerPadding)
-                )
-            } else if (selectedPage == "music") {
-                MusicScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "wallet") {
-                WalletScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "msgs") {
-                MessageAppScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "couple") {
-                CoupleScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "coread") {
-                CoreadScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "worlds") {
-                WorldbookScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "desktopcustom") {
-                DesktopThemePackScreen(
-                    onBack = { selectedPage = "home" },
-                    onApplied = { json -> desktopPackJson = json; selectedPage = "home" },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            } else if (selectedPage == "diary") {
-                DiaryScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "rolephones") {
-                RolePhoneScreen(onBack = { selectedPage = "home" }, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "chatmemory") {
-                MemoryScreen(onBack = { selectedPage = "app" }, conversationId = selectedConversationId, modifier = Modifier.padding(innerPadding))
-            } else if (selectedPage == "settings") {
-                SettingsScreen(
-                    modifier = Modifier.padding(innerPadding),
-                    onOpenBackup = { selectedPage = "backup" },
-                    onBack = { selectedPage = "home" }
-                )
-            } else if (selectedPage == "backup") {
-                BackupPreviewScreen(modifier = Modifier.padding(innerPadding))
-            } else {
-                FeaturePlaceholder(
-                    title = selectedEntry?.title ?: "功能",
-                    modifier = Modifier.padding(innerPadding),
-                    onBack = { selectedPage = "home" }
-                )
-            }
+        if (showSplash) {
+            MioSplashScreen(onFinished = { showSplash = false })
         }
     }
-    if (showSplash) {
-        MioSplashScreen(onFinished = { showSplash = false })
-    }
-}
 }
 
 @Composable
-private fun BackupPreviewScreen(modifier: Modifier = Modifier) {
+private fun BackupPreviewScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var preview by remember { mutableStateOf<LegacyBackupPreview?>(null) }
@@ -329,6 +245,10 @@ private fun BackupPreviewScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = onBack) { Text("返回") }
+            Text("备份与旧版数据迁移", style = MaterialTheme.typography.titleMedium)
+        }
         Card(shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Icon(painter = painterResource(R.drawable.mio_ic_backup), contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(30.dp))
