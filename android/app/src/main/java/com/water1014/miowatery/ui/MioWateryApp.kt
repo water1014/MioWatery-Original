@@ -871,7 +871,9 @@ private fun HomeScreen(
                                 ) {
                                     visibleApps.forEach { entry ->
                                         Column(
-                                            Modifier.fillMaxWidth().clickable { onOpen(entry.id) },
+                                            Modifier.fillMaxWidth()
+                                                .clickable { if (activeDragId.value == null) onOpen(entry.id) }
+                                                .desktopSortable(entry.id, sortableBounds, activeDragId, dragPosition, ::swapDesktopApps),
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Box(Modifier.size(44.dp).background(Color.White, RoundedCornerShape(14.dp)), contentAlignment = Alignment.Center) {
@@ -972,7 +974,10 @@ private fun HomeScreen(
                             ) {
                                 items(visibleApps) { entry ->
                                     Column(
-                                        Modifier.fillMaxWidth().clickable { onOpen(entry.id) }.padding(vertical = 2.dp),
+                                        Modifier.fillMaxWidth()
+                                            .clickable { if (activeDragId.value == null) onOpen(entry.id) }
+                                            .desktopSortable(entry.id, sortableBounds, activeDragId, dragPosition, ::swapDesktopApps)
+                                            .padding(vertical = 2.dp),
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         Box(Modifier.size(58.dp).background(panel, RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
