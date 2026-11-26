@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.google.gson.JsonParser
 import com.water1014.miowatery.core.network.ApiConfigStore
 import com.water1014.miowatery.core.network.SavedApiConfig
 import kotlinx.coroutines.launch
@@ -80,9 +82,39 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Text("快捷配置", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            baseUrl = "https://opencode.ai/zen/go"
+                            savedMessage = null
+                            errorMessage = null
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("OpenCode Go") }
+                    OutlinedButton(
+                        onClick = {
+                            baseUrl = "https://api.deepseek.com/v1"
+                            model = "deepseek-chat"
+                            savedMessage = null
+                            errorMessage = null
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) { Text("DeepSeek") }
+                }
+                OutlinedButton(
+                    onClick = {
+                        savedMessage = null
+                        errorMessage = null
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) { Text("通用 OpenAI 兼容接口（保留当前地址和模型）") }
                 OutlinedTextField(
                     value = baseUrl,
-                    onValueChange = { baseUrl = it; savedMessage = null },
+                    onValueChange = { baseUrl = it; savedMessage = null; errorMessage = null },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("API 地址") },
                     placeholder = { Text("https://example.com/v1") },
@@ -90,7 +122,7 @@ fun SettingsScreen(
                 )
                 OutlinedTextField(
                     value = model,
-                    onValueChange = { model = it; savedMessage = null },
+                    onValueChange = { model = it; savedMessage = null; errorMessage = null },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("模型名称") },
                     placeholder = { Text("填写服务商提供的模型 ID") },
@@ -98,7 +130,7 @@ fun SettingsScreen(
                 )
                 OutlinedTextField(
                     value = apiKey,
-                    onValueChange = { apiKey = it; savedMessage = null },
+                    onValueChange = { apiKey = it; savedMessage = null; errorMessage = null },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("API Key") },
                     visualTransformation = PasswordVisualTransformation(),
@@ -106,7 +138,7 @@ fun SettingsScreen(
                 )
                 OutlinedTextField(
                     value = headers,
-                    onValueChange = { headers = it; savedMessage = null },
+                    onValueChange = { headers = it; savedMessage = null; errorMessage = null },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("自定义请求头（JSON，可留空）") },
                     placeholder = { Text("{\"X-Example\": \"value\"}") },
@@ -122,9 +154,29 @@ fun SettingsScreen(
                 savedMessage?.let { Text(it, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodySmall) }
                 Button(
                     onClick = {
-                        saving = true
                         errorMessage = null
                         savedMessage = null
+                        val rawHeaders = headers.trim()
+                        if (rawHeaders.isNotEmpty()) {
+                            val parsedHeaders = try {
+                                JsonParser.parseString(rawHeaders)
+                            } catch (_: Exception) {
+                                errorMessage = "请求头 JSON 格式错误，请检查引号、逗号和括号"
+                                return@Button
+                            }
+                            if (!parsedHeaders.isJsonObject) {
+                                errorMessage = "自定义请求头必须是 JSON 对象"
+                                return@Button
+                            }
+                            val invalidHeader = parsedHeaders.asJsonObject.entrySet().firstOrNull { entry ->
+                                entry.key.isBlank() || !entry.value.isJsonPrimitive
+                            }
+                            if (invalidHeader != null) {
+                                errorMessage = "请求头名称不能为空，值必须是字符串、数字或布尔值"
+                                return@Button
+                            }
+                        }
+                        saving = true
                         scope.launch {
                             try {
                                 store.save(SavedApiConfig(
