@@ -504,15 +504,17 @@ private fun HomeScreen(
         "p4" to listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube"),
         "dock" to listOf("app", "worlds", "personas", "settings")
     )
-    val groupForApp = groupDefaults.flatMap { (group, ids) -> ids.map { it to group } }.toMap()
     fun idsInGroup(group: String): List<String> {
-        val ids = groupDefaults[group].orEmpty().filterNot { it in hiddenDesktopIds }
-        val rank = desktopOrder[group].orEmpty().withIndex().associate { it.value to it.index }
-        return ids.sortedBy { rank[it] ?: Int.MAX_VALUE }
+        val saved = desktopOrder[group].orEmpty()
+        val ids = (if (saved.isNotEmpty()) saved else groupDefaults[group].orEmpty()).distinct()
+        return ids.filterNot { it in hiddenDesktopIds && appEntries.any { entry -> entry.id == it } }
+            .filter { id -> appEntries.any { it.id == id } }
     }
+    fun currentGroupFor(id: String): String? =
+        groupDefaults.keys.firstOrNull { id in idsInGroup(it) }
     fun swapDesktopApps(first: String, second: String) {
-        val firstGroup = groupForApp[first] ?: return
-        val secondGroup = groupForApp[second] ?: return
+        val firstGroup = currentGroupFor(first) ?: return
+        val secondGroup = currentGroupFor(second) ?: return
         if (firstGroup == secondGroup) {
             val ids = idsInGroup(firstGroup).toMutableList()
             val a = ids.indexOf(first)
@@ -642,10 +644,10 @@ private fun HomeScreen(
     val sub = Color(0xFF6B7480)
     val panel = Color(0xFFF3F4F5)
     fun orderedDesktopApps(ids: List<String>, group: String): List<AppEntry> {
-        val visible = ids.filterNot { it in hiddenDesktopIds }
+        val saved = desktopOrder[group].orEmpty()
+        val source = if (saved.isNotEmpty()) saved else ids
+        return source.distinct().filterNot { it in hiddenDesktopIds }
             .mapNotNull { id -> appEntries.firstOrNull { it.id == id } }
-        val rank = desktopOrder[group].orEmpty().withIndex().associate { it.value to it.index }
-        return visible.sortedBy { rank[it.id] ?: Int.MAX_VALUE }
     }
     val dock = orderedDesktopApps(listOf("app", "worlds", "personas", "settings"), "dock")
     Box(modifier.fillMaxSize()) {
