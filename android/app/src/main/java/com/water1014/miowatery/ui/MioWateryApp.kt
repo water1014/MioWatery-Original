@@ -607,60 +607,76 @@ private fun HomeScreen(
                     ) {
                         if (page == 2) {
                             Card(
-                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onOpen("music") },
+                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                                 shape = RoundedCornerShape(24.dp),
                                 colors = CardDefaults.cardColors(containerColor = Color.White),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                             ) {
-                                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp)) {
+                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                         Box(
-                                            Modifier.size(104.dp).clip(RoundedCornerShape(14.dp)).background(panel),
+                                            Modifier.size(104.dp).clip(RoundedCornerShape(14.dp)).background(
+                                                androidx.compose.ui.graphics.Brush.linearGradient(listOf(Color(0xFFE4E5E8), Color(0xFFC9CCD1)))
+                                            ).clickable {
+                                                imageSlot = 4
+                                                desktopImagePicker.launch(arrayOf("image/*"))
+                                            },
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            if (!musicCover.isNullOrBlank()) {
-                                                AsyncImage(model = musicCover, contentDescription = "音乐封面", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                            } else {
-                                                Text("♫", color = sub, fontSize = 34.sp)
-                                            }
+                                            if (!musicCover.isNullOrBlank()) AsyncImage(model = musicCover, contentDescription = "音乐封面", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                            else Text("♫", color = Color(0xFF9A9EA6), fontSize = 34.sp)
                                         }
-                                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                                            Text(if (musicPlaying) "正在播放" else "最近播放", color = sub, style = MaterialTheme.typography.labelSmall)
-                                            Text(musicTitle, color = ink, style = MaterialTheme.typography.titleMedium, maxLines = 2)
-                                            Text(musicArtist, color = sub, style = MaterialTheme.typography.bodySmall, maxLines = 1)
-                                            Text(if (musicPlaying) "正在播放 · 轻触打开控制" else "已暂停 · 轻触打开音乐", color = sub, style = MaterialTheme.typography.bodySmall)
-                                            Text("打开音乐播放器  ›", color = ink, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 5.dp))
+                                        Column(Modifier.weight(1f).padding(top = 2.dp, end = 30.dp)) {
+                                            Text("播放中", color = Color(0xFF8A8D94), fontSize = 12.sp)
+                                            Text(musicTitle.ifBlank { "未在播放" }, color = Color(0xFF171719), fontSize = 17.sp, lineHeight = 21.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+                                            Text(musicArtist.ifBlank { "—" }, color = Color(0xFF8A8D94), fontSize = 15.sp, maxLines = 1)
+                                            Button(
+                                                onClick = {
+                                                    musicPrefs.edit().putBoolean("play_on_open", true).apply()
+                                                    onOpen("music")
+                                                },
+                                                modifier = Modifier.padding(top = 10.dp).height(32.dp),
+                                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                                shape = RoundedCornerShape(16.dp)
+                                            ) { Text("▶  播放", fontSize = 13.sp) }
+                                        }
+                                        Box(Modifier.size(28.dp).clickable { onOpen("music") }, contentAlignment = Alignment.Center) {
+                                            Text("♫", color = Color(0xFF171719), fontSize = 22.sp)
                                         }
                                     }
-                                    Text("最近播放", color = ink, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                                    if (musicRecent.isEmpty()) {
-                                        Text("还没有播放记录", color = sub, style = MaterialTheme.typography.bodySmall)
-                                    } else {
-                                        musicRecent.forEach { track ->
-                                            Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable {
-                                                musicTitle = track.name
-                                                musicArtist = track.artist
-                                                musicCover = track.coverUri
-                                                musicPrefs.edit()
-                                                    .putString("track_uri", track.uri)
-                                                    .putString("track_name", track.name)
-                                                    .putString("artist_name", track.artist)
-                                                    .putString("cover_uri", track.coverUri)
-                                                    .putBoolean("play_on_open", true)
-                                                    .putBoolean("is_playing", false)
-                                                    .apply()
-                                                onOpen("music")
-                                            }.padding(vertical = 5.dp),
-                                                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                                                Box(Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)).background(panel), contentAlignment = Alignment.Center) {
-                                                    if (!track.coverUri.isNullOrBlank()) AsyncImage(model = track.coverUri, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                                    else Text("♫", color = sub, fontSize = 17.sp)
+                                    Column(Modifier.fillMaxWidth().padding(top = 14.dp).border(0.7.dp, Color(0xFFEEF0F2), RoundedCornerShape(1.dp)).padding(top = 12.dp)) {
+                                        Text("最近播放", color = Color(0xFF8A8D94), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
+                                        if (musicRecent.isEmpty()) {
+                                            Text("还没有播放记录", color = sub, style = MaterialTheme.typography.bodySmall)
+                                        } else {
+                                            musicRecent.forEach { track ->
+                                                Row(
+                                                    Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable {
+                                                        musicTitle = track.name
+                                                        musicArtist = track.artist
+                                                        musicCover = track.coverUri
+                                                        musicPrefs.edit()
+                                                            .putString("track_uri", track.uri)
+                                                            .putString("track_name", track.name)
+                                                            .putString("artist_name", track.artist)
+                                                            .putString("cover_uri", track.coverUri)
+                                                            .putBoolean("play_on_open", true)
+                                                            .putBoolean("is_playing", false)
+                                                            .apply()
+                                                        onOpen("music")
+                                                    }.padding(vertical = 5.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(11.dp)
+                                                ) {
+                                                    Box(Modifier.size(40.dp).clip(RoundedCornerShape(9.dp)).background(panel), contentAlignment = Alignment.Center) {
+                                                        if (!track.coverUri.isNullOrBlank()) AsyncImage(model = track.coverUri, contentDescription = null, modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                                        else Text("♫", color = sub, fontSize = 18.sp)
+                                                    }
+                                                    Column(Modifier.weight(1f)) {
+                                                        Text(track.name, color = Color(0xFF171719), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                                                        Text(track.artist, color = Color(0xFF8A8D94), fontSize = 12.sp, maxLines = 1)
+                                                    }
                                                 }
-                                                Column(Modifier.weight(1f)) {
-                                                    Text(track.name, color = ink, style = MaterialTheme.typography.bodySmall, maxLines = 1)
-                                                    Text(track.artist, color = sub, style = MaterialTheme.typography.labelSmall, maxLines = 1)
-                                                }
-                                                Text("播放", color = sub, style = MaterialTheme.typography.labelSmall)
                                             }
                                         }
                                     }
