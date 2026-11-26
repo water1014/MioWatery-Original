@@ -778,6 +778,23 @@ private fun HomeScreen(
                                         }
                                     }
                                 }
+                                Column(Modifier.weight(1.05f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    HomePanel("文案与照片", Modifier.fillMaxWidth().clickable { editQuote = true }) {
+                                        Text(quoteLine1, color = ink, style = MaterialTheme.typography.titleSmall)
+                                        if (quoteLine2.isNotBlank()) Text(quoteLine2, color = sub, style = MaterialTheme.typography.bodySmall)
+                                        Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            listOf(quoteImage1, quoteImage2, quoteImage3).forEachIndexed { index, image ->
+                                                Box(Modifier.weight(1f).height(82.dp).background(panel, RoundedCornerShape(12.dp)).clickable {
+                                                    imageSlot = index + 1
+                                                    desktopImagePicker.launch(arrayOf("image/*"))
+                                                }, contentAlignment = Alignment.Center) {
+                                                    if (image.isNotBlank()) AsyncImage(model = image, contentDescription = "文案照片", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                                    else Text("＋", color = sub, fontSize = 22.sp)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                                 Column(Modifier.weight(0.95f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     HomePanel("Recent Searches", Modifier.fillMaxWidth().clickable { editSearches = true }) {
                                         Row(Modifier.fillMaxWidth().padding(bottom = 7.dp), horizontalArrangement = Arrangement.End) {
@@ -793,21 +810,6 @@ private fun HomeScreen(
                                                 Text(term.ifBlank { " " }, Modifier.weight(1f), color = Color(0xFF111111), fontSize = 10.sp, maxLines = 2)
                                             }
                                             if (term != recent3) Divider(color = Color(0xFFE3E3E5), thickness = 0.6.dp)
-                                        }
-                                    }
-                                }
-                            }
-                            HomePanel("文案与照片", Modifier.fillMaxWidth().padding(top = 16.dp).clickable { editQuote = true }) {
-                                Text(quoteLine1, color = ink, style = MaterialTheme.typography.titleSmall)
-                                if (quoteLine2.isNotBlank()) Text(quoteLine2, color = sub, style = MaterialTheme.typography.bodySmall)
-                                Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    listOf(quoteImage1, quoteImage2, quoteImage3).forEachIndexed { index, image ->
-                                        Box(Modifier.weight(1f).height(82.dp).background(panel, RoundedCornerShape(12.dp)).clickable {
-                                            imageSlot = index + 1
-                                            desktopImagePicker.launch(arrayOf("image/*"))
-                                        }, contentAlignment = Alignment.Center) {
-                                            if (image.isNotBlank()) AsyncImage(model = image, contentDescription = "文案照片", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                            else Text("＋", color = sub, fontSize = 22.sp)
                                         }
                                     }
                                 }
