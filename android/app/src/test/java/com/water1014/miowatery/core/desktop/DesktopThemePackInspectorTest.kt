@@ -63,6 +63,37 @@ class DesktopThemePackInspectorTest {
     }
 
     @Test
+    fun updatesDesktopOrderWithoutDiscardingExistingThemeData() {
+        val original = """
+            {
+              "app": "xsj-desktop-theme",
+              "v": 1,
+              "name": "My desk",
+              "desktop": {
+                "wallpaper": "https://example.com/wallpaper.webp",
+                "icons": {"wallet": "https://example.com/wallet.png"},
+                "order": {"p4": ["wallet", "music"]}
+              }
+            }
+        """.trimIndent()
+
+        val updated = DesktopThemePackStore.updateOrder(
+            original,
+            mapOf("p4" to listOf("music", "wallet", "bad id"))
+        )
+        val root = org.json.JSONObject(updated)
+        val desktop = root.getJSONObject("desktop")
+
+        assertEquals("My desk", root.getString("name"))
+        assertEquals("https://example.com/wallpaper.webp", desktop.getString("wallpaper"))
+        assertEquals("https://example.com/wallet.png", desktop.getJSONObject("icons").getString("wallet"))
+        assertEquals(listOf("music", "wallet"), buildList {
+            val ids = desktop.getJSONObject("order").getJSONArray("p4")
+            for (index in 0 until ids.length()) add(ids.getString(index))
+        })
+    }
+
+    @Test
     fun rejectsUnknownPackFormat() {
         val failure = runCatching {
             DesktopThemePackInspector.inspect("""{"app":"other","v":1,"desktop":{}}""")
