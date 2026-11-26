@@ -1679,25 +1679,6 @@ button.feed-follow-plus{padding:0;cursor:pointer}
 /* Gacha machine casing: neutral cool gray; keep the red header lettering unchanged */
 .gc-cap{background:#FEFFF7!important;border-color:#FEFFF7!important}
 .gc-body{background:#FEFFF7!important;border-color:#FEFFF7!important}
-
-/* API 自定义请求头：收进主卡片的设置分组，减少套卡片的突兀感 */
-.api-header-panel{margin:18px 0 16px;padding:14px 0 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
-.api-header-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 9px}
-.api-header-title{font-size:14px;font-weight:650;letter-spacing:.01em;color:var(--ink)}
-.api-header-subtitle{margin-top:3px;font-size:11px;color:var(--sub);line-height:1.5}
-.api-header-tag{flex:none;padding:3px 8px;border-radius:7px;background:var(--p);border:1px solid var(--line);font-size:10px;color:var(--sub);letter-spacing:.04em}
-.api-header-panel textarea#c-headers{display:block;box-sizing:border-box;width:100%;min-height:88px;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--p);color:var(--ink);font:12px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;outline:none;transition:border-color .18s,box-shadow .18s}
-.api-header-panel textarea#c-headers:focus{border-color:var(--sub);box-shadow:0 0 0 3px color-mix(in srgb,var(--ink) 6%,transparent)}
-.api-header-hint{display:flex;align-items:flex-start;gap:7px;margin:9px 1px 10px;font-size:11px;line-height:1.6;color:var(--sub)}
-.api-header-hint-dot{width:6px;height:6px;margin-top:5px;border-radius:50%;background:#30a46c;flex:none}
-.api-header-hint code{padding:1px 4px;border-radius:4px;background:var(--p);font:10px ui-monospace,monospace;color:var(--ink)}
-.api-header-fill{display:inline-flex;align-items:center;gap:7px;width:auto;max-width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--sub);font-size:11px;font-weight:550;text-align:left;transition:background .15s,border-color .15s}
-.api-header-fill:active{background:var(--p);border-color:var(--sub)}
-.api-header-fill>span:first-child{color:var(--sub);font-size:13px}
-.api-header-arrow{margin-left:2px;font-size:17px;color:var(--sub);line-height:1}
-[data-theme=dark] .api-header-panel{background:transparent;border-color:var(--line)}
-[data-theme=dark] .api-header-tag,[data-theme=dark] .api-header-panel textarea#c-headers,[data-theme=dark] .api-header-fill{background:#202023;border-color:#38383d}
-@media(max-width:380px){.api-header-panel{margin-top:15px}.api-header-fill{width:100%;justify-content:flex-start}}
 </style>
 <style id="ucss"></style>
 
@@ -1881,7 +1862,7 @@ button.feed-follow-plus{padding:0;cursor:pointer}
 .of-bar{overflow-x:auto;scrollbar-width:none}.of-bar::-webkit-scrollbar{display:none}
 .of-bar button{flex:none;white-space:nowrap;padding:6px 12px}
 </style>
-<style id="fix61-dcw-off">#v-home #home-page2 .dcw-off,#v-home #home-page3 .dcw-off,#v-home #home-page4 .dcw-off,#v-home .dcw-off{display:none!important}</style>
+<style id="fix61-dcw-off">#v-home #home-page2 .dcw-off,#v-home #home-page3 .dcw-off,#v-home #home-page4 .dcw-off,#v-home .dcw-off{display:none!important}/* 这三个组件的布局规则选择器更具体（带 #id + !important），要用更高优先级才压得住 */#v-home #home-page2 #desktop-quote-widget.dcw-off,#v-home #home-page3 #p3-calendar.dcw-off,#v-home #home-page4 #p4-music.dcw-off,#v-home #home-page2 #recent-search-widget.dcw-off,#v-home .wrap>#tw.dcw-off,#v-home .wrap>#memo-image-card.dcw-off,#v-home .wrap>.recent-glass.dcw-off{display:none!important}</style>
 <style id="p3-hide-imessage-leave-blank">
 /* 第三页：移除 iMessage 卡片，日历和四个横排 App 保留，下面留白 */
 #home-page3 .page3-layout{
@@ -3125,7 +3106,7 @@ setTimeout(function(){finish(false)},7600);
 <section class="view" id="v-settings">
   <div class="bar"><button class="bk" data-back>‹</button><h2>设置</h2></div>
   <div class="body" id="settings-main">
-    <button class="ios-account row" id="open-settings-profile" type="button" style="width:100%;text-align:left"><div class="av" id="m-av"></div><div><p id="ios-name">个人资料</p><small>头像、账号与个人简介</small></div><span class="chev">›</span></button>
+    <button class="ios-account row" id="open-settings-profile" type="button" style="width:100%;text-align:left"><div class="av" id="m-av"></div><div><p id="ios-name">我的资料</p><small>头像、账号与个人简介</small></div><span class="chev">›</span></button>
     <div class="ios-group">
       <button class="ios-row" data-setting-section="appearance"><span class="ios-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></span><span>外观</span><span class="ios-value" id="ios-theme">浅色</span><span class="chev">›</span></button>
       <button class="ios-row" data-setting-section="innervoice"><span class="ios-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-4 3v-3H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M8 10h8M8 13h5"/></svg></span><span>心声</span><span class="chev">›</span></button>
@@ -3135,28 +3116,28 @@ setTimeout(function(){finish(false)},7600);
       <button class="ios-row" data-setting-section="fball"><span class="ios-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg></span><span>悬浮球</span><span class="chev">›</span></button>
       <button class="ios-row" data-setting-section="data"><span class="ios-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v5c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 10v5c0 1.7 3.6 3 8 3s8-1.3 8-3v-5M4 15v4c0 1.7 3.6 3 8 3s8-1.3 8-3v-4"/></svg></span><span>数据与备份</span><span class="chev">›</span></button>
     </div>
-    <p class="note" style="padding:0 5px">选择一个分类来配置对应设置。</p>
+    <p class="note" style="padding:0 5px">选择一个分类来配置相关设置。</p>
   </div>
   <div class="body settings-sub" id="settings-fball" style="display:none">
-    <div class="cap">悬浮球</div><div class="card"><label class="chk" style="margin-top:0"><input type="checkbox" id="c-fball">显示悬浮球</label><p class="note" style="margin-top:8px">开启后屏幕上会出现可拖动的小圆球，轻点可快速切换 API 预设，或一键回到主画面。</p><div class="fb-img"><span id="c-fball-prev" class="fb-prev"></span><div class="fb-act"><button class="btn fill" id="c-fball-img" type="button">更换图片</button><button class="btn" id="c-fball-img-clear" type="button">恢复默认</button></div></div><p class="note" style="margin-top:8px">支持相册图片、图片链接和 GIF 动图（GIF 不超过 3MB）。透明背景的 PNG 或 GIF 会按图片本身的形状显示，不带底圈。</p><label class="chk"><input type="checkbox" id="c-fball-round">将图片裁剪为圆形</label><div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>悬浮球大小</span><span id="c-fball-size-v">46px</span></div><input type="range" id="c-fball-size" min="28" max="96" step="1" style="width:100%;margin-top:8px"></div><label class="chk" style="margin-top:14px"><input type="checkbox" id="c-lyrwin">播放音乐时显示歌词悬浮窗</label><p class="note" style="margin-top:8px">听歌时退出音乐 App，会出现一个可上下拖动的歌词悬浮窗；左滑或右滑可收起到屏幕边缘，点边缘小标签再展开。</p></div>
+    <div class="cap">悬浮球</div><div class="card"><label class="chk" style="margin-top:0"><input type="checkbox" id="c-fball">Show 悬浮球</label><p class="note" style="margin-top:8px">开启后屏幕上会出现可拖动的小圆球，轻点可快速切换 API 预设，或一键回到主画面。</p><div class="fb-img"><span id="c-fball-prev" class="fb-prev"></span><div class="fb-act"><button class="btn fill" id="c-fball-img" type="button">更换图片</button><button class="btn" id="c-fball-img-clear" type="button">恢复默认</button></div></div><p class="note" style="margin-top:8px">支持相册图片、图片链接和 GIF 动图（GIF 不超过 3MB）。透明背景的 PNG 或 GIF 会按图片本身的形状显示，不带底圈。</p><label class="chk"><input type="checkbox" id="c-fball-round">图片裁剪为圆形</label><div style="margin-top:14px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>悬浮球大小</span><span id="c-fball-size-v">46px</span></div><input type="range" id="c-fball-size" min="28" max="96" step="1" style="width:100%;margin-top:8px"></div><label class="chk" style="margin-top:14px"><input type="checkbox" id="c-lyrwin">播放音乐时显示歌词悬浮窗</label><p class="note" style="margin-top:8px">听歌时退出音乐 App，会出现一个可上下拖动的歌词悬浮窗；左滑或右滑可收起到屏幕边缘，点边缘小标签再展开。</p></div>
   </div>
   <div class="body settings-sub" id="settings-system" style="display:none">
-    <div class="cap">后台保活</div><div class="card"><label class="chk"><input type="checkbox" id="c-keepalive">后台保活（静音播放，并在灵动岛／锁屏显示播放卡片）</label><p class="note">开启后会循环播放静音音频，降低系统暂停应用的概率。角色的新消息会显示在播放卡片上。点击屏幕即可启动。音乐播放优先级更高。iOS 仍可能暂停应用。</p></div>
+    <div class="cap">后台保活</div><div class="card"><label class="chk"><input type="checkbox" id="c-keepalive">后台保活（静音播放，并在灵动岛／锁屏显示播放卡片）</label><p class="note">开启后会循环播放一段静音音轨，降低系统暂停应用的概率。角色的新消息会显示在播放卡片上。点击屏幕即可启动。音乐播放优先；iOS 仍可能暂停应用。</p></div>
     <div class="cap">消息通知</div><div class="card"><label class="chk"><input type="checkbox" id="c-notify">角色回复时显示横幅通知</label><button class="btn" id="notify-perm" type="button">开启系统通知</button><button class="btn" id="notify-test" type="button">发送测试通知（5 秒后）</button><p class="note" id="notify-status"></p></div>
   </div>
   <div class="body settings-sub" id="settings-appearance" style="display:none">
     <div class="cap">外观</div><div class="seg" id="c-theme"><button data-v="light">浅色</button><button data-v="dark">深色</button><button data-v="auto">跟随系统</button></div>
     <div class="cap">状态栏</div><div class="card"><label style="margin-top:0">顶部状态栏避让（安卓浏览器全屏用）</label><select id="c-sat"><option value="auto">自动</option><option value="0">不留白</option><option value="24">24</option><option value="28">28</option><option value="32">32</option><option value="36">36</option><option value="40">40</option><option value="44">44</option><option value="48">48</option></select><p class="note">安卓浏览器「完整全屏」时，系统状态栏盖住聊天顶栏的话，选一个高度（小米常见 28–36）。只对当前这台设备生效；iOS 不需要。</p></div>
     <div class="cap">字体</div><div class="card">
-      <label style="margin-top:0">当前字体</label><select id="font-select"></select>
+      <label style="margin-top:0">Current 字体</label><select id="font-select"></select>
       <div class="font-preview" id="font-preview">字体预览 Aa 你好，世界 1234567890</div>
-      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="font-file" type="button" style="margin:0;flex:1">导入字体文件</button><button class="btn" id="font-url" type="button" style="margin:0;flex:1">粘贴字体链接</button></div>
-      <button class="btn del" id="font-del" type="button">删除所选自定义字体</button>
-      <label>字体大小： <b id="font-scale-v">100%</b></label><input type="range" id="font-scale" min="80" max="140" step="2" style="width:100%;padding:0;border:0;background:none">
-      <button class="btn" id="font-scale-reset" type="button">恢复默认字号</button>
+      <div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="font-file" type="button" style="margin:0;flex:1">Import 字体 File</button><button class="btn" id="font-url" type="button" style="margin:0;flex:1">Paste 字体 URL</button></div>
+      <button class="btn del" id="font-del" type="button">Delete Selected Custom 字体</button>
+      <label>字体 Size: <b id="font-scale-v">100%</b></label><input type="range" id="font-scale" min="80" max="140" step="2" style="width:100%;padding:0;border:0;background:none">
+      <button class="btn" id="font-scale-reset" type="button">Reset 字体 Size</button>
       <p class="note">支持 ttf、otf、woff、woff2。字体文件和字号只保存在本机。链接需要对方服务器允许跨域读取。字号在 iOS Safari 里对整体文字生效，个别固定字号的小字可能不跟着变。</p>
     </div>
-    <div class="cap">字体预设</div><div id="pz-font"></div><p class="note">点击预设即可应用，同时保存字体和字号。</p>
+    <div class="cap">字体 Presets</div><div id="pz-font"></div><p class="note">点击预设即可应用。预设会同时保存字体和字号。</p>
     <div class="cap">桌面文字颜色</div><div class="card">
       <div style="display:flex;align-items:center;gap:12px"><input type="color" id="dtc-input" style="width:56px;height:38px;padding:0;border:0;background:none;flex:none"><div style="flex:1;min-width:0"><div style="font-size:15px">桌面软件名称颜色</div><div class="note" id="dtc-state" style="margin:2px 0 0">跟随日夜间</div></div></div>
       <button class="btn" id="dtc-reset" type="button">恢复跟随日夜间</button>
@@ -3164,7 +3145,7 @@ setTimeout(function(){finish(false)},7600);
     </div>
   </div>
   <div class="body settings-sub" id="settings-innervoice" style="display:none">
-    <div class="cap">心声预设</div><div class="card">
+    <div class="cap">心声 Presets</div><div class="card">
       <label style="margin-top:0">心声预设</label><select id="vc-sel"></select>
       <div class="vc-row"><button class="btn" id="vc-new" type="button">新建</button><button class="btn" id="vc-ren" type="button">重命名</button><button class="btn del" id="vc-del" type="button">删除</button></div>
       <div class="vc-row"><button class="btn" id="vc-exp" type="button">导出当前预设</button><button class="btn" id="vc-imp" type="button">导入到当前预设</button></div>
@@ -3175,62 +3156,54 @@ setTimeout(function(){finish(false)},7600);
         <div class="vc-row"><button class="btn" id="vc-fs-p" type="button">全屏编辑提示词</button><button class="btn" id="vc-fs-h" type="button">全屏编辑模板</button></div>
         <div class="vc-row"><button class="btn" id="vc-prev" type="button">预览</button><button class="btn" id="vc-demo" type="button">用示例覆盖</button></div>
         <div class="vc-row"><button class="btn" id="vc-demo2" type="button">载入多页面示例（私信 / 个人主页）</button></div>
-        <div class="vc-row"><button class="btn" id="vc-demo3" type="button">载入多标签页示例（首页 / 消息 / 我 + 聊天子页）</button></div>
+        <div class="vc-row"><button class="btn" id="vc-demo3" type="button">载入多 Tab 示例（首页 / 消息 / 我 + 聊天子页）</button></div>
       </div>
       <p class="note">默认的心声是 iPod 样式。这里建好预设后，到某个聊天的「聊天设置 → 心声样式」里选用，只对那个聊天生效。模板里用 {{键名}} 取 AI 写的内容，{{键名|默认值}} 在 AI 没写时显示默认值。内置：{{thought}} 内心想法、{{thoughtTr}} 译文、{{name}} 角色名、{{user}} 你的名字、{{time}} {{date}}、{{msg}} 对应那条消息、{{avatar}} 角色头像、{{userAvatar}} 你的头像（没设置头像时显示名字首字）、{{song.title}} 这类歌曲字段。点击事件用 data-vc：prev 上一条、next 下一条、tr 翻译（把译文填进 class 为 vc-tr 的元素）、close 关闭。勾选「像 App 一样打开」后是全屏进入，点任意空白处退出，data-vc 按钮除外。多页面（像抖音点私信、点主页）：把每个子页面写成 &lt;div data-vc-page="dm"&gt;…&lt;/div&gt;，主界面里的按钮写 data-vc="page:dm" 就会进入这个页面，子页面里写 data-vc="back" 返回；返回后可以接着点别的页面。底部横条在子页面是返回，在主界面是退出。多 Tab：把每个 Tab 的内容写成 &lt;div data-vc-tab="home"&gt;…&lt;/div&gt;（放在主界面里，只显示当前 Tab），切换按钮写 data-vc="tab:home"（当前 Tab 的按钮会自动加 class=on），底部 Tab 栏放在 data-vc-tab 容器外面就会一直显示。Tab 里的按钮照样可以 data-vc="page:dm" 进入聊天子页面，返回后回到原来的 Tab；写了 data-vc-tab 的模板在 App 模式下点空白不会退出，用底部横条或 data-vc="close" 退出。不写 data-vc-tab 的现有模板完全不受影响。模板在独立沙盒里，CSS 不会影响其他页面，可以用 var(--ink) var(--bg) var(--sub) var(--line) 跟随日夜间；脚本和 onclick 会被去掉。提示词里的键名要和模板一致，新消息才会带上内容，旧消息显示默认值。</p>
     </div>
   </div>
   <div class="body settings-sub" id="settings-api" style="display:none">
-    <div class="cap">API 设置</div><div class="card">
-      <label style="margin-top:0">API 接口地址（兼容 OpenAI 格式）</label><input id="c-base" placeholder="https://api.openai.com/v1">
-      <label>API 密钥</label><input id="c-key" type="password" placeholder="sk-...">
-      <section class="api-header-panel" aria-label="自定义请求头">
-        <div class="api-header-head"><div><div class="api-header-title">自定义请求头</div><div class="api-header-subtitle">为特殊 API 服务添加额外参数</div></div><span class="api-header-tag">进阶</span></div>
-        <textarea id="c-headers" rows="4" spellcheck="false" placeholder='{
-  "x-opencode-session": "$SESSION_ID"
-}'></textarea>
-        <p class="api-header-hint"><span class="api-header-hint-dot"></span><span>OpenCode Go 会自动附带稳定的聊天会话标识。需要其他请求头时，在此填写 JSON，<code>$SESSION_ID</code> 会自动替换为当前聊天 ID。</span></p>
-        <button class="api-header-fill" id="opencode-go-fill" type="button"><span aria-hidden="true">✦</span> 一键配置 OpenCode Go <span class="api-header-arrow" aria-hidden="true">›</span></button>
-      </section>
-      <label>模型 ID</label><div style="display:flex;flex-direction:column;gap:8px"><input id="c-model" placeholder="手动输入模型 ID" style="width:100%;min-width:0"><button class="btn" id="pull-models" type="button" style="white-space:nowrap;width:100%;margin:0">获取模型列表</button></div><label style="margin-top:10px">可用模型（点击选择）</label><select id="c-model-select" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">请先获取模型列表</option></select><p class="note" id="models-result">填写 API 地址和密钥后，点击“获取模型列表”，准备好后在下方选择模型。</p>
-      <div style="display:none"><label>已保存的 API 预设</label><div style="display:flex;gap:8px;align-items:center"><select id="api-preset-select" style="flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">选择已保存预设</option></select><button class="btn" id="api-preset-load" type="button">使用</button></div><div style="margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--fld)"><label for="api-preset-name" style="display:block;margin:0 0 7px;font-weight:600;color:var(--text)">新预设名称</label><input id="api-preset-name" type="text" autocomplete="off" placeholder="例如：我的主力模型 API" style="display:block;width:100%;box-sizing:border-box;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px"><p class="note" style="margin:6px 0 10px">先在这里输入名称，再点下面的保存按钮。保存后下次可直接从上方列表选择。</p><div style="display:flex;gap:8px"><button class="btn fill" id="api-preset-save" type="button" style="flex:1">保存为预设</button><button class="btn" id="api-preset-delete" type="button">删除所选</button></div></div></div><div class="cap" style="margin-top:16px">API 预设</div><div id="pz-api"></div>
-      <div class="cap" style="margin-top:18px">备用 API（可选，用于记忆总结）</div><p class="note">用于自动或手动生成聊天记忆总结。留空则使用主 API。</p><label>备用 API 地址</label><input id="c-secondary-base" placeholder="留空则使用主 API 地址"><label>备用 API 密钥</label><input id="c-secondary-key" type="password" placeholder="留空则使用主 API 密钥"><label>备用 API 模型 ID</label><input id="c-secondary-model" placeholder="留空则使用主模型 ID">
-<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="pull-sec-models" type="button" style="white-space:nowrap;margin:0">获取模型列表</button></div><label style="margin-top:10px">可用模型（点击选择）</label><select id="c-sec-model-select" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">请先获取模型列表</option></select><p class="note" id="sec-models-result">地址或密钥留空时将使用主 API。获取模型列表后可从列表中选择。</p>
-<div style="display:none"><label>已保存的副 API 预设</label><div style="display:flex;gap:8px;align-items:center"><select id="sec-preset-select" style="flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">选择已保存预设</option></select><button class="btn" id="sec-preset-load" type="button" style="margin:0">使用</button></div><div style="margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--fld)"><label for="sec-preset-name" style="display:block;margin:0 0 7px;font-weight:600;color:var(--text)">新预设名称</label><input id="sec-preset-name" type="text" autocomplete="off" placeholder="例如：便宜的总结模型" style="display:block;width:100%;box-sizing:border-box;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px"><div style="display:flex;gap:8px;margin-top:10px"><button class="btn fill" id="sec-preset-save" type="button" style="flex:1">保存为预设</button><button class="btn" id="sec-preset-delete" type="button">删除所选</button></div></div></div><div class="cap" style="margin-top:16px">副 API 预设</div><div id="pz-sec"></div>
-      <label>温度参数（Temperature）</label><input id="c-temp" type="number" step="0.1" min="0" max="2">
-      <label>携带的历史消息数量</label><input id="c-hist" type="number" min="0" max="100">
-      <label class="chk" style="margin-top:16px"><input type="checkbox" id="c-stream">流式输出</label>
+    <div class="cap">API Settings</div><div class="card">
+      <label style="margin-top:0">API Base URL (OpenAI-compatible)</label><input id="c-base" placeholder="https://api.openai.com/v1">
+      <label>API Key</label><input id="c-key" type="password" placeholder="sk-...">
+      <label>Model ID</label><div style="display:flex;flex-direction:column;gap:8px"><input id="c-model" placeholder="Enter a model ID manually" style="width:100%;min-width:0"><button class="btn" id="pull-models" type="button" style="white-space:nowrap;width:100%;margin:0">Fetch Models</button></div><label style="margin-top:10px">Available Models (tap to select)</label><select id="c-model-select" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">Fetch models first</option></select><p class="note" id="models-result">Enter the API URL and key, then tap “Fetch Models”. Select a model below when ready.</p>
+      <div style="display:none"><label>已保存的 API Presets</label><div style="display:flex;gap:8px;align-items:center"><select id="api-preset-select" style="flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">选择已保存预设</option></select><button class="btn" id="api-preset-load" type="button">使用</button></div><div style="margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--fld)"><label for="api-preset-name" style="display:block;margin:0 0 7px;font-weight:600;color:var(--text)">新预设名称</label><input id="api-preset-name" type="text" autocomplete="off" placeholder="例如：我的主力模型 API" style="display:block;width:100%;box-sizing:border-box;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px"><p class="note" style="margin:6px 0 10px">先在这里输入名称，再点下面的保存按钮。保存后下次可直接从上方列表选择。</p><div style="display:flex;gap:8px"><button class="btn fill" id="api-preset-save" type="button" style="flex:1">保存为预设</button><button class="btn" id="api-preset-delete" type="button">删除所选</button></div></div></div><div class="cap" style="margin-top:16px">API Presets</div><div id="pz-api"></div>
+      <div class="cap" style="margin-top:18px">Secondary API (optional, for memory summaries)</div><p class="note">Used for automatic or manual chat-memory summaries. Leave blank to use the primary API.</p><label>Secondary API URL</label><input id="c-secondary-base" placeholder="Leave blank to use primary API URL"><label>Secondary API Key</label><input id="c-secondary-key" type="password" placeholder="Leave blank to use primary API key"><label>Secondary API Model ID</label><input id="c-secondary-model" placeholder="Leave blank to use primary model ID">
+<div style="display:flex;gap:8px;margin-top:10px"><button class="btn" id="pull-sec-models" type="button" style="white-space:nowrap;margin:0">Fetch Models</button></div><label style="margin-top:10px">Available Models (tap to select)</label><select id="c-sec-model-select" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">Fetch models first</option></select><p class="note" id="sec-models-result">Blank URL/key fields use the primary API. Fetch models and select one from the list.</p>
+<div style="display:none"><label>已保存的副 API Presets</label><div style="display:flex;gap:8px;align-items:center"><select id="sec-preset-select" style="flex:1;min-width:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">选择已保存预设</option></select><button class="btn" id="sec-preset-load" type="button" style="margin:0">使用</button></div><div style="margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--fld)"><label for="sec-preset-name" style="display:block;margin:0 0 7px;font-weight:600;color:var(--text)">新预设名称</label><input id="sec-preset-name" type="text" autocomplete="off" placeholder="例如：便宜的总结模型" style="display:block;width:100%;box-sizing:border-box;min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px"><div style="display:flex;gap:8px;margin-top:10px"><button class="btn fill" id="sec-preset-save" type="button" style="flex:1">保存为预设</button><button class="btn" id="sec-preset-delete" type="button">删除所选</button></div></div></div><div class="cap" style="margin-top:16px">副 API Presets</div><div id="pz-sec"></div>
+      <label>Temperature</label><input id="c-temp" type="number" step="0.1" min="0" max="2">
+      <label>Number of Previous Messages</label><input id="c-hist" type="number" min="0" max="100">
+      <label class="chk" style="margin-top:16px"><input type="checkbox" id="c-stream">Streaming Output</label>
       <label class="chk" style="margin-top:10px"><input type="checkbox" id="c-rsn">显示思维链（模型返回时才有）</label>
 </div>
-      <button class="btn fill" id="test">测试连接</button><p class="note" id="tres">浏览器直连需要服务端支持 CORS 跨域请求，否则请使用自己的代理。</p>
+      <button class="btn fill" id="test">Test Connection</button><p class="note" id="tres">Direct browser requests require CORS support. Otherwise, use your own proxy.</p>
     </div>
   </div>
   <div class="body settings-sub" id="settings-voice" style="display:none">
-    <div class="cap">语音模式</div><div class="card"><label class="chk" style="margin-top:0"><input id="c-voice-enabled" type="checkbox">启用真实语音（MiniMax）</label><p class="note" style="margin-top:8px">关闭时，语音消息只显示可展开的文字波形，不生成音频。开启并保存后，MiniMax 会为发送的语音消息生成音频。此功能需要 API 密钥。</p></div><div class="cap">MiniMax 语音合成</div><p class="note">从聊天左侧「＋」菜单发送我方语音；对方的文字回复也可以点「转语音」。</p>
-    <div class="card"><label style="margin-top:0">API 地址</label><input id="c-voice-base" placeholder="https://api.minimax.io/v1">
-    <label>API 密钥</label><input id="c-voice-key" type="password" placeholder="MiniMax API 密钥">
-    <label>Group ID（如有需要）</label><input id="c-voice-group" placeholder="可选，按你的 MiniMax 账号要求填写">
-    <label>语音模式l</label><input id="c-voice-model" placeholder="speech-02-turbo">
-    <label>音色 ID</label><input id="c-voice-id" placeholder="female-shaonv，例如系统支持的音色 ID">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>语速（0.5–2）</label><input id="c-voice-speed" type="number" min="0.5" max="2" step="0.1"></div><div><label>音量（0–2）</label><input id="c-voice-vol" type="number" min="0" max="2" step="0.1"></div><div><label>音调（-12–12）</label><input id="c-voice-pitch" type="number" min="-12" max="12" step="1"></div></div>
-    <button class="btn fill" id="save-voice-settings" type="button">保存语音设置</button><button class="btn" id="test-voice" type="button">测试语音</button>
-    <hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="cap" style="margin-top:0">语音世界书</div><p class="note">可以专门写角色说话的语气、停顿、情绪与音色要求。保存后作为普通世界书参与提示词注入。</p><button class="btn" id="add-voice-world" type="button">＋ 添加语音世界书</button><button class="btn" id="manage-voice-worlds" type="button">查看／管理世界书</button>
+    <div class="cap">Voice Mode</div><div class="card"><label class="chk" style="margin-top:0"><input id="c-voice-enabled" type="checkbox">Enable Real Voice (MiniMax)</label><p class="note" style="margin-top:8px">When disabled, voice messages show an expandable text waveform without synthesized audio. When enabled and saved, MiniMax generates audio for sent voice messages. An API key is required.</p></div><div class="cap">MiniMax Speech Synthesis</div><p class="note">从聊天左侧「＋」菜单发送我方语音；对方的文字回复也可以点「转语音」。</p>
+    <div class="card"><label style="margin-top:0">API URL</label><input id="c-voice-base" placeholder="https://api.minimax.io/v1">
+    <label>API Key</label><input id="c-voice-key" type="password" placeholder="MiniMax API Key">
+    <label>Group ID (if required)</label><input id="c-voice-group" placeholder="可选，按你的 MiniMax 账号要求填写">
+    <label>Voice Model</label><input id="c-voice-model" placeholder="speech-02-turbo">
+    <label>Voice ID</label><input id="c-voice-id" placeholder="female-shaonv，例如系统支持的音色 ID">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>Speed (0.5–2)</label><input id="c-voice-speed" type="number" min="0.5" max="2" step="0.1"></div><div><label>Volume (0–2)</label><input id="c-voice-vol" type="number" min="0" max="2" step="0.1"></div><div><label>Pitch (-12–12)</label><input id="c-voice-pitch" type="number" min="-12" max="12" step="1"></div></div>
+    <button class="btn fill" id="save-voice-settings" type="button">Save Voice Settings</button><button class="btn" id="test-voice" type="button">Test Voice</button>
+    <hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="cap" style="margin-top:0">Voice Worldbook</div><p class="note">可以专门写角色说话的语气、停顿、情绪与音色要求。保存后作为普通世界书参与提示词注入。</p><button class="btn" id="add-voice-world" type="button">＋ Add Voice Worldbook</button><button class="btn" id="manage-voice-worlds" type="button">View / Manage Worldbooks</button>
     </div>
   </div>
-  <div class="body settings-sub" id="settings-prompt" style="display:none"><div class="cap">全局 AI 角色扮演提示词</div><p class="note">适用于所有角色的共享规则，会与每位联系人的角色设定提示词一同发送。</p><div class="card"><p class="note" style="margin:0 0 12px">全局提示词已经合并进第四页的「预设」App（线上预设里的模块）。原来写在这里的内容，现在是预设「水的预设」里的 The-World 模块。</p><button class="btn fill" data-go="preset">打开预设</button></div></div>
+  <div class="body settings-sub" id="settings-prompt" style="display:none"><div class="cap">Global AI Roleplay Prompt</div><p class="note">Shared rules for all characters, sent alongside each contact’s persona prompt.</p><div class="card"><p class="note" style="margin:0 0 12px">全局提示词已经合并进第四页的「预设」App（线上预设里的模块）。原来写在这里的内容，现在是预设「水的预设」里的 The-World 模块。</p><button class="btn fill" data-go="preset">打开预设</button></div></div>
   <div class="body settings-sub" id="settings-memory" style="display:none">
-    <div class="mem-hero"><div class="mem-kicker">记忆系统</div><div class="mem-title">记忆中心</div><p class="mem-copy">选择对话中使用记忆的方式，然后配置向量检索。记忆内容仍在每个聊天的“聊天设置”中单独管理。</p></div>
-    <div class="mem-section"><div class="mem-section-title">记忆模式</div><p class="note" style="margin-top:3px">选择全局默认模式。另一种模式中已有的内容不会被删除。</p>
-      <label class="mem-mode" for="memory-mode-traditional"><input type="radio" name="memory-mode" value="traditional" id="memory-mode-traditional"><span><strong>传统记忆 <span class="mem-tag">稳定 · 直接</span></strong><small>将固定记忆加入提示词，适合角色资料、关系背景和长期约定。</small></span></label>
-      <label class="mem-mode" for="memory-mode-vector"><input type="radio" name="memory-mode" value="vector" id="memory-mode-vector"><span><strong>向量记忆 <span class="mem-tag">语义检索</span></strong><small>根据当前对话检索相关记忆，适合记忆内容较多的情况。需要 Embedding API。</small></span></label>
+    <div class="mem-hero"><div class="mem-kicker">MEMORY SYSTEM</div><div class="mem-title">Memory Center</div><p class="mem-copy">Choose how memory is used in conversations, then configure vector search. Memory content is managed separately in each chat’s Chat Settings.</p></div>
+    <div class="mem-section"><div class="mem-section-title">Memory Mode</div><p class="note" style="margin-top:3px">Choose the global default. Existing content in the other mode will not be deleted.</p>
+      <label class="mem-mode" for="memory-mode-traditional"><input type="radio" name="memory-mode" value="traditional" id="memory-mode-traditional"><span><strong>Traditional Memory <span class="mem-tag">Stable · Direct</span></strong><small>Includes fixed memories in the prompt; ideal for character profiles, relationship context, and long-term agreements.</small></span></label>
+      <label class="mem-mode" for="memory-mode-vector"><input type="radio" name="memory-mode" value="vector" id="memory-mode-vector"><span><strong>向量记忆 <span class="mem-tag">Semantic Search</span></strong><small>Retrieves relevant memories based on the current conversation; useful for many experiences. Requires an Embedding API.</small></span></label>
     </div>
-    <div class="mem-section" id="vector-connection-card"><div class="mem-section-title">向量模型连接</div><p class="note" style="margin-top:3px">你可以单独设置向量服务地址和密钥。留空则使用“模型与 API”中的地址和密钥。</p>
+    <div class="mem-section" id="vector-connection-card"><div class="mem-section-title">Vector Model Connection</div><p class="note" style="margin-top:3px">You can set a separate vector service URL and key. Leave blank to use the URL and key from Models & API.</p>
       <div class="mem-field"><label for="c-embedding-base">Embedding 接口地址</label><input id="c-embedding-base" placeholder="留空则使用主 API，例如 https://api.openai.com/v1" autocomplete="url"></div>
-      <div class="mem-field"><label for="c-embedding-key">Embedding API 密钥</label><input id="c-embedding-key" type="password" placeholder="留空则使用主 API 密钥" autocomplete="off"></div>
-      <div class="mem-field"><label for="c-embedding-model">Embedding 模型</label><input id="c-embedding-model" placeholder="拉取后选择，或手动填写模型 ID" autocomplete="off"></div>
-      <div class="mem-actions"><button class="btn" id="pull-embedding-models" type="button">获取模型列表列表</button><button class="btn" id="use-main-embedding-api" type="button">使用主 API</button></div>
-      <div class="mem-field"><label for="c-embedding-model-select">可选模型</label><select id="c-embedding-model-select"><option value="">请先获取模型列表</option></select></div>
-      <p class="mem-status" id="embedding-models-result">填写向量接口地址和密钥后，点击「获取模型列表」。模型列表能被获取，不代表每个模型都支持 Embedding；最终以实际接口响应为准。</p>
+      <div class="mem-field"><label for="c-embedding-key">Embedding API Key</label><input id="c-embedding-key" type="password" placeholder="Leave blank to use primary API key" autocomplete="off"></div>
+      <div class="mem-field"><label for="c-embedding-model">Embedding 模型</label><input id="c-embedding-model" placeholder="拉取后选择，或手动填写Model ID" autocomplete="off"></div>
+      <div class="mem-actions"><button class="btn" id="pull-embedding-models" type="button">Fetch Models列表</button><button class="btn" id="use-main-embedding-api" type="button">使用主 API</button></div>
+      <div class="mem-field"><label for="c-embedding-model-select">可选模型</label><select id="c-embedding-model-select"><option value="">Fetch models first</option></select></div>
+      <p class="mem-status" id="embedding-models-result">填写向量接口地址和 Key 后点击「Fetch Models列表」。模型列表能被获取，不代表每个模型都支持 Embedding；最终以实际接口响应为准。</p>
     </div>
     <div class="mem-section" id="vector-retrieval-card"><div class="mem-section-title">检索范围</div><p class="note" style="margin-top:3px">每次回复最多取回多少条相关记忆，以及相似度达到多少才会被取回。</p>
       <div class="mem-grid">
@@ -3239,45 +3212,44 @@ setTimeout(function(){finish(false)},7600);
       </div>
       <p class="mem-status">阈值越高越严格，不相关的记忆不会被带入；太高则可能一条都取不到。text-embedding-3-small 下相关内容多在 0.3–0.5，建议 0.35–0.45。</p>
     </div>
-    <button class="btn fill mem-primary" id="save-memory-settings">保存记忆设置</button>
+    <button class="btn fill mem-primary" id="save-memory-settings">保存记忆Settings</button>
   </div>
   <div class="body settings-sub" id="settings-profile" style="display:none">
-    <div class="cap">个人资料</div><div class="card">
+    <div class="cap">My Profile</div><div class="card">
       <div class="profile-avatar-row"><button class="av" id="m-av-edit"></button><span class="note">点击头像更换</span></div>
       <label>名字</label><input id="m-name" placeholder="My Name">
-      <label>用户名（@）</label><input id="m-handle">
-      <label>个人简介（显示在个人资料中，并会分享给角色）</label><textarea id="m-bio" rows="3"></textarea>
+      <label>Username (@)</label><input id="m-handle">
+      <label>Bio (shown on your profile and shared with characters)</label><textarea id="m-bio" rows="3"></textarea>
     </div>
   </div>
   <div class="body settings-sub" id="settings-imageapi" style="display:none">
-    <div class="cap">生图 API</div><div class="card">
-      <label class="chk"><input type="checkbox" id="c-image-enabled">允许角色发送 AI 生成的图片</label>
-      <p class="note">关闭后，角色只能发送文字。你仍然可以在聊天中上传图片。生图设置与聊天模型 API 分开保存。</p>
-      <label>生图服务商</label><select id="c-image-provider" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="gpt">GPT／兼容 OpenAI 格式的 API</option><option value="novelai">NovelAI</option></select>
+    <div class="cap">Image Generation API</div><div class="card">
+      <label class="chk"><input type="checkbox" id="c-image-enabled">Allow characters to send AI-generated images</label>
+      <p class="note">When disabled, characters can only send text. You can still upload images in chat. Image settings are saved separately from the chat model API.</p>
+      <label>Image Provider</label><select id="c-image-provider" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="gpt">GPT / OpenAI-compatible API</option><option value="novelai">NovelAI</option></select>
       <div id="image-gpt-fields">
-        <label>GPT Image Proxy / API 地址</label><input id="c-image-base" placeholder="https://api.openai.com/v1"><label>GPT Image API 密钥</label><input id="c-image-key" type="password" placeholder="填写独立的生图 Key"><label>GPT 生图模型 ID</label><input id="c-image-model" placeholder="gpt-image-1">
+        <label>GPT Image Proxy / API URL</label><input id="c-image-base" placeholder="https://api.openai.com/v1"><label>GPT Image API Key</label><input id="c-image-key" type="password" placeholder="填写独立的生图 Key"><label>GPT 生图Model ID</label><input id="c-image-model" placeholder="gpt-image-1">
         <label>正向提示词前缀</label><textarea id="c-gpt-positive" rows="3" placeholder="例如：高质量插画，细节丰富，电影级光影……"></textarea><label>反向提示词 / 不希望出现的内容</label><textarea id="c-gpt-negative" rows="3" placeholder="例如：模糊、低清晰度、文字、水印、畸形手指……"></textarea><label>补充细节提示词</label><textarea id="c-gpt-detail" rows="3" placeholder="可填写画风、构图、镜头、光线等固定要求"></textarea>
         <label>图片尺寸</label><select id="c-gpt-size" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="1024x1024">1024 × 1024（正方形）</option><option value="1024x1536">1024 × 1536（竖图）</option><option value="1536x1024">1536 × 1024（横图）</option><option value="auto">自动</option></select>
-        <label>质量</label><select id="c-gpt-quality" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="auto">自动</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select><label>风格（服务商支持时生效）</label><select id="c-gpt-style" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">默认</option><option value="vivid">鲜明（Vivid）</option><option value="natural">自然（Natural）</option></select><label>每次生成张数</label><input id="c-gpt-n" type="number" min="1" max="4" value="1"><p class="note">标准 GPT Images API 没有通用的 negative_prompt 参数；这里会把反向提示词合并进请求文本。不同中转站支持的尺寸、质量和风格参数可能不同。</p>
+        <label>质量</label><select id="c-gpt-quality" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="auto">自动</option><option value="low">低</option><option value="medium">中</option><option value="high">高</option></select><label>风格（服务商支持时生效）</label><select id="c-gpt-style" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="">默认</option><option value="vivid">Vivid / 鲜明</option><option value="natural">Natural / 自然</option></select><label>每次生成张数</label><input id="c-gpt-n" type="number" min="1" max="4" value="1"><p class="note">标准 GPT Images API 没有通用的 negative_prompt 参数；这里会把反向提示词合并进请求文本。不同中转站支持的尺寸、质量和风格参数可能不同。</p>
       </div>
       <div id="image-nai-fields" style="display:none">
-        <label>NovelAI 中转站 / API 地址</label><input id="c-nai-base" placeholder="https://image.novelai.net"><p class="note">可填写官方地址或你有权限使用的第三方中转站地址。中转站须兼容 NovelAI 的图像生成请求和 ZIP 图片响应。</p>
-        <label>NovelAI API 密钥 / Token</label><input id="c-nai-key" type="password" placeholder="NovelAI Token 或中转站 Key">
-        <label>第三方代理接口格式</label><select id="c-nai-api-mode" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="native">NovelAI 原生（/ai/generate-image）</option><option value="openai">OpenAI 图像（/v1/images/generations）</option><option value="chat">OpenAI 对话（/v1/chat/completions）</option></select><p class="note">按代理站提供的接口文档选择格式。原生模式兼容 NovelAI ZIP 图片响应；OpenAI 图像与对话模式用于兼容型第三方代理。</p>
-        <label>NovelAI 模型</label><select id="c-nai-model" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="nai-diffusion-4-5-full">NAI Diffusion 4.5 Full</option><option value="nai-diffusion-4-5-curated">NAI Diffusion 4.5 Curated</option><option value="nai-diffusion-4-full">NAI Diffusion 4 Full</option><option value="nai-diffusion-4-curated-preview">NAI Diffusion 4 Curated</option><option value="nai-diffusion-3">NAI Diffusion 3</option><option value="nai-diffusion-furry-3">NAI Diffusion Furry 3</option></select><label>自定义模型 ID（选填，优先使用）</label><input id="c-nai-custom-model" placeholder="留空则使用上方模型"><label>正向提示词前缀</label><textarea id="c-nai-positive" rows="3" placeholder="例如：masterpiece, best quality, detailed illustration"></textarea><label>反向提示词（不希望出现的内容）</label><textarea id="c-nai-negative" rows="3" placeholder="例如：lowres, blurry, bad anatomy, watermark"></textarea><label>深度 / 补充提示词</label><textarea id="c-nai-detail" rows="3" placeholder="额外细节、构图、画风、角色特征等；会追加到正向提示词"></textarea>
+        <label>NovelAI 中转站 / API URL</label><input id="c-nai-base" placeholder="https://image.novelai.net"><p class="note">可填写官方地址或你有权限使用的第三方中转站地址。中转站须兼容 NovelAI 的图像生成请求和 ZIP 图片响应。</p>
+        <label>NovelAI API Key / Token</label><input id="c-nai-key" type="password" placeholder="NovelAI Token 或中转站 Key"><label>NovelAI 模型</label><select id="c-nai-model" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="nai-diffusion-4-5-full">NAI Diffusion 4.5 Full</option><option value="nai-diffusion-4-5-curated">NAI Diffusion 4.5 Curated</option><option value="nai-diffusion-4-full">NAI Diffusion 4 Full</option><option value="nai-diffusion-4-curated-preview">NAI Diffusion 4 Curated</option><option value="nai-diffusion-3">NAI Diffusion 3</option><option value="nai-diffusion-furry-3">NAI Diffusion Furry 3</option></select>
+        <label>正向提示词前缀</label><textarea id="c-nai-positive" rows="3" placeholder="例如：masterpiece, best quality, detailed illustration"></textarea><label>反向提示词（Undesired Content）</label><textarea id="c-nai-negative" rows="3" placeholder="例如：lowres, blurry, bad anatomy, watermark"></textarea><label>深度 / 补充提示词</label><textarea id="c-nai-detail" rows="3" placeholder="额外细节、构图、画风、角色特征等；会追加到正向提示词"></textarea>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label>宽度</label><input id="c-nai-width" type="number" min="64" max="2048" step="64"></div><div><label>高度</label><input id="c-nai-height" type="number" min="64" max="2048" step="64"></div><div><label>提示词引导强度（Scale）</label><input id="c-nai-scale" type="number" min="0" max="20" step="0.5"></div><div><label>步数（Steps）</label><input id="c-nai-steps" type="number" min="1" max="50"></div></div>
-        <label>采样器（Sampler）</label><select id="c-nai-sampler" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="k_euler_ancestral">Euler Ancestral</option><option value="k_euler">Euler</option><option value="k_dpmpp_2s_ancestral">DPM++ 2S Ancestral</option><option value="k_dpmpp_2m">DPM++ 2M</option><option value="k_dpmpp_sde">DPM++ SDE</option></select><label>CFG 重缩放</label><input id="c-nai-cfgrescale" type="number" min="0" max="1" step="0.05"><label>随机种子（留空则随机）</label><input id="c-nai-seed" type="number" min="0" placeholder="随机"><label class="chk"><input type="checkbox" id="c-nai-sm">启用 SM</label><label class="chk"><input type="checkbox" id="c-nai-sm-dyn">启用 SM Dynamic</label><p class="note">NovelAI 参数会发送给兼容的接口；不同模型/中转站对参数支持不完全一致。浏览器直连也可能受 CORS 限制。</p>
+        <label>采样器（Sampler）</label><select id="c-nai-sampler" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--fld);color:var(--text)"><option value="k_euler_ancestral">Euler Ancestral</option><option value="k_euler">Euler</option><option value="k_dpmpp_2s_ancestral">DPM++ 2S Ancestral</option><option value="k_dpmpp_2m">DPM++ 2M</option><option value="k_dpmpp_sde">DPM++ SDE</option></select><label>CFG Rescale</label><input id="c-nai-cfgrescale" type="number" min="0" max="1" step="0.05"><label>Seed（留空为随机）</label><input id="c-nai-seed" type="number" min="0" placeholder="随机"><label class="chk"><input type="checkbox" id="c-nai-sm">启用 SM</label><label class="chk"><input type="checkbox" id="c-nai-sm-dyn">启用 SM Dynamic</label><p class="note">NovelAI 参数会发送给兼容的接口；不同模型/中转站对参数支持不完全一致。浏览器直连也可能受 CORS 限制。</p>
       </div>
-      <label style="margin-top:14px">生图 API 预设</label><div id="pz-img"></div>
+      <label style="margin-top:14px">生图 API Presets</label><div id="pz-img"></div>
       <button class="btn" id="test-imageapi" type="button">测试生图配置</button>
       <div id="test-imageapi-out" class="note" style="min-height:0;word-break:break-all"></div>
-      <button class="btn fill" id="save-imageapi">保存生图设置</button>
+      <button class="btn fill" id="save-imageapi">保存生图Settings</button>
     </div>
   </div>
   <div class="body settings-sub" id="settings-data" style="display:none">
-    <div class="cap">数据与备份</div><div class="card">
+    <div class="cap">Data & Backup</div><div class="card">
       <button class="btn" id="exp" style="margin-top:0">导出 JSON 备份</button><button class="btn" id="expzip">导出 ZIP 备份</button><button class="btn" id="imp">导入 JSON / ZIP 备份</button>
-      <p class="note">备份文件包含 API 密钥，请妥善保管。</p>
+      <p class="note">备份文件包含 API Key，请妥善保管。</p>
     </div>
   </div>
 </section>
@@ -3311,7 +3283,7 @@ se:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',mn:'<path d="M4
 const ic=(k,f)=>`<svg viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
 const BADGE='<svg class="bd" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" style="fill:var(--ink)"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" style="stroke:var(--bg)" stroke-width="2.2"/></svg>';
 
-const DEF=()=>({cfg:{base:'https://api.openai.com/v1',key:'',model:'gpt-4o-mini',headers:'',secondaryBase:'',secondaryKey:'',secondaryModel:'',temp:.8,hist:30,stream:true,memoryMode:'traditional',embeddingBase:'',embeddingKey:'',embeddingModel:'text-embedding-3-small',memoryTopK:12,memoryMinScore:0.4,imageEnabled:false,imageProvider:'gpt',imageBase:'https://api.openai.com/v1',imageKey:'',imageModel:'gpt-image-1',gptPositive:'',gptNegative:'',gptDetail:'',gptSize:'1024x1024',gptQuality:'auto',gptStyle:'',gptN:1,naiBase:'https://image.novelai.net',naiKey:'',naiModel:'nai-diffusion-4-full',naiPositive:'',naiNegative:'',naiDetail:'',naiWidth:832,naiHeight:1216,naiScale:5,naiSteps:28,naiSampler:'k_euler_ancestral',naiCfgRescale:0,naiSeed:'',naiSm:false,naiSmDyn:false,voiceEnabled:false,voiceBase:'https://api.minimax.io/v1',voiceKey:'',voiceGroupId:'',voiceModel:'speech-02-turbo',voiceId:'female-shaonv',voiceSpeed:1,voiceVol:1,voicePitch:0},
+const DEF=()=>({cfg:{base:'https://api.openai.com/v1',key:'',model:'gpt-4o-mini',secondaryBase:'',secondaryKey:'',secondaryModel:'',temp:.8,hist:30,stream:true,memoryMode:'traditional',embeddingBase:'',embeddingKey:'',embeddingModel:'text-embedding-3-small',memoryTopK:12,memoryMinScore:0.4,imageEnabled:false,imageProvider:'gpt',imageBase:'https://api.openai.com/v1',imageKey:'',imageModel:'gpt-image-1',gptPositive:'',gptNegative:'',gptDetail:'',gptSize:'1024x1024',gptQuality:'auto',gptStyle:'',gptN:1,naiBase:'https://image.novelai.net',naiKey:'',naiModel:'nai-diffusion-4-full',naiPositive:'',naiNegative:'',naiDetail:'',naiWidth:832,naiHeight:1216,naiScale:5,naiSteps:28,naiSampler:'k_euler_ancestral',naiCfgRescale:0,naiSeed:'',naiSm:false,naiSmDyn:false,voiceEnabled:false,voiceBase:'https://api.minimax.io/v1',voiceKey:'',voiceGroupId:'',voiceModel:'speech-02-turbo',voiceId:'female-shaonv',voiceSpeed:1,voiceVol:1,voicePitch:0},
   me:{name:'我',handle:'me',bio:'',avatar:''},
   personas:[{id:'p1',name:'默认',handle:'',bio:'',prompt:'你是一个温柔、简洁的聊天伙伴，用自然的口语回复。',greet:'',avatar:''}],
   worlds:[],apiPresets:[],chats:{},posts:[],memo:'',memoImage:'',memoImageTitle:'备忘录图片',desktop:{wallpaper:'',icons:{},widgets:[],order:{}},last:'',theme:'light',stickers:[],cc:{},themes:[],globalPrompt:'',userProfiles:[],activeUserProfile:'',diaries:[],postDecorations:[],
@@ -3694,32 +3666,6 @@ function modal(t,cb){const m=$('#modal'),ta=m.querySelector('textarea');ta.value
 function askText(title,placeholder='可留空'){return new Promise(resolve=>{const m=$('#modal'),ta=m.querySelector('textarea'),old=ta.placeholder;ta.placeholder=placeholder;ta.value='';m.classList.add('on');setTimeout(()=>ta.focus(),50);m.querySelector('.ok').onclick=()=>{m.classList.remove('on');ta.placeholder=old;resolve(ta.value)};m.querySelector('.no').onclick=()=>{m.classList.remove('on');ta.placeholder=old;resolve(null)}})}
 
 /* API */
-function apiSessionId(){
-  const key=String(S.activeUserProfile||'default')+':'+String(typeof cur!=='undefined'&&cur?cur:'default');
-  S.apiSessions=S.apiSessions||{};
-  if(!S.apiSessions[key]){S.apiSessions[key]='mio-'+uid()+uid()+uid()+Date.now().toString(36);save()}
-  return S.apiSessions[key];
-}
-function apiRequestHeaders(c){
-  const h={'Content-Type':'application/json','Authorization':'Bearer '+(c&&c.key||'')};
-  const raw=String((c&&c.headers)||S.cfg.headers||'').trim();
-  if(raw){
-    let extra;try{extra=JSON.parse(raw)}catch(_){throw new Error('自定义请求头格式错误，请填写有效的 JSON 对象')}
-    if(!extra||typeof extra!=='object'||Array.isArray(extra))throw new Error('自定义请求头必须是 JSON 对象');
-    Object.keys(extra).forEach(k=>{if(extra[k]!==undefined&&extra[k]!==null&&String(extra[k]).trim())h[k]=String(extra[k])});
-  }
-  const sessionKey=Object.keys(h).find(k=>k.toLowerCase()==='x-opencode-session');
-  const isOpenCode=/opencode\.ai/i.test(String(c&&c.base||S.cfg.base||''));
-  if(sessionKey)h[sessionKey]=h[sessionKey].replace(/\$SESSION_ID|\{\{SESSION_ID\}\}/g,apiSessionId());
-  else if(isOpenCode)h['x-opencode-session']=apiSessionId();
-  return h;
-}
-function modelListEndpoint(base){
-  base=String(base||'').replace(/\/+$/,'');
-  if(/\/inference\/go\/openai\/v1$/i.test(base))return base.replace(/\/openai\/v1$/i,'/v1')+'/models';
-  if(/\/inference\/go$/i.test(base))return base+'/v1/models';
-  return base+'/models';
-}
 function rsnSplit(c,r){c=String(c||'');r=String(r||'');
   const m=c.match(/<think(?:ing)?>([\s\S]*?)<\/think(?:ing)?>/i);
   if(m){r=(r?r+'\n':'')+m[1];c=c.replace(m[0],'')}
@@ -3728,7 +3674,7 @@ function rsnSplit(c,r){c=String(c||'');r=String(r||'');
 function takeRsn(){const r=String(window.__rsn||'').trim();window.__rsn='';return r}
 async function ask(msgs,onD,opt,configOverride,signal){
   const c=configOverride||S.cfg,r=await fetch((c.base||'').replace(/\/+$/,'')+'/chat/completions',{method:'POST',signal,
-    headers:apiRequestHeaders(c),
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},
     body:JSON.stringify(Object.assign({model:c.model,temperature:+c.temp,stream:!!onD,messages:msgs},opt))});
   if(!r.ok){let m;try{m=(await r.json()).error.message}catch(e){}throw new Error(m||'HTTP '+r.status)}
   if(!onD){const j=await r.json(),mg=j.choices[0].message,sp=rsnSplit(mg.content,mg.reasoning_content||mg.reasoning||mg.thinking||mg.reasoning_text);window.__rsn=sp.r;return sp.c.trim()}
@@ -4492,6 +4438,7 @@ function desktopApply(){
  try{deskClockApply()}catch(e){}
  try{deskGlassApply()}catch(e){}
  applyDesktopOrder();
+ try{dcFitAll()}catch(e){console.error(e)}
  try{window.hdFreeApply&&window.hdFreeApply()}catch(e){console.error(e)}
 }
 function applyDesktopOrder(){const d=S.desktop||{};const defs=[['first',$('.wrap')],['second',$('#home-page2 .home-app-grid')],['dock',$('#v-home .dock')],['p3',$('#home-page3 .page3-apps')],['p4',$('#home-page4 .p4-apps')]];const idOf=x=>x.dataset.homeItem||x.dataset.go||x.dataset.dwId||x.dataset.p3Decor||'';const keyOf=par=>{const f=defs.find(z=>z[1]===par);return f?f[0]:null};const inOrd=(k,id)=>!!(k&&d.order&&Array.isArray(d.order[k])&&d.order[k].includes(id));defs.forEach(([key,par])=>{if(!par)return;const order=d.order&&d.order[key];if(!Array.isArray(order))return;order.forEach(id=>{if(!id)return;let el=[...par.children].find(x=>idOf(x)===id);if(!el)el=desktopHomeItems().find(x=>idOf(x)===id&&isHomeIcon(x)&&x.parentElement!==par&&!inOrd(keyOf(x.parentElement),id));if(el)par.appendChild(el)})})}
@@ -4506,7 +4453,7 @@ function renderDesktopCustomizer(){const root=$('#desktop-customizer');if(!root)
  $('#dc-arrange').onclick=()=>toast('返回桌面后长按软件或组件直接拖动；拖到屏幕边缘停留可翻页，软件可以跨屏。');
  $$('[data-dc-edit]').forEach(b=>b.onclick=async()=>{const w=d.widgets.find(x=>x.id===b.dataset.dcEdit);if(!w)return;if(w.kind==='css'){dcwEditor({id:w.lib});return}const title=await askText('组件标题',w.title||'');if(title===null)return;w.title=title;if(w.kind==='text'){const text=await askText('组件文字',w.text||'');if(text===null)return;w.text=text}if(w.kind==='image'){const change=await askText('输入新图片链接；留空保留当前图片','https://...');if(change===null)return;if(change.trim())w.image=change.trim();else if(confirm('是否从相册重新选择图片？')){const src=await new Promise(resolve=>desktopFile(resolve));if(src)w.image=src}}save();desktopApply();renderDesktopCustomizer()});
  $$('[data-dc-del]').forEach(b=>b.onclick=()=>{d.widgets=d.widgets.filter(x=>x.id!==b.dataset.dcDel);save();desktopApply();renderDesktopCustomizer()});
- $('#dc-reset').onclick=()=>{if(!confirm('确定重置壁纸、图标和自定义组件吗？'))return;S.desktop={wallpaper:'',icons:{},widgets:[],order:{}};try{window.hdFreeReset&&hdFreeReset()}catch(e){console.error(e)}save();desktopApply();renderDesktopCustomizer();toast('桌面美化已重置')};
+ $('#dc-reset').onclick=()=>{if(!confirm('确定重置壁纸、图标和自定义组件吗？'))return;S.desktop={wallpaper:'',icons:{},widgets:[],order:{}};try{dcRestoreDock()}catch(e){console.error(e)}try{window.hdFreeReset&&hdFreeReset()}catch(e){console.error(e)}save();desktopApply();renderDesktopCustomizer();toast('桌面美化已重置')};
  dcIos();
 }
 let dcTab='wall';
@@ -4537,7 +4484,7 @@ function dcIos(){
   sW.append(mk('div','dci-h','添加'),grp(...adds));
   if(hasW){sW.append(mk('div','dci-h','已添加'),grp(list))}else{sW.append(mk('div','dci-f','还没有自定义小组件。'));}
   try{sW.append(...dcGlassUI())}catch(e){console.error(e)}
-  const sMore=mk('section','dci-s');sMore.dataset.dcs='more';
+  const sMore=mk('section','dci-s');sMore.dataset.dcs='more';try{sMore.append(...dctPackUI())}catch(e){console.error(e)}
   if(intro){intro.className='dci-f';sMore.append(mk('div','dci-h','说明'),intro)}
   reset.className='dci-row dci-red';reset.innerHTML='<span class="l">重置所有桌面美化</span>';
   sMore.append(grp(reset));
@@ -4553,10 +4500,42 @@ function dcTabApply(){const root=$('#desktop-customizer'),v=$('#v-desktopcustom'
 let desktopEditing=false,desktopHold=null,desktopSelected=null;
 function desktopHomeItems(){return [...$$('#v-home .wrap > .w, #v-home .wrap > .full, #v-home .wrap > .home-app, #home-page2 .home-app-grid > *, #desktop-widgets > *, #v-home .dock > .app, #home-page3 .page3-apps > .home-app, #home-page4 .p4-apps > .home-app')];}
 function enableDesktopEditing(){desktopEditing=true;$('#v-home').classList.add('desktop-editing');toast('摆放模式：再点一个软件或组件交换位置；软件可与底部栏互换，小组件留在桌面；长按空白处或点设置退出')}
-function swapDesktopItems(a,b){if(!a||!b||a===b)return;const pa=a.parentElement,pb=b.parentElement;const dockA=!!a.closest('.dock'),dockB=!!b.closest('.dock');if(dockA||dockB){if(!(a.matches('.app[data-go]')&&b.matches('.app[data-go]'))){toast('底部固定栏只放软件图标，小组件请放在桌面区域');return}}else if(pa!==pb&&!(isHomeIcon(a)&&isHomeIcon(b))){toast('小组件只能在同一屏内交换位置');return}const marker=document.createComment('swap');pa.insertBefore(marker,a);pb.insertBefore(a,b);pa.insertBefore(b,marker);marker.remove();saveDesktopOrder();}
+/* 软件在底部栏和桌面之间换位置时，外观要换成目标位置该有的样子：
+   底部栏软件是 <button class="app"><i>图标</i>文字</button>，桌面软件是 <button class="app home-app"><i>图标</i><span>文字</span></button> */
+function dcFitApp(el){
+ if(!el||!el.matches||!el.matches('.app[data-go]'))return;
+ const dock=!!el.closest('.dock'),i=el.querySelector(':scope > i');let sp=el.querySelector(':scope > span');
+ if(dock){
+  el.classList.remove('home-app');
+  if(sp){const txt=sp.textContent;sp.remove();el.appendChild(document.createTextNode(txt))}
+  if(i)i.classList.remove('diary-icon')
+ }else{
+  el.classList.add('home-app');
+  if(!sp){const tn=[...el.childNodes].filter(n=>n.nodeType===3&&n.textContent.trim()).pop();const txt=tn?tn.textContent.trim():'';if(tn)tn.remove();sp=document.createElement('span');sp.textContent=txt;el.appendChild(sp)}
+  if(i)i.classList.add('diary-icon')
+ }
+}
+function dcFitAll(){document.querySelectorAll('#v-home .app[data-go]').forEach(dcFitApp)}
+function dcAppKey(e){return 'app:'+(e.dataset.homeItem||e.dataset.go||e.dataset.p3Decor||'')}
+function dcPageNo(e){return e.closest('#home-page2')?2:e.closest('#home-page3')?3:e.closest('#home-page4')?4:e.closest('.wrap')?1:0}
+/* 桌面上的软件和底部栏软件互换：让换上桌面的那个软件接手原来的格子 */
+function dcFreeTake(el){const p=dcPageNo(el),d=S.desktop||{},m=d.free&&d.free[p],q=m&&m[dcAppKey(el)];return q&&typeof q==='object'?{p,q:Object.assign({},q)}:null}
+function dcFreePut(dockEl,pos,pageEl){
+ try{window.hdFreeClear&&hdFreeClear(pageEl)}catch(e){}
+ if(pos){const d=S.desktop=S.desktop||{};d.free=d.free||{};if(d.free[pos.p])delete d.free[pos.p][dcAppKey(pageEl)];(d.free[pos.p]=d.free[pos.p]||{})[dcAppKey(dockEl)]=pos.q}
+}
+/* 重置时把四个底部栏软件放回底部栏，被换进去的软件先放回桌面 */
+function dcRestoreDock(){
+ const dock=$('#v-home .dock'),tmp=$('#desktop-widgets');if(!dock||!tmp)return;
+ const DOCK=['app','worlds','personas','settings'],all=[...document.querySelectorAll('#v-home .app[data-go]')];
+ all.filter(e=>e.closest('.dock')&&!DOCK.includes(e.dataset.go)).forEach(e=>tmp.appendChild(e));
+ DOCK.forEach(id=>{const el=all.find(e=>e.dataset.go===id);if(el)dock.appendChild(el)});
+ dcFitAll()
+}
+function swapDesktopItems(a,b,pre){if(!a||!b||a===b)return;const pa=a.parentElement,pb=b.parentElement;const dockA=!!a.closest('.dock'),dockB=!!b.closest('.dock');if(dockA||dockB){if(!(a.matches('.app[data-go]')&&b.matches('.app[data-go]'))){toast('底部固定栏只放软件图标，小组件请放在桌面区域');return}}else if(pa!==pb&&!(isHomeIcon(a)&&isHomeIcon(b))){toast('小组件只能在同一屏内交换位置');return}const cross=dockA!==dockB;let pos=null,pel=null,del=null;if(cross){del=dockA?a:b;pel=dockA?b:a;pos=pre||dcFreeTake(pel)}const marker=document.createComment('swap');pa.insertBefore(marker,a);pb.insertBefore(a,b);pa.insertBefore(b,marker);marker.remove();if(cross){dcFitApp(a);dcFitApp(b);dcFreePut(del,pos,pel)}saveDesktopOrder();}
 function isHomeIcon(el){return !!el&&el.matches('.app,.home-app')&&!el.matches('.w,.full,.desktop-widget')}
 function saveDesktopOrder(){const orderFor=par=>par?[...par.children].map(el=>el.dataset.homeItem||el.dataset.go||el.dataset.dwId||el.dataset.p3Decor||''):[];S.desktop.order=S.desktop.order||{};S.desktop.order.first=orderFor($('.wrap'));S.desktop.order.second=orderFor($('#home-page2 .home-app-grid'));S.desktop.order.dock=orderFor($('#v-home .dock'));S.desktop.order.p3=orderFor($('#home-page3 .page3-apps'));S.desktop.order.p4=orderFor($('#home-page4 .p4-apps'));save()}
-function moveDesktopIcon(el,par){if(!isHomeIcon(el)||!par||el.parentElement===par)return false;par.appendChild(el);saveDesktopOrder();return true}
+function moveDesktopIcon(el,par){if(!isHomeIcon(el)||!par||el.parentElement===par||el.closest('.dock'))return false;par.appendChild(el);saveDesktopOrder();return true}
 const HOME_DRAG_SEL='.wrap > .w,.wrap > .full,.wrap > .home-app,#home-page2 .home-app-grid > *,#desktop-widgets > *,#v-home .dock > .app,#home-page3 .page3-apps > .home-app,#home-page4 .p4-apps > .home-app,#home-page2 .recent-search-widget,#home-page2 .quote-widget,#home-page3 .p3-calendar,#home-page4 #p4-bar,#home-page4 #p4-music';
 function hdClone(src){const c=src.cloneNode(false);if(c.removeAttribute){c.removeAttribute('id');c.removeAttribute('data-go')}const cs=getComputedStyle(src);for(let i=0;i<cs.length;i++){const p=cs[i];try{c.style.setProperty(p,cs.getPropertyValue(p),cs.getPropertyPriority(p))}catch(e){}}c.style.setProperty('pointer-events','none','important');src.childNodes.forEach(n=>c.appendChild(n.nodeType===1?hdClone(n):n.cloneNode(true)));return c}
 function homeDragSetup(home){
@@ -4580,8 +4559,8 @@ function homeDragSetup(home){
     clearHold();if(!d)return;
     const still=Math.hypot(cx-sx,cy-sy)<8;const el=d.el,g=d.g,over=d.over,r0=d.r,ddx=cx-sx,ddy=cy-sy;clearInterval(d.iv);d=null;window.__homeDrag=false;endTs=Date.now();
     g.remove();el.classList.remove('hd-src');if(over)over.classList.remove('hd-over');
-    if(drop){if(!still&&window.hdFreeDrop&&hdFreeDrop(el,r0,ddx,ddy,over))return;if(!still&&window.hdFreeClear){hdFreeClear(el);if(over)hdFreeClear(over)}
-    if(over){swapDesktopItems(el,over);desktopApply()}else if(isHomeIcon(el)){const box=pageBox(cx,cy);if(box&&moveDesktopIcon(el,box)){desktopApply();toast('已移到这一屏')}}if(still&&!over&&!isHomeIcon(el)&&typeof dcwMenu==='function')setTimeout(()=>dcwMenu(el),30)}
+    if(drop){const pre=over&&over.closest&&(!!el.closest('.dock')!==!!over.closest('.dock'))?dcFreeTake(el.closest('.dock')?over:el):null;if(!still&&window.hdFreeDrop&&hdFreeDrop(el,r0,ddx,ddy,over))return;if(!still&&window.hdFreeClear){hdFreeClear(el);if(over)hdFreeClear(over)}
+    if(over){swapDesktopItems(el,over,pre);desktopApply()}else if(isHomeIcon(el)){if(el.closest('.dock')){if(!still)toast('底部栏的软件只能和桌面上的软件互换：把它拖到要换的软件上')}else{const box=pageBox(cx,cy);if(box&&moveDesktopIcon(el,box)){desktopApply();toast('已移到这一屏')}}}if(still&&!over&&!isHomeIcon(el)&&typeof dcwMenu==='function')setTimeout(()=>dcwMenu(el),30)}
   };
   window.__hdExt={start:(el,x,y)=>{if(d)return;sx=cx=x;sy=cy=y;clearHold();start(el)},move:(x,y)=>{cx=x;cy=y;if(d)move()},end:ok=>{if(d)finish(ok)}};
   home.addEventListener('click',e=>{if(Date.now()-endTs<450){e.preventDefault();e.stopImmediatePropagation()}},true);
@@ -5217,7 +5196,7 @@ async function skyAsk(msgs,cfgO,sig){
   arm(60000);
   try{
     const r=await fetch(base+'/chat/completions',{method:'POST',signal:ctl.signal,
-      headers:apiRequestHeaders(c),
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.key},
       body:JSON.stringify({model:c.model,temperature:+c.temp,stream:true,max_tokens:800,messages:msgs})});
     if(!r.ok){let m;try{m=(await r.json()).error.message}catch(e){}throw new Error(m||'HTTP '+r.status)}
     got=true;arm(40000);
@@ -6453,10 +6432,9 @@ async function generateImage(prompt,opt){
  opt=opt||{};const c=opt.cfg||S.cfg,pp=opt.pid&&P(opt.pid),face=opt.noFace?'':(pp&&pp.faceLock)||'';
  if((c.imageProvider||'gpt')==='novelai'){
    if(!c.naiKey)throw new Error('请先在「生图 API」里填写 NovelAI Token / 中转站 Key');
-   const root=(c.naiBase||'https://image.novelai.net').replace(/\/+$/,'').replace(/\/v1$/,'');
-   const apiMode=c.naiApiMode||'native';
+   const base=(c.naiBase||'https://image.novelai.net').replace(/\/+$/,'');
    const positive=[c.naiPositive,prompt,c.naiDetail].filter(Boolean).join(', ');
-   let nm=String(c.naiCustomModel||c.naiModel||'nai-diffusion-4-full');if(nm==='nai-diffusion-4-curated')nm='nai-diffusion-4-curated-preview';
+   let nm=String(c.naiModel||'nai-diffusion-4-full');if(nm==='nai-diffusion-4-curated')nm='nai-diffusion-4-curated-preview';
    const isV4=/diffusion-4/.test(nm),uc0=c.naiNegative||'';
    const parameters={width:Number(c.naiWidth)||832,height:Number(c.naiHeight)||1216,scale:Number(c.naiScale)||5,steps:Number(c.naiSteps)||28,sampler:c.naiSampler||'k_euler_ancestral',n_samples:1,uc:uc0,cfg_rescale:Number(c.naiCfgRescale)||0,sm:isV4?false:!!c.naiSmDyn||!!c.naiSm,sm_dyn:isV4?false:!!c.naiSmDyn};
    if(!isV4)parameters.sm=!!c.naiSm;
@@ -6465,41 +6443,16 @@ async function generateImage(prompt,opt){
    if(isV4){Object.assign(parameters,{params_version:3,legacy:false,legacy_v3_extend:false,noise_schedule:'karras',qualityToggle:false,ucPreset:2,autoSmea:false,add_original_image:true,controlnet_strength:1,dynamic_thresholding:false,prefer_brownian:true,deliberate_euler_ancestral_bug:false,skip_cfg_above_sigma:null,use_coords:false,characterPrompts:[],
      v4_prompt:{caption:{base_caption:positive,char_captions:[]},use_coords:false,use_order:true},
      v4_negative_prompt:{caption:{base_caption:uc0,char_captions:[]},legacy_uc:false}})}
-   let faceData=null;
-   if(face){const b64=await naiRefPng(face);faceData='data:image/png;base64,'+b64;
-     if(apiMode==='native'){
-       if(/4-5/.test(nm)){parameters.director_reference_images=[b64];parameters.director_reference_descriptions=[{caption:{base_caption:'character',char_captions:[]},legacy_uc:false}];parameters.director_reference_information_extracted=[1];parameters.director_reference_strength_values=[1];parameters.director_reference_secondary_strength_values=[0]}
-       else if(/diffusion-4/.test(nm)){parameters.reference_image_multiple=[b64];parameters.reference_information_extracted_multiple=[1];parameters.reference_strength_multiple=[.6]}
-     }}
-   const headers={'Content-Type':'application/json','Authorization':'Bearer '+c.naiKey};
-   let res,images=[];
-   if(apiMode==='native'){
-     res=await fetch(root+'/ai/generate-image',{method:'POST',headers,body:JSON.stringify({input:positive,model:nm,action:'generate',parameters})});
-     if(!res.ok){const tx=await res.text().catch(()=> '');throw new Error('NovelAI 原生代理返回 '+res.status+(tx?'（'+tx.replace(/\s+/g,' ').slice(0,180)+'）':'')+'，请检查地址、Key、CORS 和接口兼容性')}
-     const buf=await res.arrayBuffer(),u=new Uint8Array(buf),mime=res.headers.get('content-type')||'';
-     if(mime.startsWith('image/')){let bin='';for(let j=0;j<u.length;j+=0x8000)bin+=String.fromCharCode(...u.subarray(j,j+0x8000));return 'data:'+mime+';base64,'+btoa(bin)}
-     for(let i=0;i<u.length-30;i++){if(u[i]===0x50&&u[i+1]===0x4b&&u[i+2]===0x03&&u[i+3]===0x04){const nl=u[i+26]|u[i+27]<<8,el=u[i+28]|u[i+29]<<8,cs=(u[i+18]|u[i+19]<<8|u[i+20]<<16|u[i+21]<<24)>>>0,method=u[i+8]|u[i+9]<<8;const name=new TextDecoder().decode(u.slice(i+30,i+30+nl));const data=u.slice(i+30+nl+el,i+30+nl+el+cs);if(/\.(png|jpg|jpeg|webp)$/i.test(name)){if(method===0){let bin='';for(let j=0;j<data.length;j+=0x8000)bin+=String.fromCharCode(...data.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}if(method===8&&'DecompressionStream'in window){try{const out=await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();const a=new Uint8Array(out);let bin='';for(let j=0;j<a.length;j+=0x8000)bin+=String.fromCharCode(...a.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}catch(e){}}}}}
-     throw new Error('代理已返回，但未识别到图片。请确认返回 NovelAI 兼容的 ZIP 或 image/* 图片响应');
-   }
-   if(apiMode==='openai'){
-     if(face)throw new Error('当前 OpenAI 图像接口模式不支持角色参照图，请切换 NovelAI 原生或 OpenAI 对话模式');
-     const payload={model:nm,prompt:positive,n:1,size:parameters.width+'x'+parameters.height,response_format:'b64_json',negative_prompt:uc0,action:'generate',parameters,...parameters};
-     res=await fetch(root+'/v1/images/generations',{method:'POST',headers,body:JSON.stringify(payload)});
-     const j=await res.json().catch(()=>({}));if(!res.ok)throw new Error('OpenAI 图像代理返回 '+res.status+'：'+(j.error?.message||JSON.stringify(j).slice(0,220)));
-     images=(j.data||[]).map(x=>x.b64_json?'data:image/png;base64,'+x.b64_json:x.url).filter(Boolean);
-     if(!images.length)throw new Error('图像代理响应中没有 data[].b64_json 或 data[].url');
-     return images[0];
-   }
-   if(apiMode==='chat'){
-     const content=[{type:'text',text:JSON.stringify({prompt:positive,negative_prompt:uc0,model:nm,action:'generate',parameters})}];
-     if(faceData)content.push({type:'image_url',image_url:{url:faceData}});
-     res=await fetch(root+'/v1/chat/completions',{method:'POST',headers,body:JSON.stringify({model:nm,stream:false,messages:[{role:'user',content}],novelai:{input:positive,model:nm,action:'generate',parameters},parameters})});
-     const j=await res.json().catch(()=>({}));if(!res.ok)throw new Error('OpenAI 对话代理返回 '+res.status+'：'+(j.error?.message||JSON.stringify(j).slice(0,220)));
-     const raw=JSON.stringify(j),re=/(data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+)|(https?:\/\/[^\s)"'<>]+?\.(?:png|jpe?g|webp)(?:\?[^\s)"'<>]*)?)/gi;let m;while((m=re.exec(raw)))images.push(m[1]||m[2]);
-     images=[...new Set(images)];if(!images.length)throw new Error('对话代理响应中未找到图片链接或 Base64 图片数据');
-     return images[0];
-   }
-   throw new Error('未知的 NovelAI 代理接口格式：'+apiMode);
+    if(face){const b64=await naiRefPng(face),mn=nm;
+     if(/4-5/.test(mn)){parameters.director_reference_images=[b64];parameters.director_reference_descriptions=[{caption:{base_caption:'character',char_captions:[]},legacy_uc:false}];parameters.director_reference_information_extracted=[1];parameters.director_reference_strength_values=[1];parameters.director_reference_secondary_strength_values=[0]}
+     else if(/diffusion-4/.test(mn)){parameters.reference_image_multiple=[b64];parameters.reference_information_extracted_multiple=[1];parameters.reference_strength_multiple=[.6]}}
+    const res=await fetch(base+'/ai/generate-image',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+c.naiKey},body:JSON.stringify({input:positive,model:nm,action:'generate',parameters})});
+   if(!res.ok){const tx=await res.text().catch(()=>'');throw new Error('NovelAI / 中转站接口返回 '+res.status+(tx?'（'+tx.replace(/\s+/g,' ').slice(0,140)+'）':'')+'，请检查地址、Key、CORS 和接口兼容性')}
+   const buf=await res.arrayBuffer(),u=new Uint8Array(buf);
+   // Supports a direct image response as well as the ZIP response used by NovelAI.
+   const mime=res.headers.get('content-type')||'';if(mime.startsWith('image/')){let bin='';for(let j=0;j<u.length;j+=0x8000)bin+=String.fromCharCode(...u.subarray(j,j+0x8000));return 'data:'+mime+';base64,'+btoa(bin)}
+   for(let i=0;i<u.length-30;i++){if(u[i]===0x50&&u[i+1]===0x4b&&u[i+2]===0x03&&u[i+3]===0x04){const nl=u[i+26]|u[i+27]<<8,el=u[i+28]|u[i+29]<<8,cs=(u[i+18]|u[i+19]<<8|u[i+20]<<16|u[i+21]<<24)>>>0,method=u[i+8]|u[i+9]<<8;const name=new TextDecoder().decode(u.slice(i+30,i+30+nl));const data=u.slice(i+30+nl+el,i+30+nl+el+cs);if(/\.(png|jpg|jpeg|webp)$/i.test(name)){if(method===0){let bin='';for(let j=0;j<data.length;j+=0x8000)bin+=String.fromCharCode(...data.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}if(method===8&&'DecompressionStream'in window){try{const out=await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();const a=new Uint8Array(out);let bin='';for(let j=0;j<a.length;j+=0x8000)bin+=String.fromCharCode(...a.subarray(j,j+0x8000));return 'data:image/png;base64,'+btoa(bin)}catch(e){}}}}}
+   throw new Error('接口已返回，但未识别到图片。请确认中转站返回 NovelAI 兼容的 ZIP 或 image/* 图片响应');
  }
  const base=(c.imageBase||'https://api.openai.com/v1').replace(/\/+$/,'');if(!c.imageKey)throw new Error('请先在「生图 API」里填写 GPT 生图 Key');
  const bits=[c.gptPositive,prompt,c.gptDetail].filter(Boolean);if(c.gptNegative)bits.push('Avoid / negative prompt: '+c.gptNegative);const body={model:c.imageModel||'gpt-image-1',prompt:bits.join('\n\n'),n:Math.max(1,Math.min(4,Number(c.gptN)||1))};if(c.gptSize&&c.gptSize!=='auto')body.size=c.gptSize;if(c.gptQuality&&c.gptQuality!=='auto')body.quality=c.gptQuality;if(c.gptStyle)body.style=c.gptStyle;
@@ -6569,9 +6522,9 @@ async function gen(){
   const redoNote=window.__redoNote||'';window.__redoNote='';
   const p=P(cur),h=S.chats[cur],gid=cur;setBusy(1);const el=bub({role:'assistant',content:'···'},-1,1,0);THK={cid:gid,el};
   try{
-    try{await linksPrefetch(h)}catch(_){}const basePrompt=build(p,h,true,{pre:1});if((S.cfg.memoryMode||'traditional')==='vector'){try{const vm=await vectorMemoryPrompt(p,h);if(vm)basePrompt.push({role:'system',content:vm})}catch(memErr){toast('向量记忆检索失败，本次继续普通聊天：'+memErr.message)}}const prompt=basePrompt.concat([{role:'system',content:'在保持角色人设和自然对话的前提下，请一次性输出严格 JSON，不要 Markdown 代码块，格式为 {"messages":["第一条独立聊天消息","第二条独立聊天消息"],"reply":"兼容字段","thought":"角色此刻未说出口的内心想法","image_prompt":""}。messages 是角色按真实聊天节奏连续发送的消息数组：结合语境，适合分开发的内容就拆成 2-5 条短消息，每条只放一个自然聊天气泡；不要把几句话用换行或一大段塞进同一个气泡。只有确实一句就能说清时才只输出一条。不要机械地每次都拆成多条。reply 可作为 messages 的兼容备用字段。thought 是简短内心活动。'+imgPromptRule()+'如果某条回复是针对对话里某一条具体消息的回应（用户说的或你自己之前说的都可以），可以偶尔（不要每条都用）把这一条写成对象 {"text":"回复内容","quote":"被引用消息的原文片段，原样摘抄，不超过30字"}，其余条目仍写成普通字符串。'},{role:'system',content:TRF_PROMPT()},{role:'system',content:LIFE_PROMPT()}].concat([{role:'system',content:vcSystemPrompt()}]).concat(avPrompt(cur)).concat((window.__callPrompt&&window.__callPrompt(cur))?[{role:'system',content:window.__callPrompt(cur)}]:[]).concat(CC(cur).narrOn?[{role:'system',content:narrPrompt(S.chats[cur])}]:[]).concat(CC(cur).trOn?[{role:'system',content:trMsgPrompt(CC(cur).trTo||'简体中文')}]:[]));
+    try{await linksPrefetch(h)}catch(_){}const basePrompt=build(p,h,true,{pre:1});if((S.cfg.memoryMode||'traditional')==='vector'){try{const vm=await vectorMemoryPrompt(p,h);if(vm)basePrompt.push({role:'system',content:vm})}catch(memErr){toast('向量记忆检索失败，本次继续普通聊天：'+memErr.message)}}const prompt=basePrompt.concat([{role:'system',content:'在保持角色人设和自然对话的前提下，请一次性输出严格 JSON，不要 Markdown 代码块，格式为 {"thought":"角色此刻未说出口的内心想法（必填，不能为空）","messages":["第一条独立聊天消息","第二条独立聊天消息"],"reply":"兼容字段","image_prompt":""}。messages 是角色按真实聊天节奏连续发送的消息数组：结合语境，适合分开发的内容就拆成 2-5 条短消息，每条只放一个自然聊天气泡；不要把几句话用换行或一大段塞进同一个气泡。只有确实一句就能说清时才只输出一条。不要机械地每次都拆成多条。reply 可作为 messages 的兼容备用字段。thought 是必填字段：每一次回复都必须写，不能省略、不能留空，不要因为对话简短、气氛平淡或只回一两个字就跳过；写一两句简短的内心活动，要和这次的回复对得上。'+imgPromptRule()+'如果某条回复是针对对话里某一条具体消息的回应（用户说的或你自己之前说的都可以），可以偶尔（不要每条都用）把这一条写成对象 {"text":"回复内容","quote":"被引用消息的原文片段，原样摘抄，不超过30字"}，其余条目仍写成普通字符串。'},{role:'system',content:TRF_PROMPT()},{role:'system',content:LIFE_PROMPT()}].concat([{role:'system',content:vcSystemPrompt()}]).concat(avPrompt(cur)).concat((window.__callPrompt&&window.__callPrompt(cur))?[{role:'system',content:window.__callPrompt(cur)}]:[]).concat(CC(cur).narrOn?[{role:'system',content:narrPrompt(S.chats[cur])}]:[]).concat(CC(cur).trOn?[{role:'system',content:trMsgPrompt(CC(cur).trTo||'简体中文')}]:[]).concat([{role:'system',content:thkReminder(cur)}]));
     {const _t=prTip(p);if(_t)prompt.push({role:'system',content:_t})}{let _n=0;for(let i=h.length-1;i>=0&&h[i].role==='user';i--)_n++;if(_n>1)prompt.push({role:'system',content:'【本轮用户连发了'+_n+'条消息】上面最后一个用户回合里，每一行（或每个「[用户引用了…]」块）都是用户单独发的一条。请逐条回应，每条都要有对应的反应，不要只回最后一句；带「引用」的那条是在回复被引用的旧消息，要针对被引用的内容回应。'})}{const _sl=(typeof stkListAI==='function'?stkListAI():[]).filter(x=>x&&x.src&&(x.description||x.name)).slice(0,80);window.__stkMap={};_sl.forEach((x,i)=>{window.__stkMap['s'+(i+1)]=x.id});prompt.push({role:'system',content:_sl.length?'【表情包】你只能发下面这个列表里真实存在的表情包。想发时，在 messages 里单独加一条对象 {"sticker":"编号"}，编号只能取下表里的 s1、s2 这类值；不要自己编表情包，不要在文字里写「[表情包：…]」「［表情］」这类占位或画面描述。没有合适的就不发，可以用文字或颜文字带过。\n'+_sl.map((x,i)=>'s'+(i+1)+'：'+String(x.description||x.name).slice(0,40)).join('\n'):'【表情包】你现在没有任何可发的表情包。不要在文字里写「[表情包：…]」「［表情］」之类的占位或画面描述；用户要表情包时，如实说这边没有，或用文字、颜文字回应。'})}prompt.push({role:'system',content:ANTI_ECHO});prompt.push({role:'system',content:FMT_RULE+RECALL_RULE});if(redoNote)prompt.push({role:'system',content:redoNote});if(h.length&&h[h.length-1].role==='assistant')prompt.push({role:'user',content:proNudge(p,0,'cont')});{const lm=h[h.length-1];if(lm&&lm.role==='user'&&lm.t&&Date.now()-lm.t>=3600000)prompt.push({role:'system',content:gapNote(lm.t)});else{const _g=gapOpenNote(h);if(_g)prompt.push({role:'system',content:_g})}}window.__lastPrompt={t:Date.now(),id:p.id,msgs:prompt};const raw=await askClean(prompt,chatCfg(p.id));const _rsn=takeRsn();let _rsnU=0;const data=banFilter(parseAI(raw))
-    let replyQuotes=[],replies=[],replyNarr=[],replyTr=[],replyStk=[],_stkDrop=0,_rcLast=0;const _fakeStk=t=>/^\s*[\[［【(（]\s*(表情包|表情|贴纸|贴图|动图|sticker|meme|emoji)\s*[:：]/i.test(t);if(Array.isArray(data.messages)){data.messages.forEach(x=>{const isO=x&&typeof x==='object';if(isO&&x.recall_last&&!(x.text||x.content||x.narr||x.sticker)){_rcLast=1;return}if(isO&&x.sticker){const _id=(window.__stkMap||{})[String(x.sticker).trim()],_s=_id&&S.stickers.find(v=>v.id===_id);if(_s){replies.push('[表情包：'+(_s.description||_s.name||'')+']');replyQuotes.push('');replyNarr.push(false);replyTr.push('');replyStk.push(_s.id)}else _stkDrop++;return}if(!(isO&&x.narr)&&_fakeStk(String(isO?(x.text||x.content||x.reply||''):(x||'')))){_stkDrop++;return}const nr=isO&&x.narr?String(x.narr).trim():'',tx=nr||String(isO?(x.text||x.content||x.reply||''):(x||'')).trim();if(tx){replies.push(((isO&&!nr&&(x.recall===true||x.recall==='true'||x.recalled===true))?'\u0001RC':'')+tx);replyQuotes.push(isO&&!nr?String(x.quote||'').trim():'');replyNarr.push(!!nr);replyTr.push(isO&&!nr?String(x.tr||x.translation||'').trim():'');replyStk.push('')}})}if(!replies.length&&!_stkDrop&&!_rcLast){const out=String(data.reply||raw).trim();replies=out.split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);if(replies.length===1&&out.length>180){const parts=out.match(/[^。！？!?]+[。！？!?]?/g)||[out];if(parts.length>=3)replies=parts.map(x=>x.trim()).filter(Boolean)}}if(!replies.length&&!_stkDrop&&!_rcLast)replies=[String(data.reply||raw).trim()];if(replies.some((t,i)=>!replyStk[i]&&_fakeStk(t))){const _k=replies.map((t,i)=>!(!replyStk[i]&&_fakeStk(t)));_stkDrop+=_k.filter(v=>!v).length;replies=replies.filter((_,i)=>_k[i]);replyNarr=replyNarr.filter((_,i)=>_k[i]);replyQuotes=replyQuotes.filter((_,i)=>_k[i]);replyTr=replyTr.filter((_,i)=>_k[i]);replyStk=replyStk.filter((_,i)=>_k[i])}if(_stkDrop)toast('已拦截 AI 编造的表情包（只能发表情包库里的）');{const _e=(THK&&THK.cid===gid&&THK.el)?THK.el:el;if(_e&&_e.parentNode)_e.remove();THK=null}const thoughtTr=String(data.thought_tr||data.thoughtTr||'').trim();const voiceObj=vcOn(gid)?vcParse(data.voice):null;const songObj=(()=>{const x=data.song;if(!x||typeof x!=='object')return null;const t=String(x.title||'').trim();return t?{title:t,artist:String(x.artist||'').trim(),lyric:String(x.lyric||'').trim(),tag:String(x.tag||'').trim()}:null})();for(let k=0;k<replies.length;k++)if(replyNarr[k])replies[k]=await narrCN(replies[k]);const replyChatId=gid;let thoughtDone=0,_lastA=null;if(_rcLast){for(let q=h.length-1;q>=0;q--){const z=h[q];if(z&&z.role==='assistant'&&!z.recalled&&!z.narr&&(z.content||z.image||z.stk)){z.recalled=true;break}}save();if(cur===gid)draw()}for(let idx=0;idx<replies.length;idx++){if(idx>0&&cur===replyChatId){await new Promise(resolve=>setTimeout(resolve,520+Math.floor(Math.random()*420)));}let _tx=replies[idx],_rc=false;if(_tx.charCodeAt(0)===1){_rc=true;_tx=_tx.slice(3)}if(!replyNarr[idx]&&!replyStk[idx]&&/^\s*[\[［【(（][^\]］】)）]{0,24}撤回了?(一条|1条)?(消息|信息)[^\]］】)）]{0,12}[\]］】)）]\s*$/.test(_tx)){const _t=_lastA||rcLastA(h);if(_t){_t.recalled=true;save();if(cur===gid)draw()}continue}const isN=!!replyNarr[idx];if(_rc&&!isN&&!replyStk[idx]){const _old=rcTarget(h,_tx);if(_old){_old.recalled=true;save();if(cur===gid)draw();continue}}h.push({role:'assistant',content:_tx,...(_rc&&!isN&&!replyStk[idx]?{recalled:true}:{}),...(replyStk[idx]?{stk:replyStk[idx]}:{}),...(isN?{narr:1}:((!thoughtDone&&(thoughtDone=1))?{thought:String(data.thought||'').trim(),...(thoughtTr&&thoughtTr!==String(data.thought||'').trim()?{thoughtTr}:{}),...(songObj?{song:songObj}:{}),...(voiceObj?{voice:voiceObj}:{})}:{thought:''})),t:Date.now(),...((!isN&&_rsn&&!_rsnU&&(_rsnU=1))?{reasoning:_rsn}:{}),...(isN?{}:findQuote(h,replyQuotes[idx])),...(!isN&&replyTr[idx]?{tr:replyTr[idx],trLang:CC(gid).trTo||'简体中文'}:{})});_lastA=h[h.length-1];save();if(cur===gid)draw();}trfApplyAI(h,data,gid);try{kinApplyAI(h,data,gid)}catch(_){}try{lifeApplyAI(h,data,gid)}catch(_){}try{avApplyAI(gid,data)}catch(_){}try{window.__callApplyAI&&window.__callApplyAI(gid,data)}catch(_){}if(S.cfg.imageEnabled&&String(data.image_prompt||'').trim()){try{const im=await generateImage(String(data.image_prompt).trim(),{pid:gid});h.push({role:'assistant',content:'',image:im,thought:'我把刚才描述的画面生成出来了。',t:Date.now()})}catch(imgErr){h.push({role:'assistant',content:'图片生成失败：'+imgErr.message,t:Date.now()})}}save();try{await maybeAutoSummarize(gid)}catch(_){}
+    let replyQuotes=[],replies=[],replyNarr=[],replyTr=[],replyStk=[],_stkDrop=0,_rcLast=0;const _fakeStk=t=>/^\s*[\[［【(（]\s*(表情包|表情|贴纸|贴图|动图|sticker|meme|emoji)\s*[:：]/i.test(t);if(Array.isArray(data.messages)){data.messages.forEach(x=>{const isO=x&&typeof x==='object';if(isO&&x.recall_last&&!(x.text||x.content||x.narr||x.sticker)){_rcLast=1;return}if(isO&&x.sticker){const _id=(window.__stkMap||{})[String(x.sticker).trim()],_s=_id&&S.stickers.find(v=>v.id===_id);if(_s){replies.push('[表情包：'+(_s.description||_s.name||'')+']');replyQuotes.push('');replyNarr.push(false);replyTr.push('');replyStk.push(_s.id)}else _stkDrop++;return}if(!(isO&&x.narr)&&_fakeStk(String(isO?(x.text||x.content||x.reply||''):(x||'')))){_stkDrop++;return}const nr=isO&&x.narr?String(x.narr).trim():'',tx=nr||String(isO?(x.text||x.content||x.reply||''):(x||'')).trim();if(tx){replies.push(((isO&&!nr&&(x.recall===true||x.recall==='true'||x.recalled===true))?'\u0001RC':'')+tx);replyQuotes.push(isO&&!nr?String(x.quote||'').trim():'');replyNarr.push(!!nr);replyTr.push(isO&&!nr?String(x.tr||x.translation||'').trim():'');replyStk.push('')}})}if(!replies.length&&!_stkDrop&&!_rcLast){const out=String(data.reply||raw).trim();replies=out.split(/\n{2,}/).map(x=>x.trim()).filter(Boolean);if(replies.length===1&&out.length>180){const parts=out.match(/[^。！？!?]+[。！？!?]?/g)||[out];if(parts.length>=3)replies=parts.map(x=>x.trim()).filter(Boolean)}}if(!replies.length&&!_stkDrop&&!_rcLast)replies=[String(data.reply||raw).trim()];if(replies.some((t,i)=>!replyStk[i]&&_fakeStk(t))){const _k=replies.map((t,i)=>!(!replyStk[i]&&_fakeStk(t)));_stkDrop+=_k.filter(v=>!v).length;replies=replies.filter((_,i)=>_k[i]);replyNarr=replyNarr.filter((_,i)=>_k[i]);replyQuotes=replyQuotes.filter((_,i)=>_k[i]);replyTr=replyTr.filter((_,i)=>_k[i]);replyStk=replyStk.filter((_,i)=>_k[i])}if(_stkDrop)toast('已拦截 AI 编造的表情包（只能发表情包库里的）');{const _e=(THK&&THK.cid===gid&&THK.el)?THK.el:el;if(_e&&_e.parentNode)_e.remove();THK=null}const thoughtTr=String(data.thought_tr||data.thoughtTr||'').trim();const voiceObj=vcOn(gid)?vcParse(data.voice):null;const songObj=(()=>{const x=data.song;if(!x||typeof x!=='object')return null;const t=String(x.title||'').trim();return t?{title:t,artist:String(x.artist||'').trim(),lyric:String(x.lyric||'').trim(),tag:String(x.tag||'').trim()}:null})();for(let k=0;k<replies.length;k++)if(replyNarr[k])replies[k]=await narrCN(replies[k]);const replyChatId=gid;let thoughtDone=0,_lastA=null;const _n0=h.length;if(_rcLast){for(let q=h.length-1;q>=0;q--){const z=h[q];if(z&&z.role==='assistant'&&!z.recalled&&!z.narr&&(z.content||z.image||z.stk)){z.recalled=true;break}}save();if(cur===gid)draw()}for(let idx=0;idx<replies.length;idx++){if(idx>0&&cur===replyChatId){await new Promise(resolve=>setTimeout(resolve,520+Math.floor(Math.random()*420)));}let _tx=replies[idx],_rc=false;if(_tx.charCodeAt(0)===1){_rc=true;_tx=_tx.slice(3)}if(!replyNarr[idx]&&!replyStk[idx]&&/^\s*[\[［【(（][^\]］】)）]{0,24}撤回了?(一条|1条)?(消息|信息)[^\]］】)）]{0,12}[\]］】)）]\s*$/.test(_tx)){const _t=_lastA||rcLastA(h);if(_t){_t.recalled=true;save();if(cur===gid)draw()}continue}const isN=!!replyNarr[idx];if(_rc&&!isN&&!replyStk[idx]){const _old=rcTarget(h,_tx);if(_old){_old.recalled=true;save();if(cur===gid)draw();continue}}h.push({role:'assistant',content:_tx,...(_rc&&!isN&&!replyStk[idx]?{recalled:true}:{}),...(replyStk[idx]?{stk:replyStk[idx]}:{}),...(isN?{narr:1}:((!thoughtDone&&(thoughtDone=1))?{thought:String(data.thought||'').trim(),...(thoughtTr&&thoughtTr!==String(data.thought||'').trim()?{thoughtTr}:{}),...(songObj?{song:songObj}:{}),...(voiceObj?{voice:voiceObj}:{})}:{thought:''})),t:Date.now(),...((!isN&&_rsn&&!_rsnU&&(_rsnU=1))?{reasoning:_rsn}:{}),...(isN?{}:findQuote(h,replyQuotes[idx])),...(!isN&&replyTr[idx]?{tr:replyTr[idx],trLang:CC(gid).trTo||'简体中文'}:{})});_lastA=h[h.length-1];save();if(cur===gid)draw();}try{thkBackfill(h,_n0,gid,data)}catch(_){}trfApplyAI(h,data,gid);try{kinApplyAI(h,data,gid)}catch(_){}try{lifeApplyAI(h,data,gid)}catch(_){}try{avApplyAI(gid,data)}catch(_){}try{window.__callApplyAI&&window.__callApplyAI(gid,data)}catch(_){}if(S.cfg.imageEnabled&&String(data.image_prompt||'').trim()){try{const im=await generateImage(String(data.image_prompt).trim(),{pid:gid});h.push({role:'assistant',content:'',image:im,thought:'我把刚才描述的画面生成出来了。',t:Date.now()})}catch(imgErr){h.push({role:'assistant',content:'图片生成失败：'+imgErr.message,t:Date.now()})}}save();try{await maybeAutoSummarize(gid)}catch(_){}
   }catch(e){{const _e=(THK&&THK.cid===gid&&THK.el&&THK.el.parentNode)?THK.el:el;_e.textContent='请求失败：'+e.message;_e.classList.add('err')}setBusy(0);return}
   setBusy(0);if(cur===gid)draw();
 }
@@ -6989,7 +6942,33 @@ async function vcTr(){if(!VC)return;const m=(S.chats[cur]||[])[VC.idx];const box
  if(VC&&(S.chats[cur]||[])[VC.idx]===m){box.textContent=m.thoughtTr;box.removeAttribute('hidden')}}
 let IPD=null;
 function ipodClose(){vcClose();if(!IPD)return;clearInterval(IPD.timer);IPD.el.remove();IPD=null}
+/* ===== 心声：必填提醒 / 漏写时自动补 / 点头像时找同一轮的心声 ===== */
+function thkReminder(cid){
+ const c=(typeof vcPreset==='function')?vcPreset(cid):null;
+ return '【输出检查】这次输出的 JSON 里，thought 必须有内容，不能为空、不能省略；'+(c?'voice 对象也要按要求填写。':'song 字段也要写。')+'写完回复后再核对一遍这几个字段是否都在。'
+}
+async function thkBackfill(h,n0,gid,data){
+ if(S.cfg&&S.cfg.thoughtBackfill===false)return;
+ if(String((data&&data.thought)||'').trim())return;
+ const batch=h.slice(n0).filter(m=>m&&m.role==='assistant'&&!m.narr&&!m.recalled);
+ const m=batch.find(x=>x.content&&!x.thought&&!x.stk);if(!m)return;
+ const p=P(gid);if(!p)return;
+ const recent=h.slice(-10).filter(x=>x&&(x.role==='user'||x.role==='assistant')&&x.content&&!x.narr).map(x=>(x.role==='user'?'用户':(p.name||'角色'))+'：'+String(x.content).slice(0,300)).join('\n');
+ const sys='你是「'+(p.name||'角色')+'」。'+String(p.prompt||'').slice(0,1500)+'\n\n任务：根据下面的对话，写出你在发出最后一条回复时，没有说出口的内心想法。用第一人称，一到两句，贴合人设和当时的语气，只输出想法本身，不要引号、不要解释、不要 JSON。';
+ let out='';try{out=await askClean([{role:'system',content:sys},{role:'user',content:recent}],chatCfg(gid))}catch(e){return}
+ const th=String(out||'').replace(/^[\s"“”「」]+|[\s"“”「」]+$/g,'').slice(0,300);
+ if(!th||m.thought)return;
+ m.thought=th;save();if(cur===gid){try{draw()}catch(_){}}
+}
+/* 点头像时：这条没有心声，就用同一轮里带心声的那一条 */
+function thkResolve(idx){
+ const h=S.chats[cur]||[],has=m=>m&&m.role==='assistant'&&!m.narr&&(m.thought||m.song||m.voice);
+ if(has(h[idx]))return idx;
+ for(let i=idx-1;i>=0&&i>=idx-8;i--){const m=h[i];if(!m||m.recalled||m.narr)continue;if(m.role!=='assistant')break;if(has(m))return i}
+ for(let i=idx+1;i<h.length&&i<=idx+8;i++){const m=h[i];if(!m||m.recalled||m.narr)continue;if(m.role!=='assistant')break;if(has(m))return i}
+ return idx}
 function ipodOpen(idx){
+ idx=thkResolve(idx);
  if(vcOn()){vcOpen(idx);return}
  ipodClose();
  const el=document.createElement('div');el.id='ipod';
@@ -7223,7 +7202,7 @@ $('#import-worlds').onclick=()=>{$('#wb-action-menu')?.classList.remove('on');xr
 $('#wb-export').onclick=()=>{$('#wb-action-menu')?.classList.remove('on');xrExportPick('world')};
 
 /* settings */
-const FS=[['#c-base','cfg','base'],['#c-key','cfg','key'],['#c-headers','cfg','headers'],['#c-model','cfg','model'],['#c-temp','cfg','temp'],['#c-hist','cfg','hist'],['#m-name','me','name'],['#m-handle','me','handle'],['#m-bio','me','bio']];
+const FS=[['#c-base','cfg','base'],['#c-key','cfg','key'],['#c-model','cfg','model'],['#c-temp','cfg','temp'],['#c-hist','cfg','hist'],['#m-name','me','name'],['#m-handle','me','handle'],['#m-bio','me','bio']];
 let settingsPage='main';
 function rSettings(){
   const showSetting=k=>{settingsPage=k;$('#v-settings').classList.toggle('detail',k!=='main');$$('#v-settings .body').forEach(e=>e.style.display='none');const target=$('#settings-'+k);if(target)target.style.display='block';if(k==='prompt')rRolePrompt();if(k==='memory'){const mode=S.cfg.memoryMode||'traditional';$('#memory-mode-traditional').checked=mode==='traditional';$('#memory-mode-vector').checked=mode==='vector';$('#c-embedding-base').value=S.cfg.embeddingBase||'';$('#c-embedding-key').value=S.cfg.embeddingKey||'';$('#c-embedding-model').value=S.cfg.embeddingModel||'text-embedding-3-small';$('#ios-memory-mode').textContent=mode==='vector'?'向量记忆':'传统记忆';$('#vector-connection-card').style.display=mode==='vector'?'block':'none';$('#vector-retrieval-card').style.display=mode==='vector'?'block':'none';$('#c-memory-topk').value=S.cfg.memoryTopK||12;$('#c-memory-minscore').value=S.cfg.memoryMinScore||0.4}$('#v-settings .bar h2').textContent=k==='main'?'设置':({'profile':'我的资料','appearance':'外观','innervoice':'心声预设','api':'模型与 API','imageapi':'生图 API','data':'数据与备份','prompt':'AI 扮演提示词','memory':'记忆模式','voice':'语音接入（MiniMax）','system':'系统（保活与通知）'}[k]||'设置');if(k==='voice'){const en=$('#c-voice-enabled');if(en)en.checked=!!S.cfg.voiceEnabled;const v=[['c-voice-base','voiceBase','https://api.minimax.io/v1'],['c-voice-key','voiceKey',''],['c-voice-group','voiceGroupId',''],['c-voice-model','voiceModel','speech-02-turbo'],['c-voice-id','voiceId','female-shaonv'],['c-voice-speed','voiceSpeed',1],['c-voice-vol','voiceVol',1],['c-voice-pitch','voicePitch',0]];v.forEach(([id,key,def])=>{const el=$('#'+id);if(el)el.value=S.cfg[key]??def})}};
@@ -7238,7 +7217,7 @@ function rSettings(){
   FS.forEach(([s,o,k])=>{const e=$(s);e.value=S[o][k]??'';e.oninput=()=>{S[o][k]=e.type==='number'?Number(e.value):e.value;if(o==='me'&&S.activeUserProfile){const up=S.userProfiles.find(x=>x.id===S.activeUserProfile);if(up)up[k]=S.me[k]}save();if(o==='me'&&k==='name')$('#ios-name').textContent=S.me.name||'我的资料'}});[['c-secondary-base','secondaryBase'],['c-secondary-key','secondaryKey'],['c-secondary-model','secondaryModel']].forEach(([id,k])=>{const e=$('#'+id);if(e){e.value=S.cfg[k]||'';e.oninput=()=>{S.cfg[k]=e.value.trim();save()}}});secApiInit();sysInit();fontUi();pzInitAll();
   {const fb=$('#c-fball');if(fb){fb.checked=!!S.cfg.fball;fb.onchange=()=>{S.cfg.fball=fb.checked;save();fballSync();toast(fb.checked?'悬浮球已开启':'悬浮球已关闭')}}}{const pv=$('#c-fball-prev'),sy=()=>{if(pv){pv.classList.toggle('img',!!S.cfg.fballImg);pv.classList.toggle('round',!!S.cfg.fballRound)}if(pv)pv.style.backgroundImage=S.cfg.fballImg?'url("'+String(S.cfg.fballImg).replace(/"/g,'%22')+'")':'none'};sy();const bi=$('#c-fball-img');if(bi)bi.onclick=async()=>{const src=await desktopImageSource('悬浮球图片',192);if(src===null)return;if(!src)return toast('没有选择图片');S.cfg.fballImg=src;save();fballSync();sy();toast('悬浮球图片已更新')};const bc=$('#c-fball-img-clear');if(bc)bc.onclick=()=>{S.cfg.fballImg='';save();fballSync();sy();toast('已恢复默认悬浮球')};const rd=$('#c-fball-round');if(rd){rd.checked=!!S.cfg.fballRound;rd.onchange=()=>{S.cfg.fballRound=rd.checked;save();fballSync();sy()}}}{const sz=$('#c-fball-size'),sv=$('#c-fball-size-v');if(sz){sz.value=S.cfg.fballSize||46;if(sv)sv.textContent=sz.value+'px';sz.oninput=()=>{S.cfg.fballSize=+sz.value;if(sv)sv.textContent=sz.value+'px';fballSync()};sz.onchange=()=>save()}const lw=$('#c-lyrwin');if(lw){lw.checked=S.cfg.lyrWin!==false;lw.onchange=()=>{S.cfg.lyrWin=lw.checked;save();if(window.lyrWinSync)lyrWinSync()}}}$('#c-stream').checked=!!S.cfg.stream;$('#c-stream').onchange=e=>{S.cfg.stream=e.target.checked;save()};{const rb=$('#c-rsn');if(rb){rb.checked=S.cfg.showRsn!==false;rb.onchange=()=>{S.cfg.showRsn=rb.checked;save();toast(rb.checked?'已显示思维链':'已隐藏思维链')}}}const imageToggle=$('#c-image-enabled');if(imageToggle){imageToggle.checked=!!S.cfg.imageEnabled;imageToggle.onchange=()=>{S.cfg.imageEnabled=imageToggle.checked;save();toast(imageToggle.checked?'已开启对方生图':'已关闭对方生图')}};
   const ip=$('#c-image-provider');if(ip){ip.value=S.cfg.imageProvider||'gpt';const syncImageProvider=()=>{S.cfg.imageProvider=ip.value;$('#image-gpt-fields').style.display=ip.value==='gpt'?'block':'none';$('#image-nai-fields').style.display=ip.value==='novelai'?'block':'none'};syncImageProvider();ip.onchange=syncImageProvider;
-    const fields={ 'c-image-base':['imageBase','https://api.openai.com/v1'],'c-image-key':['imageKey',''],'c-image-model':['imageModel','gpt-image-1'],'c-gpt-positive':['gptPositive',''],'c-gpt-negative':['gptNegative',''],'c-gpt-detail':['gptDetail',''],'c-gpt-size':['gptSize','1024x1024'],'c-gpt-quality':['gptQuality','auto'],'c-gpt-style':['gptStyle',''],'c-gpt-n':['gptN',1],'c-nai-base':['naiBase','https://image.novelai.net'],'c-nai-key':['naiKey',''],'c-nai-api-mode':['naiApiMode','native'],'c-nai-model':['naiModel','nai-diffusion-4-full'],'c-nai-custom-model':['naiCustomModel',''],'c-nai-positive':['naiPositive',''],'c-nai-negative':['naiNegative',''],'c-nai-detail':['naiDetail',''],'c-nai-width':['naiWidth',832],'c-nai-height':['naiHeight',1216],'c-nai-scale':['naiScale',5],'c-nai-steps':['naiSteps',28],'c-nai-sampler':['naiSampler','k_euler_ancestral'],'c-nai-cfgrescale':['naiCfgRescale',0],'c-nai-seed':['naiSeed','']};
+    const fields={ 'c-image-base':['imageBase','https://api.openai.com/v1'],'c-image-key':['imageKey',''],'c-image-model':['imageModel','gpt-image-1'],'c-gpt-positive':['gptPositive',''],'c-gpt-negative':['gptNegative',''],'c-gpt-detail':['gptDetail',''],'c-gpt-size':['gptSize','1024x1024'],'c-gpt-quality':['gptQuality','auto'],'c-gpt-style':['gptStyle',''],'c-gpt-n':['gptN',1],'c-nai-base':['naiBase','https://image.novelai.net'],'c-nai-key':['naiKey',''],'c-nai-model':['naiModel','nai-diffusion-4-full'],'c-nai-positive':['naiPositive',''],'c-nai-negative':['naiNegative',''],'c-nai-detail':['naiDetail',''],'c-nai-width':['naiWidth',832],'c-nai-height':['naiHeight',1216],'c-nai-scale':['naiScale',5],'c-nai-steps':['naiSteps',28],'c-nai-sampler':['naiSampler','k_euler_ancestral'],'c-nai-cfgrescale':['naiCfgRescale',0],'c-nai-seed':['naiSeed','']};
     const pzImg={list:()=>S.imagePresets,
      sub:p=>{const nv=(p.imageProvider||'gpt')==='novelai';return (nv?'NovelAI · '+(p.naiModel||''):'GPT · '+(p.imageModel||'gpt-image-1'))+' · '+hostOf(nv?p.naiBase:p.imageBase)},
      active:p=>Object.keys(p).filter(k=>k!=='id'&&k!=='name').every(k=>String(S.cfg[k]??'')===String(p[k]??'')),
@@ -7252,7 +7231,7 @@ function rSettings(){
   const saveMemorySettings=()=>{const picked=document.querySelector('input[name="memory-mode"]:checked');S.cfg.memoryMode=picked?picked.value:'traditional';S.cfg.embeddingBase=$('#c-embedding-base').value.trim().replace(/\/+$/,'');S.cfg.embeddingKey=$('#c-embedding-key').value.trim();S.cfg.embeddingModel=$('#c-embedding-model').value.trim()||'text-embedding-3-small';S.cfg.memoryTopK=Math.max(1,Math.min(12,Math.round(Number($('#c-memory-topk').value))||12));{const t=parseFloat($('#c-memory-minscore').value);S.cfg.memoryMinScore=isFinite(t)?Math.min(.95,Math.max(.05,Math.round(t*100)/100)):0.4}save();$('#ios-memory-mode').textContent=S.cfg.memoryMode==='vector'?'向量记忆':'传统记忆';toast('记忆设置已保存')};
   $('#save-memory-settings').onclick=saveMemorySettings;
   $('#use-main-embedding-api').onclick=()=>{$('#c-embedding-base').value='';$('#c-embedding-key').value='';toast('已改为沿用「模型与 API」设置；记得保存记忆设置')};
-  $('#pull-embedding-models').onclick=async()=>{const btn=$('#pull-embedding-models'),out=$('#embedding-models-result'),base=($('#c-embedding-base').value.trim()||$('#c-base').value.trim()).replace(/\/+$/,''),key=$('#c-embedding-key').value.trim()||$('#c-key').value.trim();if(!base)return toast('请先填写 Embedding 接口地址或主 API 地址');if(!key)return toast('请先填写 Embedding API Key 或主 API Key');btn.disabled=true;btn.textContent='拉取中…';out.textContent='正在获取模型列表…';try{const res=await fetch(modelListEndpoint(base),{headers:apiRequestHeaders({base,key})});if(!res.ok)throw new Error('HTTP '+res.status+'：'+(await res.text()).slice(0,160));const json=await res.json(),models=Array.isArray(json.data)?json.data.map(x=>x.id).filter(Boolean):Array.isArray(json.models)?json.models.map(x=>typeof x==='string'?x:x.id).filter(Boolean):[];if(!models.length)throw new Error('接口没有返回可识别的模型列表');models.sort((a,b)=>a.localeCompare(b));const sel=$('#c-embedding-model-select');sel.innerHTML='<option value="">请选择模型（共 '+models.length+' 个）</option>'+models.map(id=>'<option value="'+esc(id)+'">'+esc(id)+'</option>').join('');sel.onchange=()=>{if(sel.value){$('#c-embedding-model').value=sel.value;out.textContent='已选择模型：'+sel.value+'。请保存记忆设置。'}};const current=$('#c-embedding-model').value;if(models.includes(current))sel.value=current;out.textContent='已获取 '+models.length+' 个模型，请点选。注意：模型列表不保证每个模型都支持 Embedding。'}catch(e){out.textContent='拉取失败：'+e.message+'。请检查 /models、Key 和浏览器 CORS。'}finally{btn.disabled=false;btn.textContent='拉取模型列表'}};
+  $('#pull-embedding-models').onclick=async()=>{const btn=$('#pull-embedding-models'),out=$('#embedding-models-result'),base=($('#c-embedding-base').value.trim()||$('#c-base').value.trim()).replace(/\/+$/,''),key=$('#c-embedding-key').value.trim()||$('#c-key').value.trim();if(!base)return toast('请先填写 Embedding 接口地址或主 API 地址');if(!key)return toast('请先填写 Embedding API Key 或主 API Key');btn.disabled=true;btn.textContent='拉取中…';out.textContent='正在获取模型列表…';try{const res=await fetch(base+'/models',{headers:{Authorization:'Bearer '+key}});if(!res.ok)throw new Error('HTTP '+res.status+'：'+(await res.text()).slice(0,160));const json=await res.json(),models=Array.isArray(json.data)?json.data.map(x=>x.id).filter(Boolean):Array.isArray(json.models)?json.models.map(x=>typeof x==='string'?x:x.id).filter(Boolean):[];if(!models.length)throw new Error('接口没有返回可识别的模型列表');models.sort((a,b)=>a.localeCompare(b));const sel=$('#c-embedding-model-select');sel.innerHTML='<option value="">请选择模型（共 '+models.length+' 个）</option>'+models.map(id=>'<option value="'+esc(id)+'">'+esc(id)+'</option>').join('');sel.onchange=()=>{if(sel.value){$('#c-embedding-model').value=sel.value;out.textContent='已选择模型：'+sel.value+'。请保存记忆设置。'}};const current=$('#c-embedding-model').value;if(models.includes(current))sel.value=current;out.textContent='已获取 '+models.length+' 个模型，请点选。注意：模型列表不保证每个模型都支持 Embedding。'}catch(e){out.textContent='拉取失败：'+e.message+'。请检查 /models、Key 和浏览器 CORS。'}finally{btn.disabled=false;btn.textContent='拉取模型列表'}};
 $('#save-imageapi').onclick=()=>{S.cfg.imageProvider=ip.value;Object.entries(fields).forEach(([id,[key,def]])=>{const el=$('#'+id);if(el){let v=el.value;if(el.type==='number'&&v!=='')v=Number(v);S.cfg[key]=v===''?def:v}});S.cfg.naiSm=$('#c-nai-sm').checked;S.cfg.naiSmDyn=$('#c-nai-sm-dyn').checked;S.cfg.imageEnabled=$('#c-image-enabled').checked;save();toast('生图设置已保存')};
   {const tb=$('#test-imageapi'),out=$('#test-imageapi-out');if(tb)tb.onclick=async()=>{
    const cfg={...S.cfg,imageProvider:ip.value};Object.entries(fields).forEach(([id,[key,def]])=>{const el=$('#'+id);if(el){let v=el.value;if(el.type==='number'&&v!=='')v=Number(v);cfg[key]=v===''?def:v}});cfg.naiSm=$('#c-nai-sm').checked;cfg.naiSmDyn=$('#c-nai-sm-dyn').checked;
@@ -7262,9 +7241,8 @@ $('#save-imageapi').onclick=()=>{S.cfg.imageProvider=ip.value;Object.entries(fie
    catch(err){const msg=String(err&&err.message||err);out.textContent='❌ 测试失败：'+msg+(/Failed to fetch|NetworkError|Load failed/i.test(msg)?'。请求没发出去或被拦截：检查地址是否正确、是否支持 HTTPS，以及中转站是否允许浏览器跨域（CORS）。':'')}
    finally{tb.disabled=false;tb.textContent='测试生图配置'}}}
  }
-  const goFill=$('#opencode-go-fill');if(goFill)goFill.onclick=()=>{const base='https://opencode.ai/inference/go/openai/v1';$('#c-base').value=base;$('#c-headers').value=JSON.stringify({'x-opencode-session':'$SESSION_ID'},null,2);S.cfg.base=base;S.cfg.headers=$('#c-headers').value;save();toast('已填入 OpenCode Go 配置，请填写 API Key 并选择模型')};
-  const pullBtn=$('#pull-models');if(pullBtn)pullBtn.onclick=async()=>{const base=$('#c-base').value.trim().replace(/\/+$/,'');const key=$('#c-key').value.trim();const out=$('#models-result');if(!base)return toast('请先填写接口地址');if(!key)return toast('请先填写 API Key');pullBtn.disabled=true;pullBtn.textContent='拉取中…';out.textContent='正在获取模型列表…';try{const res=await fetch(modelListEndpoint(base),{headers:apiRequestHeaders({base,key})});if(!res.ok)throw new Error('HTTP '+res.status+'：'+(await res.text()).slice(0,180));const json=await res.json();const models=Array.isArray(json.data)?json.data.map(x=>x.id).filter(Boolean):Array.isArray(json.models)?json.models.map(x=>typeof x==='string'?x:x.id).filter(Boolean):[];if(!models.length)throw new Error('接口没有返回可识别的模型列表');models.sort((a,b)=>a.localeCompare(b));const select=$('#c-model-select');select.innerHTML='<option value="">请选择一个模型（共 '+models.length+' 个）</option>'+models.map(id=>'<option value="'+esc(id)+'">'+esc(id)+'</option>').join('');select.onchange=()=>{if(select.value){$('#c-model').value=select.value;S.cfg.model=select.value;save();out.textContent='已选择模型：'+select.value}};const current=$('#c-model').value;if(models.includes(current))select.value=current;else if(models.length===1){select.value=models[0];$('#c-model').value=models[0];S.cfg.model=models[0];save()}out.textContent='已拉取 '+models.length+' 个模型，请点击下方列表选择。';}catch(err){out.textContent='拉取失败：'+err.message+'。请检查接口是否支持 GET /models、API Key 和浏览器跨域（CORS）。'}finally{pullBtn.disabled=false;pullBtn.textContent='拉取模型'}};
-  const presetSelect=$('#api-preset-select');if(presetSelect){const renderPresets=()=>{presetSelect.innerHTML='<option value="">选择已保存预设</option>'+S.apiPresets.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')};renderPresets();$('#api-preset-save').onclick=()=>{const name=$('#api-preset-name').value.trim();if(!name)return toast('先给预设起个名字');const data={base:$('#c-base').value.trim(),key:$('#c-key').value,headers:$('#c-headers').value,model:$('#c-model').value.trim(),temp:Number($('#c-temp').value||.8),hist:Number($('#c-hist').value||30),stream:$('#c-stream').checked};const old=S.apiPresets.find(x=>x.name===name);if(old)Object.assign(old,data);else S.apiPresets.push(Object.assign({id:uid(),name},data));save();renderPresets();toast('API 预设已保存')};$('#api-preset-load').onclick=()=>{const x=S.apiPresets.find(x=>x.id===presetSelect.value);if(!x)return toast('请先选择一个预设');['base','key','headers','model','temp','hist','stream'].forEach(k=>{if(k==='stream')$('#c-stream').checked=!!x[k];else $('#c-'+k).value=x[k]??'';S.cfg[k]=x[k]??(k==='headers'?'':S.cfg[k])});save();toast('已载入 API 预设')};$('#api-preset-delete').onclick=()=>{const x=S.apiPresets.find(x=>x.id===presetSelect.value);if(!x)return toast('请先选择要删除的预设');if(confirm('删除 API 预设「'+x.name+'」？')){S.apiPresets=S.apiPresets.filter(y=>y.id!==x.id);save();renderPresets();toast('预设已删除')}}}
+  const pullBtn=$('#pull-models');if(pullBtn)pullBtn.onclick=async()=>{const base=$('#c-base').value.trim().replace(/\/+$/,'');const key=$('#c-key').value.trim();const out=$('#models-result');if(!base)return toast('请先填写接口地址');if(!key)return toast('请先填写 API Key');pullBtn.disabled=true;pullBtn.textContent='拉取中…';out.textContent='正在获取模型列表…';try{const res=await fetch(base+'/models',{headers:{Authorization:'Bearer '+key}});if(!res.ok)throw new Error('HTTP '+res.status+'：'+(await res.text()).slice(0,180));const json=await res.json();const models=Array.isArray(json.data)?json.data.map(x=>x.id).filter(Boolean):Array.isArray(json.models)?json.models.map(x=>typeof x==='string'?x:x.id).filter(Boolean):[];if(!models.length)throw new Error('接口没有返回可识别的模型列表');models.sort((a,b)=>a.localeCompare(b));const select=$('#c-model-select');select.innerHTML='<option value="">请选择一个模型（共 '+models.length+' 个）</option>'+models.map(id=>'<option value="'+esc(id)+'">'+esc(id)+'</option>').join('');select.onchange=()=>{if(select.value){$('#c-model').value=select.value;S.cfg.model=select.value;save();out.textContent='已选择模型：'+select.value}};const current=$('#c-model').value;if(models.includes(current))select.value=current;else if(models.length===1){select.value=models[0];$('#c-model').value=models[0];S.cfg.model=models[0];save()}out.textContent='已拉取 '+models.length+' 个模型，请点击下方列表选择。';}catch(err){out.textContent='拉取失败：'+err.message+'。请检查接口是否支持 GET /models、API Key 和浏览器跨域（CORS）。'}finally{pullBtn.disabled=false;pullBtn.textContent='拉取模型'}};
+  const presetSelect=$('#api-preset-select');if(presetSelect){const renderPresets=()=>{presetSelect.innerHTML='<option value="">选择已保存预设</option>'+S.apiPresets.map(x=>`<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')};renderPresets();$('#api-preset-save').onclick=()=>{const name=$('#api-preset-name').value.trim();if(!name)return toast('先给预设起个名字');const data={base:$('#c-base').value.trim(),key:$('#c-key').value,model:$('#c-model').value.trim(),temp:Number($('#c-temp').value||.8),hist:Number($('#c-hist').value||30),stream:$('#c-stream').checked};const old=S.apiPresets.find(x=>x.name===name);if(old)Object.assign(old,data);else S.apiPresets.push(Object.assign({id:uid(),name},data));save();renderPresets();toast('API 预设已保存')};$('#api-preset-load').onclick=()=>{const x=S.apiPresets.find(x=>x.id===presetSelect.value);if(!x)return toast('请先选择一个预设');['base','key','model','temp','hist','stream'].forEach(k=>{if(k==='stream')$('#c-stream').checked=!!x[k];else $('#c-'+k).value=x[k]??'';S.cfg[k]=x[k]});save();toast('已载入 API 预设')};$('#api-preset-delete').onclick=()=>{const x=S.apiPresets.find(x=>x.id===presetSelect.value);if(!x)return toast('请先选择要删除的预设');if(confirm('删除 API 预设「'+x.name+'」？')){S.apiPresets=S.apiPresets.filter(y=>y.id!==x.id);save();renderPresets();toast('预设已删除')}}}
   $$('#c-theme button').forEach(b=>{b.classList.toggle('on',b.dataset.v===S.theme);b.onclick=()=>{S.theme=b.dataset.v;save();applyTheme();rSettings()}});
   {const dti=$('#dtc-input');if(dti){const cur0=(S.desktop&&S.desktop.textColor)||'',smp=document.querySelector('#v-home .app[data-go]'),rgb=c=>{const m=String(c).match(/\d+/g);return m?'#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join(''):'#111111'};
    dti.value=cur0||rgb(smp?getComputedStyle(smp).color:'rgb(17,17,17)');$('#dtc-state').textContent=cur0?cur0.toUpperCase():'跟随日夜间';
@@ -7803,7 +7781,7 @@ function modelPicker(o){
   if(!base)return toast('请先填写接口地址');if(!key)return toast('请先填写 API Key');
   btn.disabled=true;btn.textContent='拉取中…';out.textContent='正在获取模型列表…';
   try{
-   const r=await fetch(modelListEndpoint(base),{headers:apiRequestHeaders({base,key})});if(!r.ok)throw new Error('HTTP '+r.status);
+   const r=await fetch(base+'/models',{headers:{Authorization:'Bearer '+key}});if(!r.ok)throw new Error('HTTP '+r.status);
    const j=await r.json(),ms=(Array.isArray(j.data)?j.data.map(x=>x.id):Array.isArray(j.models)?j.models.map(x=>typeof x==='string'?x:x.id):[]).filter(Boolean);
    if(!ms.length)throw new Error('没有识别到模型列表');ms.sort((a,b)=>a.localeCompare(b));
    fill(ms,'已拉取 '+ms.length+' 个模型，请在列表里点选。');
@@ -7834,7 +7812,7 @@ function secApiInit(){
  g('pull-sec-models').onclick=async()=>{const b=g('pull-sec-models'),out=g('sec-models-result'),base=eb(),key=ek();
   if(!base)return toast('请先填写接口地址（副 API 或主 API）');if(!key)return toast('请先填写 API Key（副 API 或主 API）');
   b.disabled=true;b.textContent='拉取中…';out.textContent='正在获取模型列表…';
-  try{const r=await fetch(modelListEndpoint(base),{headers:apiRequestHeaders({base,key})});if(!r.ok)throw new Error('HTTP '+r.status);
+  try{const r=await fetch(base+'/models',{headers:{Authorization:'Bearer '+key}});if(!r.ok)throw new Error('HTTP '+r.status);
    const j=await r.json(),ms=(Array.isArray(j.data)?j.data.map(x=>x.id):Array.isArray(j.models)?j.models.map(x=>typeof x==='string'?x:x.id):[]).filter(Boolean);
    if(!ms.length)throw new Error('没有识别到模型列表');ms.sort((a,c)=>a.localeCompare(c));
    const sel=g('c-sec-model-select');sel.innerHTML='<option value="">请选择模型（共 '+ms.length+' 个）</option>'+ms.map(m=>'<option value="'+esc(m)+'">'+esc(m)+'</option>').join('');
@@ -8741,9 +8719,9 @@ function pzMount(sel,spec){
   el.querySelector('.pz-save').onclick=()=>{const n=el.querySelector('.pz-name').value.trim();if(!n)return toast('先给预设起个名字');const d=spec.capture(),old=list.find(x=>x.name===n);if(old)Object.assign(old,d);else spec.add(Object.assign({id:uid(),name:n},d));save();draw();toast('预设已保存')}};
  draw();
 }
-const pzApi={list:()=>S.apiPresets,sub:p=>(p.model||'未设置模型')+' · '+hostOf(p.base),active:p=>S.cfg.base===p.base&&S.cfg.model===p.model&&S.cfg.key===p.key&&String(S.cfg.headers||'')===String(p.headers||''),
- apply:p=>{['base','key','headers','model','temp','hist','stream'].forEach(k=>{const e=$('#c-'+k);if(k==='stream'){if(e)e.checked=!!p[k]}else if(e)e.value=p[k]??'';S.cfg[k]=p[k]});save()},
- capture:()=>({base:$('#c-base').value.trim(),key:$('#c-key').value,headers:$('#c-headers').value,model:$('#c-model').value.trim(),temp:Number($('#c-temp').value||.8),hist:Number($('#c-hist').value||30),stream:$('#c-stream').checked}),
+const pzApi={list:()=>S.apiPresets,sub:p=>(p.model||'未设置模型')+' · '+hostOf(p.base),active:p=>S.cfg.base===p.base&&S.cfg.model===p.model&&S.cfg.key===p.key,
+ apply:p=>{['base','key','model','temp','hist','stream'].forEach(k=>{const e=$('#c-'+k);if(k==='stream'){if(e)e.checked=!!p[k]}else if(e)e.value=p[k]??'';S.cfg[k]=p[k]});save()},
+ capture:()=>({base:$('#c-base').value.trim(),key:$('#c-key').value,model:$('#c-model').value.trim(),temp:Number($('#c-temp').value||.8),hist:Number($('#c-hist').value||30),stream:$('#c-stream').checked}),
  add:p=>S.apiPresets.push(p),remove:p=>{S.apiPresets=S.apiPresets.filter(x=>x.id!==p.id)}};
 const pzSec={list:()=>S.secondaryPresets,sub:p=>(p.model||'沿用主模型')+' · '+hostOf(p.base||S.cfg.base),active:p=>(S.cfg.secondaryBase||'')===(p.base||'')&&(S.cfg.secondaryModel||'')===(p.model||'')&&(S.cfg.secondaryKey||'')===(p.key||''),
  apply:p=>{[['base','c-secondary-base','secondaryBase'],['key','c-secondary-key','secondaryKey'],['model','c-secondary-model','secondaryModel']].forEach(([k,id,ck])=>{const e=$('#'+id);if(e)e.value=p[k]||'';S.cfg[ck]=p[k]||''});save()},
@@ -10294,7 +10272,7 @@ function dcwGrip(h){const g=document.createElement('button');g.type='button';g.c
 (function(){const c=document.createElement('style');c.id='fix80-dcw-grip';c.textContent='.dcw-grip{position:absolute;top:5px;right:5px;z-index:5;width:28px;height:20px;padding:0;border:0;border-radius:10px;background:rgba(120,120,128,.2);color:#555;font-size:15px;line-height:20px;opacity:.5;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.dcw-grip:active{opacity:.9}';document.head.appendChild(c)})();
 function dcwApply(){
  const d=dcwD();
- DCW_BUILT.forEach(b=>{const el=$(b.s);if(el)el.classList.toggle('dcw-off',d.hidden.includes(b.k))});
+ DCW_BUILT.forEach(b=>{const el=$(b.s);if(!el)return;const off=d.hidden.includes(b.k);el.classList.toggle('dcw-off',off);if(off){el.style.setProperty('display','none','important');el.dataset.dcwHid='1'}else if(el.dataset.dcwHid){el.style.removeProperty('display');delete el.dataset.dcwHid}});
  document.querySelectorAll('.dcw[data-dcw]').forEach(e=>e.remove());
  for(let i=DCW_FR.length-1;i>=0;i--)if(!DCW_FR[i].preview||!DCW_FR[i].host.isConnected)DCW_FR.splice(i,1);
  d.widgets.filter(w=>w.kind==='css').forEach(w=>{const L=d.wlib.find(x=>x.id===w.lib);if(!L)return;const pg=w.page||2,z=dcwZone(pg);if(!z)return;
@@ -10426,6 +10404,81 @@ function dcwAugment(sW){
  nodes.push(mk('div','dci-h','桌面原有组件'),grp(...DCW_BUILT.map(b=>row(b.n+' · 第'+b.p+'屏',d.hidden.includes(b.k)?'已移除':'显示中',()=>{if(d.hidden.includes(b.k))d.hidden=d.hidden.filter(x=>x!==b.k);else d.hidden.push(b.k);save();dcwApply();renderDesktopCustomizer()}))),mk('div','dci-f','点一下可移除或找回；也可以在桌面长按组件、长按空白处来操作。'));
  sW.prepend(...nodes);
 }
+/* ===== 桌面美化包：导出 / 导入 ===== */
+function dctClean(o){
+ const R={wallpaper:'',icons:{},widgets:[],order:{},wlib:[],hidden:[],free:{}};
+ if(!o||typeof o!=='object')return R;
+ const OK=k=>typeof k==='string'&&/^[\w:.\-]{1,80}$/.test(k)&&k!=='__proto__'&&k!=='constructor'&&k!=='prototype';
+ const str=(v,n)=>typeof v==='string'?v.slice(0,n):'';
+ const num=(v,a,b,d)=>{v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d};
+ const col=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v)?v:'';
+ const img=v=>{v=typeof v==='string'?v.trim():'';if(!v)return'';if(/^data:image\/(png|jpe?g|gif|webp|avif);base64,[A-Za-z0-9+\/=]+$/i.test(v))return v.length<=12e6?v:'';if(/^https:\/\/[^\s"'()<>\\]{1,2000}$/i.test(v))return v;return''};
+ R.wallpaper=img(o.wallpaper);
+ if(o.icons&&typeof o.icons==='object')Object.keys(o.icons).slice(0,80).forEach(k=>{const s=img(o.icons[k]);if(OK(k)&&s)R.icons[k]=s});
+ const idm={},used=new Set();
+ (Array.isArray(o.wlib)?o.wlib:[]).slice(0,60).forEach(x=>{if(!x||typeof x!=='object')return;
+  const html=str(x.html,80000),css=str(x.css,80000),js=str(x.js,80000);if(!html&&!css&&!js)return;
+  let id=OK(x.id)&&!used.has(x.id)?x.id:uid();used.add(id);idm[x.id]=id;
+  const wp=num(x.wp||(x.w==='half'?50:100),20,100,100);
+  R.wlib.push({id,name:str(x.name,40)||'未命名',html,css,js,h:num(x.h,50,900,120),wp,w:wp<75?'half':'full',perm:false})});
+ const wids=new Set();
+ (Array.isArray(o.widgets)?o.widgets:[]).slice(0,80).forEach(w=>{if(!w||typeof w!=='object')return;
+  const id=OK(w.id)&&!wids.has(w.id)?w.id:uid();
+  if(w.kind==='css'){const lib=idm[w.lib];if(!lib)return;wids.add(id);R.widgets.push({id,kind:'css',lib,page:Math.round(num(w.page,1,4,2)),title:str(w.title,60)})}
+  else if(w.kind==='text'){wids.add(id);R.widgets.push({id,kind:'text',title:str(w.title,60),text:str(w.text,2000)})}
+  else if(w.kind==='image'){const im=img(w.image);if(!im)return;wids.add(id);R.widgets.push({id,kind:'image',title:str(w.title,60),image:im})}
+  else if(w.kind==='clock'){wids.add(id);R.widgets.push({id,kind:'clock',title:str(w.title,60)||'时间',text:''})}});
+ R.hidden=[...new Set((Array.isArray(o.hidden)?o.hidden:[]).filter(k=>DCW_BUILT.some(b=>b.k===k)))];
+ if(o.order&&typeof o.order==='object')['first','second','dock','p3','p4'].forEach(k=>{if(Array.isArray(o.order[k]))R.order[k]=o.order[k].slice(0,100).map(v=>str(v,80))});
+ const safe=(v,d)=>{if(typeof v==='number')return isFinite(v)?v:undefined;if(typeof v==='boolean')return v;if(typeof v==='string')return v.slice(0,60);
+  if(v&&typeof v==='object'&&!Array.isArray(v)&&d<4){const r={};Object.keys(v).slice(0,200).forEach(k=>{if(!OK(k))return;const s=safe(v[k],d+1);if(s!==undefined)r[k]=s});return r}return undefined};
+ const fr=safe(o.free,0);if(fr&&typeof fr==='object')R.free=fr;
+ if(o.glass&&typeof o.glass==='object'){const g={on:{}},go=o.glass.on&&typeof o.glass.on==='object'?o.glass.on:{};
+  glassList().forEach(a=>{if(typeof go[a[0]]==='boolean')g.on[a[0]]=go[a[0]]});
+  if(o.glass.blur!=null)g.blur=num(o.glass.blur,0,40,16);if(o.glass.alpha!=null)g.alpha=num(o.glass.alpha,.05,.95,.45);
+  const gt=col(o.glass.text);if(gt)g.text=gt;R.glass=g}
+ ['musicWidgetCover','p3MusicCover','p4Cover','p3ChatAvatar'].forEach(k=>{const s=img(o[k]);if(s)R[k]=s});
+ ['qwLine1','qwLine2','p4Text','p3ChatTitle','p3ChatSubtitle'].forEach(k=>{const s=str(o[k],200);if(s)R[k]=s});
+ {const s=str(o.p3ChatAvatarEmoji,16);if(s)R.p3ChatAvatarEmoji=s}
+ if(Array.isArray(o.qwImgs)){const a=[0,1,2].map(i=>img(o.qwImgs[i]));if(a.some(Boolean))R.qwImgs=a}
+ if(Array.isArray(o.rsLines)){const a=o.rsLines.slice(0,12).map(v=>str(v,120));if(a.some(Boolean))R.rsLines=a}
+ ['textColor','timeColor','dateColor'].forEach(k=>{const c=col(o[k]);if(c)R[k]=c});
+ return R}
+function dctBuild(){return{app:'xsj-desktop-theme',v:1,created:new Date().toISOString().slice(0,10),desktop:dctClean(dcwD())}}
+function dctDownload(json,name){
+ const fn=name.replace(/[\\\/:*?"<>|]/g,'_')+'.json',f=new File([json],fn,{type:'application/json'});
+ if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],title:name}).catch(()=>{});
+ else{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},600)}}
+async function dctExport(){
+ const name=await askText('美化包名称','给这套桌面起个名字');if(name===null)return;
+ const nm=(name.trim()||'我的桌面').slice(0,40),pack=dctBuild();pack.name=nm;
+ const json=JSON.stringify(pack),kb=Math.max(1,Math.round(json.length/1024));
+ dcwSheet('导出「'+nm+'」 · '+(kb>=1024?(kb/1024).toFixed(1)+' MB':kb+' KB'),[
+  {label:'保存为文件',run:()=>dctDownload(json,nm)},
+  {label:'复制代码',run:()=>json.length>1500000?toast('内容太大，请用「保存为文件」'):dcwCopy(json)},
+  {label:'取消',cancel:1}])}
+function dctImportText(txt){
+ txt=String(txt||'').trim();
+ if(txt.length>8e7){toast('文件太大了');return false}
+ let o;try{o=JSON.parse(txt)}catch(e){toast('不是有效的美化包');return false}
+ if(o&&o.app==='xsj-widgets'){toast('这是组件包，请到「小组件」里用「导入组件」');return false}
+ if(!o||o.app!=='xsj-desktop-theme'||!o.desktop||typeof o.desktop!=='object'){toast('不是有效的美化包');return false}
+ const c=dctClean(o.desktop),nm=String(o.name||'').slice(0,40)||'未命名',nI=Object.keys(c.icons).length;
+ if(!confirm('导入美化包「'+nm+'」？\n\n壁纸：'+(c.wallpaper?'有':'无')+'　图标：'+nI+' 个　小组件：'+c.widgets.length+' 个　自定义组件：'+c.wlib.length+' 个\n\n会替换你现在的壁纸、图标、小组件、自定义组件和摆放位置，天气城市等个人设置不受影响。\n建议先「导出当前桌面美化」留个备份。\n\n美化包里的自定义组件带有代码，在沙盒里运行，只导入你信任的来源。'))return false;
+ const old=S.desktop||{},keep={};['wxData','wxCity','wxLat','wxLon'].forEach(k=>{if(old[k]!==undefined)keep[k]=old[k]});
+ S.desktop=Object.assign({},c,keep);
+ Promise.resolve(save()).then(ok=>{if(ok===false)return;toast('已导入，正在刷新…');setTimeout(()=>location.reload(),600)});
+ return true}
+function dctImportMenu(){
+ dcwSheet('导入美化包',[
+  {label:'选择文件',run:()=>{const i=document.createElement('input');i.type='file';i.accept='.json,application/json,text/plain';i.onchange=()=>{const f=i.files&&i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>dctImportText(r.result);r.readAsText(f)};i.click()}},
+  {label:'粘贴代码',run:()=>{dcwClose('dct-paste');const ov=document.createElement('div');ov.id='dct-paste';ov.className='dcw-ov ed';ov.innerHTML='<div class="dcw-sh full"><div class="gh"><button type="button" class="gx" data-k="x">取消</button><b>粘贴美化包代码</b><button type="button" class="gx pri" data-k="ok">导入</button></div><div class="gb"><textarea id="dct-pt" rows="14" spellcheck="false" placeholder="把导出的美化包代码粘贴到这里"></textarea></div></div>';document.body.appendChild(ov);ov.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;if(b.dataset.k==='x')ov.remove();else{const v=ov.querySelector('#dct-pt').value;ov.remove();dctImportText(v)}})}},
+  {label:'取消',cancel:1}])}
+function dctPackUI(){
+ const mk=(t,c,h)=>{const e=document.createElement(t);e.className=c;if(h!=null)e.innerHTML=h;return e};
+ const row=(l,sub,fn)=>{const b=mk('button','dci-row','<span class="l">'+esc(l)+'</span><span class="r">'+esc(sub||'')+'</span><i class="ch">›</i>');b.type='button';b.onclick=fn;return b};
+ const g=mk('div','dci-g');g.appendChild(row('导出当前桌面美化','壁纸 · 图标 · 组件 · 摆放',dctExport));g.appendChild(row('导入美化包','文件或粘贴代码',dctImportMenu));
+ return[mk('div','dci-h','美化包'),g,mk('div','dci-f','把现在的壁纸、软件图标、小组件、自定义组件和摆放位置打包成一个文件，发给别人就能一键换上同样的桌面。导入会替换你当前的桌面美化。')]}
 /* --- 长按桌面空白处 / 不可拖动的组件 --- */
 (function(){
  const home=$('#v-home');if(!home||home.dataset.dcw)return;home.dataset.dcw=1;
@@ -10938,9 +10991,7 @@ R.repo=repoRender;
 /* ===== YouTube 应用（第4页最后一个） ===== */
 (()=>{
 const YT={cs:{open:{}},tab:'home',sub:'home',busy:false,tmp:[],ovt:null,obs:null};
-const SC_MAP={"後":"后","來":"来","這":"这","裡":"里","裏":"里","與":"与","為":"为","無":"无","沒":"没","們":"们","會":"会","說":"说","話":"话","請":"请","讓":"让","點":"点","擊":"击","開":"开","關":"关","門":"门","間":"间","頁":"页","頻":"频","題":"题","類":"类","顯":"显","設":"设","訂":"订","閱":"阅","記":"记","錄":"录","歷":"历","時":"时","長":"长","複":"复","製":"制","連":"连","結":"结","儲":"储","刪":"删","創":"创","攝":"摄","傳":"传","輸":"输","檔":"档","發":"发","佈":"布","廣":"广","場":"场","評":"评","論":"论","熱":"热","尋":"寻","應":"应","該":"该","個":"个","剛":"刚","則":"则","從":"从","進":"进","過":"过","遠":"远","邊":"边","種":"种","樣":"样","標":"标","內":"内","實":"实","語":"语","務":"务","詳":"详","規":"规","範":"范","訊":"讯","數":"数","條":"条","經":"经","驗":"验","風":"风","異":"异","寬":"宽","幾":"几","萬":"万","億":"亿","贊":"赞","別":"别","畫":"画","圖":"图","書":"书","學":"学","習":"习","網":"网","絡":"络","電":"电","腦":"脑","機":"机","線":"线","體":"体","愛":"爱","歡":"欢","樂":"乐","氣":"气","溫":"温","涼":"凉","聲":"声","節":"节","遊":"游","戲":"戏","貓":"猫","鳥":"鸟","魚":"鱼","馬":"马","龍":"龙","雲":"云","飛":"飞","車":"车","戶":"户","帳":"账","麼":"么","嗎":"吗","還":"还","總":"总","轉":"转","換":"换","選":"选","擇":"择","簡":"简","繁":"繁","復":"复","舊":"旧","統":"统","清":"清","啟":"启","閉":"闭","搜":"搜","載":"载","視頻":"视频","影片":"影片","對":"对","動":"动","態":"态","薦":"荐","頂":"顶","預":"预","詞":"词","籤":"签","視":"视","覺":"觉","觀":"观","眾":"众","悔":"悔","產":"产","準":"准","強":"强","制":"制","僅":"仅","示":"示","輸出":"输出","內容":"内容","标题":"标题","推薦":"推荐","音樂":"音乐","現場":"现场","純":"纯","療":"疗","癒":"愈","動物":"动物","領域":"领域","科學":"科学","麵":"面","伺":"伺","服":"服","張":"张","重":"重","灌":"灌","系":"系","跑":"跑","起":"起","第":"第","一":"一","倫":"伦","敦":"敦","圓":"圆","筆":"笔","聽":"听","見":"见","適":"适","寫":"写","讀":"读","給":"给","夠":"够","當":"当","終":"终","於":"于","找":"找","到":"到","度":"度","區":"区","氛":"氛","路":"路","獨":"独","家":"家","新":"新","聞":"闻","自":"自","靜":"静","處":"处","現":"现","在":"在","正":"正","什":"什","已":"已","讚":"赞","道":"道","容":"容","建":"建","置":"置","除":"除","束":"束","檢":"检","舉":"举","報":"报","興":"兴","趣":"趣","人":"人","接":"接","址":"址","移":"移","原":"原","項":"项","鳴":"鸣","識":"识","搶":"抢","綴":"缀","稱":"称","敗":"败","賣":"卖","買":"买","賺":"赚","錢":"钱","歲":"岁","術":"术","藝":"艺","劇":"剧","談":"谈","認":"认","議":"议","號":"号","碼":"码","頭":"头","顏":"颜","色":"色","髮":"发","鬧":"闹","鬆":"松","緊":"紧","絲":"丝","繼":"继","續":"续","組":"组","織":"织","計":"计","劃":"划","單":"单","難":"难","變":"变","確":"确","錯":"错","誤":"误","隱":"隐","藏":"藏","上":"上","理":"理","存":"存","潔":"洁","掃":"扫","描":"描","導":"导","入":"入","匯":"汇","出":"出","案":"案","資":"资","料":"料","據":"据","庫":"库","瀏覽":"浏览","器":"器","鏈":"链","貼":"贴","備":"备","份":"份","恢":"恢","史":"史","紀":"纪","週":"周","按":"按","鈕":"钮","息":"息","通":"通","知":"知","郵":"邮","件":"件","公":"公","告":"告","明":"明","情":"情","介":"介","片":"片","影":"影","音":"音","歌":"歌","目":"目","看":"看","播":"播","放":"放","暫":"暂","停":"停","始":"始","生":"生","推":"推","精":"精","最":"最","屆":"届","簽":"签","回":"回","覆":"复","留":"留","言":"言","喜":"喜","分":"分","享":"享","取":"取","消":"消","定":"定","返":"返","離":"离","失":"失","成":"成","功":"功","更":"更","多":"多","較":"较","合":"合","並":"并","且":"且","可":"可","能":"能","必":"必","須":"须","嚴":"严","格":"格","禁":"禁","止":"止","中":"中","文":"文","每":"每","真":"真","混":"混","品":"品","牌":"牌","名":"名","偶":"偶","爾":"尔","用":"用","帶":"带","將":"将","以":"以","及":"及","但":"但","而":"而","或":"或","因":"因","此":"此","所":"所","有":"有","候":"候","其":"其","他":"他","你":"你","我":"我","她":"她","它":"它"};
-const toSC=s=>String(s==null?'':s).replace(/[\u3400-\u9fff]/g,c=>SC_MAP[c]||c);
-const E=s=>esc(toSC(s));
+const E=s=>esc(s==null?'':s);
 const yd=()=>{S.ytBy=S.ytBy||{};const k=S.activeUserProfile||'u';if(!S.ytBy[k]){if(S.yt){S.ytBy[k]=S.yt;delete S.yt}else S.ytBy[k]={}}const d=S.ytBy[k];['feed','shorts','music','live','mine','hist','later','liked','subs'].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});if(!d.cm)d.cm={};if(!d.cl)d.cl={};return d};
 const ytDB=()=>new Promise((res,rej)=>{const r=indexedDB.open('xsj-yt',1);r.onupgradeneeded=()=>r.result.createObjectStore('f');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const ytPut=async(k,b)=>{const d=await ytDB();return new Promise((res,rej)=>{const t=d.transaction('f','readwrite');t.objectStore('f').put(b,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})};
@@ -10950,10 +11001,10 @@ const urls={};
 const media=async id=>{if(urls[id])return urls[id];const b=await ytGet(id);if(!b)return '';return urls[id]=URL.createObjectURL(b)};
 
 const SEED={
- v:[['你要上几樓啊！这是个要命的问题','异常档案室','16万','4 天前','30:55','夜班电梯里的三条规矩，少一条都不行',200],['[Vlog] 从伦敦到巴黎的三天兩夜','小圆的日常','305万','1 个月前','11:48','慢慢走、慢慢吃，把一张地鐵票用到最后一站',320],['把旧笔电改成家用伺服器要多久？','極客阿木','8.4万','2 周前','18:20','一个周末，从重灌系统到跑起第一个服务',160],['凌晨四点的面包店，一天是怎么开始的','晨光烘焙','52万','3 个月前','9:12','揉面、发酵、出爐，听见第一声「喀啦」',30],['下雨天适合在家做的五道菜','小廚房','27万','5 天前','14:03','只用一口鍋，剩下的时间留给窗外的雨',210],['为什么你总是睡不够？睡眠科学简明指南','小禾講科学','103万','6 个月前','22:41','从睡眠周期说到午睡的黃金二十分钟',260]],
- s:[['猫咪看到主人傻傻的外表，就认出来了！','科趣奇谈','12万','2 天前','0:21','一开始猫咪还在观望',30],['一罐小小的養乐多为何養这么多','chillcat','5.8万','1 周前','0:34','这个小罐真的太可爱了',330],['雪地里的爱心，今天也被治愈了','雪原集','31万','3 天前','0:18','1. 2. 3. 4. 5. 慢慢融化',195],['当这个女生终于找到那支笔','日常小剧场','2.2万','昨天','0:27','床单底下的神秘物体',290],['海浪里看不见的東西','EarthMap','88万','2 周前','0:45','鏡头拉远之后才发现',215]],
- m:[['雨夜的城市｜Lo-fi 放松歌单','夜航电台','240万','8 个月前','1:02:11','写作業、看书、发呆都适合',250],['[MV] 如果眼淚能慢慢滑落','水循環','19万','3 周前','4:32','下一秒接住的，会是你上世纪的淚吗',340],['Live Session｜小房间里的一把木吉他','阿南','7.6万','2 个月前','6:48','没有修音，只有呼吸声',40],['清晨通勤｜輕快流行歌单','晨间播放','61万','4 个月前','48:09','一路亮燈的早晨',55]],
- l:[['LIVE：网路独家新闻 24 小时直播','夜间新闻台','7528','','','',230],['深夜自习室｜一起读书到天亮','自习陪伴','1.2万','','','安静地各做各的事',270],['24/7 Lo-fi 咖啡館直播','小咖啡館','3306','','','窗边的猫偶尔路过',25]]
+ v:[['你要上幾樓啊！這是個要命的問題','異常檔案室','16萬','4 天前','30:55','夜班電梯裡的三條規矩，少一條都不行',200],['[Vlog] 從倫敦到巴黎的三天兩夜','小圓的日常','305萬','1 個月前','11:48','慢慢走、慢慢吃，把一張地鐵票用到最後一站',320],['把舊筆電改成家用伺服器要多久？','極客阿木','8.4萬','2 週前','18:20','一個週末，從重灌系統到跑起第一個服務',160],['凌晨四點的麵包店，一天是怎麼開始的','晨光烘焙','52萬','3 個月前','9:12','揉麵、發酵、出爐，聽見第一聲「喀啦」',30],['下雨天適合在家做的五道菜','小廚房','27萬','5 天前','14:03','只用一口鍋，剩下的時間留給窗外的雨',210],['為什麼你總是睡不夠？睡眠科學簡明指南','小禾講科學','103萬','6 個月前','22:41','從睡眠週期說到午睡的黃金二十分鐘',260]],
+ s:[['貓咪看到主人傻傻的外表，就認出來了！','科趣奇談','12萬','2 天前','0:21','一開始貓咪還在觀望',30],['一罐小小的養樂多為何養這麼多','chillcat','5.8萬','1 週前','0:34','這個小罐真的太可愛了',330],['雪地裡的愛心，今天也被治癒了','雪原集','31萬','3 天前','0:18','1. 2. 3. 4. 5. 慢慢融化',195],['當這個女生終於找到那支筆','日常小劇場','2.2萬','昨天','0:27','床單底下的神秘物體',290],['海浪裡看不見的東西','EarthMap','88萬','2 週前','0:45','鏡頭拉遠之後才發現',215]],
+ m:[['雨夜的城市｜Lo-fi 放鬆歌單','夜航電台','240萬','8 個月前','1:02:11','寫作業、看書、發呆都適合',250],['[MV] 如果眼淚能慢慢滑落','水循環','19萬','3 週前','4:32','下一秒接住的，會是你上世紀的淚嗎',340],['Live Session｜小房間裡的一把木吉他','阿南','7.6萬','2 個月前','6:48','沒有修音，只有呼吸聲',40],['清晨通勤｜輕快流行歌單','晨間播放','61萬','4 個月前','48:09','一路亮燈的早晨',55]],
+ l:[['LIVE：網路獨家新聞 24 小時直播','夜間新聞台','7528','','','',230],['深夜自習室｜一起讀書到天亮','自習陪伴','1.2萬','','','安靜地各做各的事',270],['24/7 Lo-fi 咖啡館直播','小咖啡館','3306','','','窗邊的貓偶爾路過',25]]
 };
 const mk=(a,k)=>({id:uid(),k,t:a[0],ch:a[1],v:a[2],ago:a[3],dur:a[4],cap:a[5],hue:a[6]|0});
 const seed=()=>{const d=yd();if(!d.feed.length)d.feed=SEED.v.map(a=>mk(a,'v'));if(!d.shorts.length)d.shorts=SEED.s.map(a=>mk(a,'s'));if(!d.music.length)d.music=SEED.m.map(a=>mk(a,'v'));if(!d.live.length)d.live=SEED.l.map(a=>mk(a,'l'))};
@@ -10992,12 +11043,12 @@ const I={
  logo:'<svg viewBox="0 0 28 20"><rect width="28" height="20" rx="5.6" fill="#f03"/><path d="M11.2 5.6v8.8L18.8 10z" fill="#fff"/></svg>',
  stack:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M6 3.5h12" stroke-linecap="round"/></svg>'
 };
-const MORE=[['电影和电视节目','mv'],['排行榜','tr'],['游戏','gm'],['Podcast','pod'],['游戏角落','gc'],['会员资格','mem']];
+const MORE=[['電影與電視節目','mv'],['排行榜','tr'],['遊戲','gm'],['Podcast','pod'],['遊戲角落','gc'],['會員資格','mem']];
 const BR=[['YouTube Premium','#f03','p'],['YouTube Music','#f03','m'],['YouTube Kids','#f03','k'],['YouTube Create','#f03','c']];
-const SUBS=[['home','首页'],['subs','订阅内容'],['music','音乐'],['live','直播中'],['more','更多内容']];
+const SUBS=[['home','首頁'],['subs','訂閱內容'],['music','音樂'],['live','直播中'],['more','更多內容']];
 
 const hash=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))>>>0;return h};
-const cnt=(id,m)=>{const h=hash(id+m)%900;return h>600?(Math.floor(h/10)/10+'万').replace('.0',''):String(h+12)};
+const cnt=(id,m)=>{const h=hash(id+m)%900;return h>600?(Math.floor(h/10)/10+'萬').replace('.0',''):String(h+12)};
 const bg=v=>v.th?`background:#111 url("${v.th}") center/cover`:`background:var(--bg)`;
 const fmt=s=>{s=Math.round(s||0);if(!s)return '';const m=Math.floor(s/60),x=s%60;return m+':'+String(x).padStart(2,'0')};
 const allv=()=>{const d=yd();return [...d.mine,...d.feed,...d.shorts,...d.music,...d.live,...YT.tmp,...d.hist,...d.later,...d.liked]};
@@ -11012,37 +11063,37 @@ const chav=v=>{if(v.mine){const u=user();return u.avatar?`<img src="${u.avatar}"
 const chcol=v=>`background:hsl(${hash(v.ch)%360} 30% 38%);color:#fff`;
 
 /* ---------- 卡片 ---------- */
-const acts=v=>`<div class="yt-ac"><button data-a="like:${v.id}" aria-label="喜欢">${has('liked',v.id)?I.likeF:I.like}</button><button data-a="cmt:${v.id}" aria-label="留言">${I.cm}</button><button data-a="sv:${v.id}" aria-label="保存">${has('later',v.id)?I.svF:I.sv}</button><button data-a="mo:${v.id}" aria-label="更多">${I.more}</button></div>`;
+const acts=v=>`<div class="yt-ac"><button data-a="like:${v.id}" aria-label="喜歡">${has('liked',v.id)?I.likeF:I.like}</button><button data-a="cmt:${v.id}" aria-label="留言">${I.cm}</button><button data-a="sv:${v.id}" aria-label="儲存">${has('later',v.id)?I.svF:I.sv}</button><button data-a="mo:${v.id}" aria-label="更多">${I.more}</button></div>`;
 const card=v=>{
- if(v.k==='l')return `<article class="yt-cd yt-lv"><div class="yt-th" data-a="play:${v.id}" style="${bg(v)}">${v.th?'':`<em class="yt-tt">${E(v.t)}</em>`}<span class="yt-mu">${I.mute}</span><span class="yt-bd">${I.live}直播</span></div><div class="yt-mt yt-lm" data-a="play:${v.id}"><span class="yt-ring"><span class="yt-av" style="${chcol(v)}">${chav(v)}</span><i>直播</i></span><div class="yt-nm"><h3>${E(v.t)}</h3><small>${E(v.ch)}　▷${E(v.v)} 人正在观看</small></div><button class="yt-ic" data-a="mo:${v.id}">${I.more}</button></div></article>`;
+ if(v.k==='l')return `<article class="yt-cd yt-lv"><div class="yt-th" data-a="play:${v.id}" style="${bg(v)}">${v.th?'':`<em class="yt-tt">${E(v.t)}</em>`}<span class="yt-mu">${I.mute}</span><span class="yt-bd">${I.live}直播</span></div><div class="yt-mt yt-lm" data-a="play:${v.id}"><span class="yt-ring"><span class="yt-av" style="${chcol(v)}">${chav(v)}</span><i>直播</i></span><div class="yt-nm"><h3>${E(v.t)}</h3><small>${E(v.ch)}　▷${E(v.v)} 人正在觀看</small></div><button class="yt-ic" data-a="mo:${v.id}">${I.more}</button></div></article>`;
  return `<article class="yt-cd"><div class="yt-th" data-a="play:${v.id}" style="${bg(v)}">${v.th?'':`<em class="yt-tt">${E(v.t)}</em>`}${v.dur?`<b class="yt-du">${E(v.dur)}</b>`:''}</div><div class="yt-mt"><h3 data-a="play:${v.id}">${E(v.t)}</h3><div class="yt-r2"><span class="yt-av" data-a="play:${v.id}" style="${chcol(v)}">${chav(v)}</span><div class="yt-nm" data-a="play:${v.id}"><b>@${E(v.ch)}</b><small>▷${E(v.v)}　${E(v.ago)}</small></div>${acts(v)}</div></div></article>`};
 const empty=t=>`<div class="yt-em">${t}</div>`;
-const moreBtn=k=>`<button class="yt-lm2" data-a="load:${k}">${YT.busy?'载入中…':'载入更多'}</button>`;
+const moreBtn=k=>`<button class="yt-lm2" data-a="load:${k}">${YT.busy?'載入中…':'載入更多'}</button>`;
 
 function homeHTML(){
  const d=yd(),s=YT.sub;let body='';
  if(s==='home')body=[...d.mine.filter(v=>v.k==='v'),...d.feed].map(card).join('')+moreBtn('feed');
- else if(s==='subs'){const set=new Set(d.subs);const l=[...d.mine,...d.feed,...d.music,...d.shorts].filter(v=>v.k!=='l'&&(v.mine||set.has(v.ch)));const seen=new Set();body=l.filter(v=>!seen.has(v.id)&&seen.add(v.id)).map(card).join('')||empty('还没有订阅的频道<br><small>在视频页点「订阅」，最新内容会出现在这里</small>')}
+ else if(s==='subs'){const set=new Set(d.subs);const l=[...d.mine,...d.feed,...d.music,...d.shorts].filter(v=>v.k!=='l'&&(v.mine||set.has(v.ch)));const seen=new Set();body=l.filter(v=>!seen.has(v.id)&&seen.add(v.id)).map(card).join('')||empty('還沒有訂閱的頻道<br><small>在影片頁點「訂閱」，最新內容會出現在這裡</small>')}
  else if(s==='music')body=d.music.map(card).join('')+moreBtn('music');
  else if(s==='live')body=[...d.mine.filter(v=>v.k==='l'),...d.live].map(card).join('')+moreBtn('live');
  else body='<div class="yt-mm">'+MORE.map(r=>`<button class="yt-mr" data-a="mr:${r[0]}"><i>${I[r[1]]}</i><span>${r[0]}</span></button>`).join('')+'<hr>'+BR.map(r=>`<button class="yt-mr" data-a="br:${r[2]}"><i class="br"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="4" fill="#f03"/><path d="M10 9v6l5-3z" fill="#fff"/></svg></i><span>${r[0]}</span></button>`).join('')+'</div>';
- return `<div class="yt-hd"><div class="yt-top"><button class="yt-lg" data-back aria-label="返回">${I.logo}<b>YouTube</b></button><span class="yt-sp"></span><button data-a="bell" aria-label="通知">${I.bell}</button><button data-a="search" aria-label="搜索">${I.search}</button></div><div class="yt-tabs" id="yt-tabs">${SUBS.map(t=>`<button class="${YT.sub===t[0]?'on':''}" data-a="sub:${t[0]}">${t[1]}</button>`).join('')}</div></div><div class="yt-sc" id="yt-sc">${body}</div>`}
+ return `<div class="yt-hd"><div class="yt-top"><button class="yt-lg" data-back aria-label="返回">${I.logo}<b>YouTube</b></button><span class="yt-sp"></span><button data-a="bell" aria-label="通知">${I.bell}</button><button data-a="search" aria-label="搜尋">${I.search}</button></div><div class="yt-tabs" id="yt-tabs">${SUBS.map(t=>`<button class="${YT.sub===t[0]?'on':''}" data-a="sub:${t[0]}">${t[1]}</button>`).join('')}</div></div><div class="yt-sc" id="yt-sc">${body}</div>`}
 
 /* ---------- Shorts ---------- */
-const shortItem=v=>`<section class="yt-si" data-id="${v.id}"><div class="yt-bgm" style="${bg(v)}">${v.th?'':`<em class="yt-tt">${E(v.t)}</em>`}</div>${v.mine&&v.m==='video'?`<video class="yt-vd" data-m="${v.id}" playsinline loop muted></video>`:v.mine&&v.m==='image'?`<img class="yt-vd" data-m="${v.id}" alt="">`:''}<div class="yt-stp"><button data-a="search">${I.search}</button><button data-a="mo:${v.id}">${I.more}</button></div><div class="yt-rl"><button data-a="like:${v.id}">${has('liked',v.id)?I.likeF:I.like}<small>${cnt(v.id,'l')}</small></button><button data-a="share:${v.id}">${I.share}<small>分享</small></button><button data-a="cmt:${v.id}">${I.cm}<small>${(yd().cm[v.id]||[]).length||cnt(v.id,'c')}</small></button><button data-a="sv:${v.id}">${has('later',v.id)?I.svF:I.sv}<small>保存</small></button><button data-a="rx:${v.id}">${I.remix}<small>Remix</small></button></div><div class="yt-bt"><div class="yt-r3"><span class="yt-av" style="${chcol(v)}">${chav(v)}</span><b>@${E(v.ch)}</b><button class="yt-sb${yd().subs.includes(v.ch)?' on':''}" data-a="subc:${v.ch}">${yd().subs.includes(v.ch)?'已订阅':'订阅'}</button></div><p>${E(v.cap||v.t)}</p></div><i class="yt-pg"><u></u></i></section>`;
+const shortItem=v=>`<section class="yt-si" data-id="${v.id}"><div class="yt-bgm" style="${bg(v)}">${v.th?'':`<em class="yt-tt">${E(v.t)}</em>`}</div>${v.mine&&v.m==='video'?`<video class="yt-vd" data-m="${v.id}" playsinline loop muted></video>`:v.mine&&v.m==='image'?`<img class="yt-vd" data-m="${v.id}" alt="">`:''}<div class="yt-stp"><button data-a="search">${I.search}</button><button data-a="mo:${v.id}">${I.more}</button></div><div class="yt-rl"><button data-a="like:${v.id}">${has('liked',v.id)?I.likeF:I.like}<small>${cnt(v.id,'l')}</small></button><button data-a="share:${v.id}">${I.share}<small>分享</small></button><button data-a="cmt:${v.id}">${I.cm}<small>${(yd().cm[v.id]||[]).length||cnt(v.id,'c')}</small></button><button data-a="sv:${v.id}">${has('later',v.id)?I.svF:I.sv}<small>儲存</small></button><button data-a="rx:${v.id}">${I.remix}<small>Remix</small></button></div><div class="yt-bt"><div class="yt-r3"><span class="yt-av" style="${chcol(v)}">${chav(v)}</span><b>@${E(v.ch)}</b><button class="yt-sb${yd().subs.includes(v.ch)?' on':''}" data-a="subc:${v.ch}">${yd().subs.includes(v.ch)?'已訂閱':'訂閱'}</button></div><p>${E(v.cap||v.t)}</p></div><i class="yt-pg"><u></u></i></section>`;
 const shortList=()=>{const d=yd();return [...d.mine.filter(v=>v.k==='s'),...d.shorts]};
 function shortsHTML(){const l=shortList();return `<div class="yt-sh" id="yt-sh">${l.map(shortItem).join('')}</div>`}
 
 /* ---------- 我 ---------- */
 function meHTML(){
  const d=yd(),u=user(),nm=E(myName());
- const hv=d.hist.slice(0,8).map(v=>`<div class="yt-hc" data-a="play:${v.id}"><div class="yt-hth${v.k==='s'?' s':''}" style="${bg(find(v.id)||v)}">${(find(v.id)||v).th?'':`<em>${E(v.t)}</em>`}<span class="yt-hp"><u style="width:${20+hash(v.id)%70}%"></u></span></div><b>${E(v.t)}</b><small>${E(v.ch)}</small></div>`).join('')||'<div class="yt-hn">看过的视频会显示在这里</div>';
- return `<div class="yt-pf"><div class="yt-pt"><button class="yt-chip" data-a="acct">账户 ${I.down}</button><span class="yt-sp"></span><button data-a="bell">${I.bell}</button><button data-a="search">${I.search}</button><button data-a="gear">${I.gear}</button></div><div class="yt-pi"><span class="yt-pa">${u.avatar?`<img src="${u.avatar}" alt="">`:E((u.name||'我')[0])}</span><h2>${nm}</h2></div><div class="yt-pb"><button class="dk" data-a="chan">${d.chan?'我的频道':'创建频道'}</button><button data-a="prem">订阅 Premium</button></div><h4 class="yt-h" data-a="histall">观看记录 ${I.chev}</h4><div class="yt-hs">${hv}</div><h4 class="yt-h">媒体库</h4><div class="yt-lb"><button data-a="lib:later"><span class="yt-lc"><i>${I.clock}</i></span><div><b>Watch later</b><small>私人${d.later.length?'・'+d.later.length+' 部视频':''}</small></div>${I.more}</button><button data-a="lib:liked"><span class="yt-lc"><i>${I.like}</i></span><div><b>喜欢的视频</b><small>私人${d.liked.length?'・'+d.liked.length+' 部视频':''}</small></div>${I.more}</button>${d.mine.length?`<button data-a="lib:mine"><span class="yt-lc"><i>${I.up}</i></span><div><b>我的视频</b><small>${d.mine.length} 部视频</small></div>${I.more}</button>`:''}</div></div>`}
+ const hv=d.hist.slice(0,8).map(v=>`<div class="yt-hc" data-a="play:${v.id}"><div class="yt-hth${v.k==='s'?' s':''}" style="${bg(find(v.id)||v)}">${(find(v.id)||v).th?'':`<em>${E(v.t)}</em>`}<span class="yt-hp"><u style="width:${20+hash(v.id)%70}%"></u></span></div><b>${E(v.t)}</b><small>${E(v.ch)}</small></div>`).join('')||'<div class="yt-hn">看過的影片會顯示在這裡</div>';
+ return `<div class="yt-pf"><div class="yt-pt"><button class="yt-chip" data-a="acct">帳戶 ${I.down}</button><span class="yt-sp"></span><button data-a="bell">${I.bell}</button><button data-a="search">${I.search}</button><button data-a="gear">${I.gear}</button></div><div class="yt-pi"><span class="yt-pa">${u.avatar?`<img src="${u.avatar}" alt="">`:E((u.name||'我')[0])}</span><h2>${nm}</h2></div><div class="yt-pb"><button class="dk" data-a="chan">${d.chan?'我的頻道':'建立頻道'}</button><button data-a="prem">訂閱 Premium</button></div><h4 class="yt-h" data-a="histall">觀看記錄 ${I.chev}</h4><div class="yt-hs">${hv}</div><h4 class="yt-h">媒體庫</h4><div class="yt-lb"><button data-a="lib:later"><span class="yt-lc"><i>${I.clock}</i></span><div><b>Watch later</b><small>私人${d.later.length?'・'+d.later.length+' 部影片':''}</small></div>${I.more}</button><button data-a="lib:liked"><span class="yt-lc"><i>${I.like}</i></span><div><b>喜歡的影片</b><small>私人${d.liked.length?'・'+d.liked.length+' 部影片':''}</small></div>${I.more}</button>${d.mine.length?`<button data-a="lib:mine"><span class="yt-lc"><i>${I.up}</i></span><div><b>我的影片</b><small>${d.mine.length} 部影片</small></div>${I.more}</button>`:''}</div></div>`}
 
 /* ---------- 导航 / 渲染 ---------- */
 function nav(){
  const u=user(),t=YT.tab;
- $('#yt-nav').innerHTML=`<button class="${t==='home'?'on':''}" data-a="nav:home" aria-label="首页">${t==='home'?I.home:I.homeO}</button><button class="${t==='shorts'?'on':''}" data-a="nav:shorts" aria-label="Shorts">${I.sh}</button><button data-a="nav:plus" aria-label="创建">${I.plus}</button><button class="${t==='me'?'on':''}" data-a="nav:me" aria-label="我"><span class="yt-na">${u.avatar?`<img src="${u.avatar}" alt="">`:E((u.name||'我')[0])}</span></button>`}
+ $('#yt-nav').innerHTML=`<button class="${t==='home'?'on':''}" data-a="nav:home" aria-label="首頁">${t==='home'?I.home:I.homeO}</button><button class="${t==='shorts'?'on':''}" data-a="nav:shorts" aria-label="Shorts">${I.sh}</button><button data-a="nav:plus" aria-label="建立">${I.plus}</button><button class="${t==='me'?'on':''}" data-a="nav:me" aria-label="我"><span class="yt-na">${u.avatar?`<img src="${u.avatar}" alt="">`:E((u.name||'我')[0])}</span></button>`}
 function post(){
  const sh=$('#yt-sh');
  if(sh){
@@ -11063,14 +11114,14 @@ function render(){
 function keepScroll(fn){const sc=$('#yt-sc'),y=sc?sc.scrollTop:0;fn();const n=$('#yt-sc');if(n)n.scrollTop=y}
 
 /* ---------- AI 生成内容 ---------- */
-const KD={feed:['v','视频推荐（各种領域：生活、科技、美食、故事、旅行、科普…）'],music:['v','音乐类视频（MV、现场演出、歌单、纯音乐）'],shorts:['s','短视频 Shorts（搞笑、治愈、动物、日常、小知识）'],live:['l','正在直播的直播间（v 填观看人数，如 7528；dur 留空字串）']};
+const KD={feed:['v','影片推薦（各種領域：生活、科技、美食、故事、旅行、科普…）'],music:['v','音樂類影片（MV、現場演出、歌單、純音樂）'],shorts:['s','短影片 Shorts（搞笑、治癒、動物、日常、小知識）'],live:['l','正在直播的直播間（v 填觀看人數，如 7528；dur 留空字串）']};
 async function gen(kind,q,n){
- const cfg={base:(S.cfg.secondaryBase||'').trim()||S.cfg.base,key:(S.cfg.secondaryKey||'').trim()||S.cfg.key,model:(S.cfg.secondaryModel||'').trim()||S.cfg.model,temp:.9,stream:false};if(!cfg.key||!cfg.base){toast('先在设置里填好 API（副 API 或主 API）');return null}
- const k=KD[kind]||KD.feed,msgs=[{role:'system',content:'你是简体中文 YouTube 模拟内容生成器。所有面向用户的文字必须严格使用中国大陆简体中文，禁止输出繁体中文或繁简混用。只输出一个 JSON 数组，不要解释，不要代码块。每项字段：t 标题；ch 频道名（不带 @）；v 观看数（如 16万、3.2万、1,204）；ago（如 4 天前、1 个月前）；dur（如 11:48，短视频如 0:27）；cap 一句简短描述或字幕；hue 0-360 的整数；cm 为 6 到 8 条留言的数组（热门排前），必须紧扣该视频的标题与内容，像真实的 YouTube 评论区：语气和长度各不相同（玩梗吐槽、真情实感的共鸣、分享自己的经历、提问、补充冷知识、抢沙发、一句话短评、几十字的长评），用户名风格各异（如 tuoma四、王位-v7j、Kiki_0319、阿宅日常，有的带数字或英文后缀），偶尔用 emoji 或网路用语，必须使用简体中文；lk 点赞数呈长尾分布（个别上万，多数几十到几百，也有个位数）；ago 各不相同（几小时前到 2 年前）；其中 2 到 3 条带 rp（1 到 3 条回复，要真的接话、有来有往，可以 @ 对方）。每条 {n,t,lk,ago,rp}。标题要有真实平台的味道，风格多样，可以混合简体中文和英文，禁止繁体中文；不要使用真实存在的知名人物姓名或品牌名称。'},{role:'user',content:'请用简体中文生成 '+(n||6)+' 条'+k[1]+(q?'，主题／关鍵词：'+q:'')+'。已有标题（不要重复）：'+yd()[kind==='music'?'music':kind==='live'?'live':kind==='shorts'?'shorts':'feed'].slice(0,12).map(x=>x.t).join('｜')}];
- let txt;try{txt=await ask(msgs,null,{},cfg)}catch(e){toast('生成失败：'+(e.message||e));return null}
- const m=String(txt).match(/\[[\s\S]*\]/);if(!m){toast('生成失败：格式不对，再試一次');return null}
- let arr;try{arr=JSON.parse(m[0])}catch(e){toast('生成失败：格式不对，再試一次');return null}
- return arr.filter(x=>x&&x.t).slice(0,12).map(x=>({id:uid(),k:k[0],t:String(x.t).slice(0,80),ch:String(x.ch||'频道').slice(0,24),v:String(x.v||'1,024').slice(0,10),ago:String(x.ago||'1 天前').slice(0,12),dur:k[0]==='l'?'':String(x.dur||'').slice(0,9),cap:String(x.cap||'').slice(0,90),hue:(+x.hue||rnd(360))%360,cm:cmClean(x.cm)}))}
+ const cfg={base:(S.cfg.secondaryBase||'').trim()||S.cfg.base,key:(S.cfg.secondaryKey||'').trim()||S.cfg.key,model:(S.cfg.secondaryModel||'').trim()||S.cfg.model,temp:.9,stream:false};if(!cfg.key||!cfg.base){toast('先在設定裡填好 API（副 API 或主 API）');return null}
+ const k=KD[kind]||KD.feed,msgs=[{role:'system',content:'你在模擬 YouTube 的推薦內容。只輸出一個 JSON 數組，不要解釋，不要代碼塊。每項字段：t 標題；ch 頻道名（不帶 @）；v 觀看數（如 16萬、3.2萬、1,204）；ago（如 4 天前、1 個月前）；dur（如 11:48，短影片如 0:27）；cap 一句簡短描述或字幕；hue 0-360 的整數；cm 為 6 到 8 條留言的數組（熱門排前），必須緊扣該影片的標題與內容，像真實的 YouTube 評論區：語氣和長度各不相同（玩梗吐槽、真情實感的共鳴、分享自己的經歷、提問、補充冷知識、搶沙發、一句話短評、幾十字的長評），用戶名風格各異（如 tuoma四、王位-v7j、Kiki_0319、阿宅日常，有的帶數字或英文後綴），偶爾用 emoji 或網路用語，可繁簡混用；lk 點贊數呈長尾分佈（個別上萬，多數幾十到幾百，也有個位數）；ago 各不相同（幾小時前到 2 年前）；其中 2 到 3 條帶 rp（1 到 3 條回覆，要真的接話、有來有往，可以 @ 對方）。每條 {n,t,lk,ago,rp}。標題要有真實平台的味道，風格多樣，可以混合繁體、簡體、英文；不要使用真實存在的知名人物姓名或品牌名稱。'},{role:'user',content:'生成 '+(n||6)+' 條'+k[1]+(q?'，主題／關鍵詞：'+q:'')+'。已有標題（不要重複）：'+yd()[kind==='music'?'music':kind==='live'?'live':kind==='shorts'?'shorts':'feed'].slice(0,12).map(x=>x.t).join('｜')}];
+ let txt;try{txt=await ask(msgs,null,{},cfg)}catch(e){toast('生成失敗：'+(e.message||e));return null}
+ const m=String(txt).match(/\[[\s\S]*\]/);if(!m){toast('生成失敗：格式不對，再試一次');return null}
+ let arr;try{arr=JSON.parse(m[0])}catch(e){toast('生成失敗：格式不對，再試一次');return null}
+ return arr.filter(x=>x&&x.t).slice(0,12).map(x=>({id:uid(),k:k[0],t:String(x.t).slice(0,80),ch:String(x.ch||'頻道').slice(0,24),v:String(x.v||'1,024').slice(0,10),ago:String(x.ago||'1 天前').slice(0,12),dur:k[0]==='l'?'':String(x.dur||'').slice(0,9),cap:String(x.cap||'').slice(0,90),hue:(+x.hue||rnd(360))%360,cm:cmClean(x.cm)}))}
 async function more(kind,quiet){
  if(YT.busy)return;YT.busy=true;if(!quiet)toast('正在更新…');
  const r=await gen(kind);YT.busy=false;if(!r||!r.length)return;
@@ -11084,61 +11135,61 @@ const ov=()=>$('#yt-ov');
 function openOv(html,cls){const o=ov();o.className='yt-ov on '+(cls||'');o.innerHTML=html;o.scrollTop=0}
 function closeOv(){const o=ov();if(YT.ovt){clearInterval(YT.ovt);YT.ovt=null}o.classList.remove('on');o.innerHTML='';YT.tmp=YT.tmp.slice(0,60);if(YT.tab==='me'||YT.tab==='home')keepScroll(render)}
 
-const POOL=[{n:'路人小张',t:'这个太真实了，看完又忍不住看了一遍',lk:4742,rp:[{n:'阿宅日常',t:'我也是，一整个停不下来',lk:150},{n:'小花猫',t:'@阿宅日常 +1，笑死',lk:36}]},{n:'夜猫子_0412',t:'为什么演算法总是在凌晨兩点推给我这种视频',lk:1203},{n:'Momo',t:'第一次看到这个频道，直接订阅了，剩下的慢慢补',lk:318},{n:'老王说',t:'講得很清楚，收藏了慢慢看。順带一提，3分12秒那段我觉得还可以补充一下',lk:96,rp:[{n:'小林',t:'@老王说 补充什么？求展开',lk:12},{n:'老王说',t:'@小林 大概就是前提条件不同结论会反过来，有空我写在下面',lk:8}]},{n:'慢慢来比较快',t:'背景音乐是什么？求歌名🙏',lk:77},{n:'Kiki_0319',t:'笑到鄰居来敲门了',lk:540},{n:'大雄不在家',t:'希望多更新一点这类内容！',lk:204},{n:'无名氏',t:'评论区比视频还好笑',lk:2031,rp:[{n:'台南小吃貨',t:'真的，我是来看留言的',lk:402}]},{n:'Ethan Lin',t:'Been watching this for the 3rd time. Still great.',lk:61},{n:'小雨天',t:'看到一半突然想起了很多以前的事情，有点难过又有点温暖。謝謝你做这个视频。',lk:889},{n:'阿凱的日常',t:'抢沙发',lk:3},{n:'云朵',t:'这个角度我之前真的没想到，涨知识了',lk:233},{n:'飞天小豬',t:'我朋友看完直接传给全家人了😂',lk:156},{n:'W.',t:'片尾那一句是整支视频的点睛之笔，认真的',lk:512},{n:'奶茶不加糖',t:'有人跟我一样是被标题騙进来的吗',lk:1450,rp:[{n:'小宇',t:'@奶茶不加糖 手动举手🙋',lk:98},{n:'Jojo',t:'被騙进来，但不虧',lk:75},{n:'奶茶不加糖',t:'@Jojo 对，意外地好看',lk:20}]},{n:'没有名字的人',t:'二刷了，細节真的多',lk:48},{n:'阿豪',t:'请问可以出一集完整版吗？这个长度根本不够看',lk:307},{n:'三月兔',t:'看了这么多年的 YouTube，这支真的算是年度最佳之一',lk:1760},{n:'mika_mika',t:'隔壁室友问我在笑什么，我说不出来😭',lk:92},{n:'老李',t:'制作很用心，支持一下',lk:15}];
-const AGO=['9 个月前','2 天前','3 周前','1 年前','5 小时前','1 个月前','6 天前'];
+const POOL=[{n:'路人小張',t:'這個太真實了，看完又忍不住看了一遍',lk:4742,rp:[{n:'阿宅日常',t:'我也是，一整個停不下來',lk:150},{n:'小花貓',t:'@阿宅日常 +1，笑死',lk:36}]},{n:'夜貓子_0412',t:'為什麼演算法總是在凌晨兩點推給我這種影片',lk:1203},{n:'Momo',t:'第一次看到這個頻道，直接訂閱了，剩下的慢慢補',lk:318},{n:'老王說',t:'講得很清楚，收藏了慢慢看。順帶一提，3分12秒那段我覺得還可以補充一下',lk:96,rp:[{n:'小林',t:'@老王說 補充什麼？求展開',lk:12},{n:'老王說',t:'@小林 大概就是前提條件不同結論會反過來，有空我寫在下面',lk:8}]},{n:'慢慢來比較快',t:'背景音樂是什麼？求歌名🙏',lk:77},{n:'Kiki_0319',t:'笑到鄰居來敲門了',lk:540},{n:'大雄不在家',t:'希望多更新一點這類內容！',lk:204},{n:'無名氏',t:'留言區比影片還好笑',lk:2031,rp:[{n:'台南小吃貨',t:'真的，我是來看留言的',lk:402}]},{n:'Ethan Lin',t:'Been watching this for the 3rd time. Still great.',lk:61},{n:'小雨天',t:'看到一半突然想起了很多以前的事情，有點難過又有點溫暖。謝謝你做這個影片。',lk:889},{n:'阿凱的日常',t:'搶沙發',lk:3},{n:'雲朵',t:'这个角度我之前真的没想到，涨知识了',lk:233},{n:'飛天小豬',t:'我朋友看完直接傳給全家人了😂',lk:156},{n:'W.',t:'片尾那一句是整支影片的點睛之筆，認真的',lk:512},{n:'奶茶不加糖',t:'有人跟我一樣是被標題騙進來的嗎',lk:1450,rp:[{n:'小宇',t:'@奶茶不加糖 手動舉手🙋',lk:98},{n:'Jojo',t:'被騙進來，但不虧',lk:75},{n:'奶茶不加糖',t:'@Jojo 對，意外地好看',lk:20}]},{n:'沒有名字的人',t:'二刷了，細節真的多',lk:48},{n:'阿豪',t:'請問可以出一集完整版嗎？這個長度根本不夠看',lk:307},{n:'三月兔',t:'看了這麼多年的 YouTube，這支真的算是年度最佳之一',lk:1760},{n:'mika_mika',t:'隔壁室友問我在笑什麼，我說不出來😭',lk:92},{n:'老李',t:'製作很用心，支持一下',lk:15}];
+const AGO=['9 個月前','2 天前','3 週前','1 年前','5 小時前','1 個月前','6 天前'];
 function cmClean(a){if(!Array.isArray(a))return undefined;const c1=(c,top)=>{if(!c||!c.t)return null;const o={n:String(c.n||'路人').slice(0,20),t:String(c.t).slice(0,220),lk:Math.max(0,parseInt(c.lk)||rnd(500))};if(c.ago)o.ago=String(c.ago).slice(0,10);if(top&&Array.isArray(c.rp)){const r=c.rp.slice(0,4).map(x=>c1(x,false)).filter(Boolean);if(r.length)o.rp=r}return o};const r=a.slice(0,10).map(c=>c1(c,true)).filter(Boolean);return r.length?r:undefined}
 function cmBase(v){const h=hash(v.id);let l=Array.isArray(v.cm)&&v.cm.length?v.cm:[0,1,2,3,4,5].map(i=>POOL[(h+i*7)%POOL.length]);return l.map((c,i)=>Object.assign({},c,{key:'b'+i,ago:c.ago||AGO[(h+i)%AGO.length],rp:(c.rp||[]).map((r,j)=>Object.assign({},r,{key:'b'+i+'.'+j,ago:r.ago||AGO[(h+i+j+2)%AGO.length]}))}))}
-function cmAll(v){const u=(yd().cm[v.id]||[]).map((c,j)=>Object.assign({},c,{key:'u'+(c.id||j),me:1,ago:c.ago||'刚刚'}));return [...u,...cmBase(v)]}
-const ccount=v=>String(cnt(v.id,'c')).replace(/万/,'万')
+function cmAll(v){const u=(yd().cm[v.id]||[]).map((c,j)=>Object.assign({},c,{key:'u'+(c.id||j),me:1,ago:c.ago||'剛剛'}));return [...u,...cmBase(v)]}
+const ccount=v=>String(cnt(v.id,'c')).replace(/萬/,'萬')
 function chavMe(){const u=user();return u.avatar?`<img src="${u.avatar}" alt="">`:E((myName())[0])}
 const DIS=I.like.replace('<svg','<svg style="transform:scaleY(-1)"'),DISF=I.likeF.replace('<svg','<svg style="transform:scaleY(-1)"');
 function cmRow(v,c,sub){
  const d=yd(),st=d.cl[v.id+'|'+c.key],lk=(+c.lk||0)+(st==='l'?1:0);
- const rp=c.rp&&c.rp.length&&!sub?`<button class="yt-rpb" data-a="crt:${c.key}">${c.rp.length} 则回复 ${YT.cs.open[c.key]?I.down.replace('<svg','<svg style="transform:rotate(180deg)"'):I.down}</button>${YT.cs.open[c.key]?c.rp.map(r=>cmRow(v,r,1)).join(''):''}`:'';
+ const rp=c.rp&&c.rp.length&&!sub?`<button class="yt-rpb" data-a="crt:${c.key}">${c.rp.length} 則回覆 ${YT.cs.open[c.key]?I.down.replace('<svg','<svg style="transform:rotate(180deg)"'):I.down}</button>${YT.cs.open[c.key]?c.rp.map(r=>cmRow(v,r,1)).join(''):''}`:'';
  return `<div class="yt-cc${sub?' sub':''}"><span class="yt-av" style="${c.me?'background:#555;color:#fff':'background:hsl('+(hash(c.n)%360)+' 30% 38%);color:#fff'}">${c.me?chavMe():E((c.n||'?')[0])}</span><div class="yt-cb"><div class="yt-cn"><span>@${E(c.n)}・${E(c.ago||'')}</span><button data-a="cmo:${v.id}|${c.key}">${I.more}</button></div><p>${E(c.t)}</p><div class="yt-cact"><button class="${st==='l'?'on':''}" data-a="clk:${v.id}|${c.key}|l">${st==='l'?I.likeF:I.like}<span>${lk||''}</span></button><button class="${st==='d'?'on':''}" data-a="clk:${v.id}|${c.key}|d">${st==='d'?DISF:DIS}</button>${sub?'':`<button data-a="crp:${E(c.n)}">${I.cm}</button>`}</div>${rp}</div></div>`}
 function cmRefresh(){
  const cs=YT.cs;if(!cs)return;const v=find(cs.id);if(!v)return;
- const ch=$('#yt-chp');if(ch)ch.innerHTML=`<button class="${cs.sort==='hot'?'on':''}" data-a="cst:hot">热门</button><button data-a="cth"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z"/></svg>主题</button><button class="${cs.sort==='new'?'on':''}" data-a="cst:new">最新</button>`;
+ const ch=$('#yt-chp');if(ch)ch.innerHTML=`<button class="${cs.sort==='hot'?'on':''}" data-a="cst:hot">熱門</button><button data-a="cth"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2L12 19.5l-2.2-6.3L3.5 11l6.3-2.2z"/></svg>主題</button><button class="${cs.sort==='new'?'on':''}" data-a="cst:new">最新</button>`;
  const l=$('#yt-cl');if(!l)return;let a=cmAll(v);if(cs.sort==='hot')a=a.slice().sort((x,y)=>(y.lk||0)-(x.lk||0));else a=[...a.filter(x=>x.me),...a.filter(x=>!x.me)];
- l.innerHTML=a.map(c=>cmRow(v,c)).join('')||'<div class="yt-hn" style="padding:40px;text-align:center">还没有评论</div>'}
+ l.innerHTML=a.map(c=>cmRow(v,c)).join('')||'<div class="yt-hn" style="padding:40px;text-align:center">還沒有留言</div>'}
 function cmOpen(id){
  const v=find(id);if(!v)return;YT.cs={id,sort:'hot',open:{}};
- const o=sheet(`<i class="yt-grab"></i><div class="yt-cmh"><h3>留言</h3><button data-a="cmi" aria-label="信息"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".6" fill="currentColor"/></svg></button><button data-a="cmx" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg></button></div><div class="yt-chp" id="yt-chp"></div><div class="yt-nt">务必遵守《YouTube 社区规范》，发布留言时请尊重他人。<b>了解详情</b></div><div class="yt-cl" id="yt-cl"></div><div class="yt-cin"><input id="yt-ci" placeholder="留言…" autocomplete="off"><button data-a="csend:${id}">送出</button></div>`);
+ const o=sheet(`<i class="yt-grab"></i><div class="yt-cmh"><h3>留言</h3><button data-a="cmi" aria-label="資訊"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 11v5.5"/><circle cx="12" cy="7.8" r=".6" fill="currentColor"/></svg></button><button data-a="cmx" aria-label="關閉"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5.5 5.5l13 13M18.5 5.5l-13 13"/></svg></button></div><div class="yt-chp" id="yt-chp"></div><div class="yt-nt">務必遵守《YouTube 社群規範》，發布留言時請尊重他人。<b>瞭解詳情</b></div><div class="yt-cl" id="yt-cl"></div><div class="yt-cin"><input id="yt-ci" placeholder="留言…" autocomplete="off"><button data-a="csend:${id}">送出</button></div>`);
  o.querySelector('.yt-shx').classList.add('cmx');cmRefresh()}
 function cmPreview(v){const a=cmAll(v).slice().sort((x,y)=>(y.lk||0)-(x.lk||0)),c=a[0];return `<button class="yt-cpv" data-a="cmt:${v.id}"><div class="yt-cph"><b>留言</b><span>${ccount(v)}</span></div>${c?`<div class="yt-cpr"><span class="yt-av" style="background:hsl(${hash(c.n)%360} 30% 38%);color:#fff">${E((c.n||'?')[0])}</span><p>${E(c.t)}</p></div>`:''}</button>`}
 function watch(id){
  const v=find(id);if(!v)return;hist(v);const d=yd(),sub=d.subs.includes(v.ch),live=v.k==='l';
  let player=`<div class="yt-pl" id="yt-pl" style="${bg(v)}">${v.th?'':`<em class="yt-tt">${E(v.t)}</em>`}${v.mine&&v.m==='video'?`<video id="yt-pv" data-m="${v.id}" controls playsinline></video>`:v.mine&&v.m==='image'?`<img data-m="${v.id}" class="yt-pimg" alt="">`:`<button class="yt-pp" data-a="pp">${I.play}</button>`}${live?`<span class="yt-bd">${I.live}直播</span>`:''}<i class="yt-pbar"><u id="yt-pu"></u></i></div>`;
- openOv(`<div class="yt-wh"><button class="yt-bk" data-a="ovx">‹</button><span class="yt-sp"></span><button data-a="mo:${v.id}">${I.more}</button></div>${player}<div class="yt-wb"><h2>${E(v.t)}</h2><small class="yt-ws">${live?'<span id="yt-vw">'+E(v.v)+'</span> 人正在观看':'▷'+E(v.v)+'　'+E(v.ago)}</small><div class="yt-r3 w"><span class="yt-av" style="${chcol(v)}">${chav(v)}</span><b>@${E(v.ch)}</b><button class="yt-sb${sub?' on':''}" data-a="subw:${v.id}">${sub?'已订阅':'订阅'}</button></div><div class="yt-chips"><button data-a="likew:${v.id}">${has('liked',v.id)?I.likeF:I.like}<span>喜欢</span></button><button data-a="svw:${v.id}">${has('later',v.id)?I.svF:I.sv}<span>稍后观看</span></button><button data-a="share:${v.id}">${I.share}<span>分享</span></button>${v.mine?`<button data-a="del:${v.id}">${I.more}<span>删除</span></button>`:''}</div>${v.cap?`<div class="yt-ds">${E(v.cap)}</div>`:''}${live&&v.mine?`<button class="yt-end" data-a="endlive:${v.id}">结束直播</button>`:''}${cmPreview(v)}</div>`,'w');
+ openOv(`<div class="yt-wh"><button class="yt-bk" data-a="ovx">‹</button><span class="yt-sp"></span><button data-a="mo:${v.id}">${I.more}</button></div>${player}<div class="yt-wb"><h2>${E(v.t)}</h2><small class="yt-ws">${live?'<span id="yt-vw">'+E(v.v)+'</span> 人正在觀看':'▷'+E(v.v)+'　'+E(v.ago)}</small><div class="yt-r3 w"><span class="yt-av" style="${chcol(v)}">${chav(v)}</span><b>@${E(v.ch)}</b><button class="yt-sb${sub?' on':''}" data-a="subw:${v.id}">${sub?'已訂閱':'訂閱'}</button></div><div class="yt-chips"><button data-a="likew:${v.id}">${has('liked',v.id)?I.likeF:I.like}<span>喜歡</span></button><button data-a="svw:${v.id}">${has('later',v.id)?I.svF:I.sv}<span>稍後觀看</span></button><button data-a="share:${v.id}">${I.share}<span>分享</span></button>${v.mine?`<button data-a="del:${v.id}">${I.more}<span>刪除</span></button>`:''}</div>${v.cap?`<div class="yt-ds">${E(v.cap)}</div>`:''}${live&&v.mine?`<button class="yt-end" data-a="endlive:${v.id}">結束直播</button>`:''}${cmPreview(v)}</div>`,'w');
  const m=ov().querySelector('[data-m]');if(m)media(m.dataset.m).then(u=>{if(u)m.src=u});
  if(live){const e=()=>{const s=$('#yt-vw');if(!s){clearInterval(YT.ovt);return}const x=+String(v.v).replace(/[^\d]/g,'')||100;s.textContent=String(Math.max(1,x+rnd(9)-3)).replace(/\B(?=(\d{3})+$)/g,',')};clearInterval(YT.ovt);YT.ovt=setInterval(e,2500)}
 }
-function listOv(title,arr){YT.tmp=[...arr,...YT.tmp];openOv(`<div class="yt-wh"><button class="yt-bk" data-a="ovx">‹</button><b class="yt-wt">${E(title)}</b><span class="yt-sp"></span></div><div class="yt-sc2">${arr.length?arr.map(card).join(''):empty('这里还没有视频')}</div>`,'l')}
+function listOv(title,arr){YT.tmp=[...arr,...YT.tmp];openOv(`<div class="yt-wh"><button class="yt-bk" data-a="ovx">‹</button><b class="yt-wt">${E(title)}</b><span class="yt-sp"></span></div><div class="yt-sc2">${arr.length?arr.map(card).join(''):empty('這裡還沒有影片')}</div>`,'l')}
 function searchOv(){
- openOv(`<div class="yt-wh"><button class="yt-bk" data-a="ovx">‹</button><form class="yt-sf" id="yt-sf"><input id="yt-sq" type="search" placeholder="搜索 YouTube" autocomplete="off" enterkeyhint="search"></form></div><div class="yt-sc2" id="yt-sr">${empty('输入关鍵词，按搜索会生成相关视频')}</div>`,'l');
+ openOv(`<div class="yt-wh"><button class="yt-bk" data-a="ovx">‹</button><form class="yt-sf" id="yt-sf"><input id="yt-sq" type="search" placeholder="搜尋 YouTube" autocomplete="off" enterkeyhint="search"></form></div><div class="yt-sc2" id="yt-sr">${empty('輸入關鍵詞，按搜尋會生成相關影片')}</div>`,'l');
  setTimeout(()=>{const i=$('#yt-sq');if(i)i.focus()},60);
  $('#yt-sf').onsubmit=async e=>{e.preventDefault();const q=$('#yt-sq').value.trim();if(!q)return;$('#yt-sq').blur();const box=$('#yt-sr');
   const loc=allv().filter(v=>(v.t+v.ch+(v.cap||'')).includes(q));const seen=new Set();const l0=loc.filter(v=>!seen.has(v.id)&&seen.add(v.id)).slice(0,10);
-  box.innerHTML=l0.map(card).join('')+empty('正在搜索…');const r=await gen('feed',q,6);if(!$('#yt-sr'))return;
-  if(r)YT.tmp=[...r,...YT.tmp];box.innerHTML=[...l0,...(r||[])].map(card).join('')||empty('没有结果')}}
+  box.innerHTML=l0.map(card).join('')+empty('正在搜尋…');const r=await gen('feed',q,6);if(!$('#yt-sr'))return;
+  if(r)YT.tmp=[...r,...YT.tmp];box.innerHTML=[...l0,...(r||[])].map(card).join('')||empty('沒有結果')}}
 function sheet(html){const o=document.createElement('div');o.className='yt-mask';o.innerHTML=`<div class="yt-shx">${html}</div>`;o.onclick=e=>{if(e.target===o)o.remove()};$('#v-youtube').appendChild(o);return o}
 function createSheet(){
- const o=sheet(`<h3>创建</h3><button class="yt-cr" data-a="cr:cam"><i>${I.cam}</i>拍摄短视频</button><button class="yt-cr" data-a="cr:up"><i>${I.up}</i>上传视频</button><button class="yt-cr" data-a="cr:live"><i>${I.live}</i>直播</button>`);return o}
+ const o=sheet(`<h3>建立</h3><button class="yt-cr" data-a="cr:cam"><i>${I.cam}</i>拍攝短影片</button><button class="yt-cr" data-a="cr:up"><i>${I.up}</i>上傳影片</button><button class="yt-cr" data-a="cr:live"><i>${I.live}</i>直播</button>`);return o}
 function thumb(file){return new Promise(res=>{const u=URL.createObjectURL(file),done=o=>{URL.revokeObjectURL(u);res(o)};
  const cv=(el,w,h,dur)=>{try{const k=Math.min(1,480/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));c.getContext('2d').drawImage(el,0,0,c.width,c.height);return {th:c.toDataURL('image/jpeg',.62),dur,vert:h>w}}catch(e){return {th:'',dur,vert:h>w}}};
  if(/^image\//.test(file.type)){const im=new Image();im.onload=()=>done(cv(im,im.naturalWidth,im.naturalHeight,0));im.onerror=()=>done({th:'',dur:0,vert:false});im.src=u}
  else{const v=document.createElement('video');v.muted=true;v.playsInline=true;v.preload='metadata';v.onloadeddata=()=>{try{v.currentTime=Math.min(.4,(v.duration||1)/2)}catch(e){done({th:'',dur:v.duration||0,vert:false})}};v.onseeked=()=>done(cv(v,v.videoWidth||16,v.videoHeight||9,v.duration));v.onerror=()=>done({th:'',dur:0,vert:false});v.src=u}})}
 async function addFile(file,cam){
- if(!file)return;if(file.size>200*1048576){toast('文件太大（超过 200MB）');return}
- toast('处理中…');const m=await thumb(file);
- const t=await sgPrompt(cam?'短视频标题':'视频标题',(file.name||'').replace(/\.[^.]+$/,'').slice(0,40),'');if(t===null)return;
- const d=yd(),id=uid();try{await ytPut(id,file)}catch(e){toast('保存失败：'+(e.message||e));return}
+ if(!file)return;if(file.size>200*1048576){toast('檔案太大（超過 200MB）');return}
+ toast('處理中…');const m=await thumb(file);
+ const t=await sgPrompt(cam?'短影片標題':'影片標題',(file.name||'').replace(/\.[^.]+$/,'').slice(0,40),'');if(t===null)return;
+ const d=yd(),id=uid();try{await ytPut(id,file)}catch(e){toast('儲存失敗：'+(e.message||e));return}
  const isS=cam||m.vert||(/^video\//.test(file.type)&&m.dur<=60&&m.vert);
- d.mine.unshift({id,k:isS?'s':'v',t:(t.trim()||'未命名').slice(0,60),ch:myName(),v:'0',ago:'刚刚',dur:fmt(m.dur),cap:'',hue:rnd(360),th:m.th,mine:1,m:/^video\//.test(file.type)?'video':'image'});
- save();toast('已发布');YT.tab=isS?'shorts':'home';YT.sub='home';render()}
+ d.mine.unshift({id,k:isS?'s':'v',t:(t.trim()||'未命名').slice(0,60),ch:myName(),v:'0',ago:'剛剛',dur:fmt(m.dur),cap:'',hue:rnd(360),th:m.th,mine:1,m:/^video\//.test(file.type)?'video':'image'});
+ save();toast('已發佈');YT.tab=isS?'shorts':'home';YT.sub='home';render()}
 function pick(cam){const f=$('#yt-file');f.value='';f.accept=cam?'video/*':'video/*,image/*';if(cam)f.setAttribute('capture','environment');else f.removeAttribute('capture');f.onchange=()=>addFile(f.files[0],cam);f.click()}
 async function goLive(){
- const t=await sgPrompt('直播标题','','');if(t===null)return;const d=yd();
+ const t=await sgPrompt('直播標題','','');if(t===null)return;const d=yd();
  const v={id:uid(),k:'l',t:(t.trim()||'我的直播').slice(0,60),ch:myName(),v:String(20+rnd(80)),ago:'',dur:'',cap:'',hue:rnd(360),mine:1};
  d.mine.unshift(v);save();YT.tab='home';YT.sub='live';render();watch(v.id)}
 
@@ -11148,63 +11199,63 @@ const I2={ban:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
 function ymenu(items,title){const o=sheet('<i class="yt-grab"></i>'+(title?'<h3>'+E(title)+'</h3>':'')+items.map((x,i)=>`<button class="yt-mi${x.red?' red':''}" data-i="${i}"><span>${x.ic}</span>${E(x.label)}${x.on?'<svg class="yt-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>':''}</button>`).join(''));o.querySelectorAll('[data-i]').forEach(b=>b.onclick=e=>{e.stopPropagation();o.remove();items[+b.dataset.i].run()});return o}
 const ytCard=v=>{const o={id:v.id,k:v.k,t:v.t,ch:v.ch,v:v.v,ago:v.ago,dur:v.dur,cap:v.cap,hue:v.hue};if(v.th&&v.th.length<60000)o.th=v.th;return o};
 function shareChat(v){
- const ps=(S.personas||[]).filter(p=>!p.blocked&&p.boundUser===S.activeUserProfile);if(!ps.length)return toast('这个用户还没有綁定的角色');
+ const ps=(S.personas||[]).filter(p=>!p.blocked&&p.boundUser===S.activeUserProfile);if(!ps.length)return toast('這個用戶還沒有綁定的角色');
  const d=yd(),url='https://www.youtube.com/'+(v.k==='s'?'shorts/':'watch?v=')+v.id;
- const o=sheet(`<i class="yt-grab"></i><div class="yt-sh2"><h3>分享</h3><span class="yt-swl">分享后前往聊天</span><button type="button" class="yt-sw${d.goChat?' on':''}" id="yt-sw" aria-label="分享后前往聊天"><u></u></button></div><div class="yt-ppl">${ps.map(p=>`<button type="button" data-p="${p.id}"><span class="yt-pa2">${av(p)}</span><small>${E(p.name)}</small></button>`).join('')}</div><hr class="yt-hr"><button type="button" class="yt-mi big" data-cp><span class="yt-cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="12" rx="1.6"/><path d="M15.5 5.5V4.6a1.1 1.1 0 0 0-1.1-1.1H5.6a1.1 1.1 0 0 0-1.1 1.1v10.8a1.1 1.1 0 0 0 1.1 1.1h.9"/></svg></span>复制链接</button>`);
+ const o=sheet(`<i class="yt-grab"></i><div class="yt-sh2"><h3>分享</h3><span class="yt-swl">分享後前往聊天</span><button type="button" class="yt-sw${d.goChat?' on':''}" id="yt-sw" aria-label="分享後前往聊天"><u></u></button></div><div class="yt-ppl">${ps.map(p=>`<button type="button" data-p="${p.id}"><span class="yt-pa2">${av(p)}</span><small>${E(p.name)}</small></button>`).join('')}</div><hr class="yt-hr"><button type="button" class="yt-mi big" data-cp><span class="yt-cic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="12" rx="1.6"/><path d="M15.5 5.5V4.6a1.1 1.1 0 0 0-1.1-1.1H5.6a1.1 1.1 0 0 0-1.1 1.1v10.8a1.1 1.1 0 0 0 1.1 1.1h.9"/></svg></span>複製連結</button>`);
  const sw=o.querySelector('#yt-sw');sw.onclick=e=>{e.stopPropagation();d.goChat=!d.goChat;sw.classList.toggle('on',d.goChat);save()};
- o.querySelectorAll('[data-p]').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=P(b.dataset.p);if(!p)return;(S.chats[p.id]=S.chats[p.id]||[]).push({role:'user',content:'[用户分享了一个YouTube'+(v.k==='s'?'短视频':v.k==='l'?'直播':'视频')+'：《'+v.t+'》—@'+v.ch+']',yt:ytCard(v),t:Date.now()});save();o.remove();if(d.goChat){cur=p.id;go('chat')}else toast('已分享给 '+p.name)});
- o.querySelector('[data-cp]').onclick=e=>{e.stopPropagation();const ok=()=>{o.remove();toast('已复制链接')};try{navigator.clipboard.writeText(url).then(ok,()=>{o.remove();toast(url,3000)})}catch(x){o.remove();toast(url,3000)}}}
+ o.querySelectorAll('[data-p]').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=P(b.dataset.p);if(!p)return;(S.chats[p.id]=S.chats[p.id]||[]).push({role:'user',content:'[用户分享了一个YouTube'+(v.k==='s'?'短视频':v.k==='l'?'直播':'视频')+'：《'+v.t+'》—@'+v.ch+']',yt:ytCard(v),t:Date.now()});save();o.remove();if(d.goChat){cur=p.id;go('chat')}else toast('已分享給 '+p.name)});
+ o.querySelector('[data-cp]').onclick=e=>{e.stopPropagation();const ok=()=>{o.remove();toast('已複製連結')};try{navigator.clipboard.writeText(url).then(ok,()=>{o.remove();toast(url,3000)})}catch(x){o.remove();toast(url,3000)}}}
 window.ytMsgHTML=x=>{const th=x.th?`background:#111 url("${x.th}") center/cover`:'background:#fff';return `<div class="msc-card ytc"><div class="ytc-th" style="${th}">${x.th?'':`<em>${E(x.t)}</em>`}${x.dur?`<b>${E(x.dur)}</b>`:''}${x.k==='l'?'<b class="lv">直播</b>':''}</div><div class="ytc-b"><b>${E(x.t)}</b><small>@${E(x.ch)}</small></div><div class="msc-ft">${I.logo}<span>YouTube</span></div></div>`};
 window.ytOpen=x=>{go('youtube');YT.tmp.unshift(x);setTimeout(()=>watch(x.id),30)};
 
 function acct(){
  const us=S.userProfiles||[];if(!us.length)return;
- ymenu(us.map(u=>({ic:`<span class="yt-pav">${av(u)}</span>`,label:u.name||'未命名',on:u.id===S.activeUserProfile,run:()=>{if(u.id===S.activeUserProfile)return;switchUser(u.id);S.me={name:u.name||'',handle:u.handle||'',bio:u.bio||'',avatar:u.avatar||''};YT.tmp=[];saveNow();render();toast('已切换到 '+(u.name||'未命名'))}})),'切换账户')}
+ ymenu(us.map(u=>({ic:`<span class="yt-pav">${av(u)}</span>`,label:u.name||'未命名',on:u.id===S.activeUserProfile,run:()=>{if(u.id===S.activeUserProfile)return;switchUser(u.id);S.me={name:u.name||'',handle:u.handle||'',bio:u.bio||'',avatar:u.avatar||''};YT.tmp=[];saveNow();render();toast('已切換到 '+(u.name||'未命名'))}})),'切換帳戶')}
 function ytSettings(){
  const d=yd(),ask=(m,f)=>{if(confirm(m)){f();save();render();toast('已完成',1200)}};
  ymenu([
-  {ic:I.clock,label:'清除观看记录',run:()=>ask('清除观看记录？',()=>{d.hist=[]})},
-  {ic:I.sv,label:'清除“稍后观看”',run:()=>ask('清空「稍后观看」？',()=>{d.later=[]})},
-  {ic:I.like,label:'清除“喜欢的视频”',run:()=>ask('清空「喜欢的视频」？',()=>{d.liked=[]})},
-  {ic:I.bell,label:'取消所有订阅',run:()=>ask('取消所有频道的订阅？',()=>{d.subs=[]})},
-  {ic:I.home,label:'重置推荐内容',run:()=>ask('清除目前的推荐并恢复预设内容？（你上传的视频不受影響）',()=>{d.feed=[];d.shorts=[];d.music=[];d.live=[]})},
-  {ic:I2.trash,label:'删除我上传的所有视频',red:1,run:()=>ask('删除你上传的所有视频？此操作无法复原',()=>{d.mine.forEach(v=>ytDel(v.id));d.mine=[];['hist','later','liked'].forEach(k=>d[k]=d[k].filter(v=>!v.mine))})}
- ],'YouTube 设置')}
+  {ic:I.clock,label:'清除觀看記錄',run:()=>ask('清除觀看記錄？',()=>{d.hist=[]})},
+  {ic:I.sv,label:'清除「稍後觀看」',run:()=>ask('清空「稍後觀看」？',()=>{d.later=[]})},
+  {ic:I.like,label:'清除「喜歡的影片」',run:()=>ask('清空「喜歡的影片」？',()=>{d.liked=[]})},
+  {ic:I.bell,label:'取消所有訂閱',run:()=>ask('取消所有頻道的訂閱？',()=>{d.subs=[]})},
+  {ic:I.home,label:'重置推薦內容',run:()=>ask('清除目前的推薦並恢復預設內容？（你上傳的影片不受影響）',()=>{d.feed=[];d.shorts=[];d.music=[];d.live=[]})},
+  {ic:I2.trash,label:'刪除我上傳的所有影片',red:1,run:()=>ask('刪除你上傳的所有影片？此操作無法復原',()=>{d.mine.forEach(v=>ytDel(v.id));d.mine=[];['hist','later','liked'].forEach(k=>d[k]=d[k].filter(v=>!v.mine))})}
+ ],'YouTube 設定')}
 const H={
  nav(x){if(x==='plus'){createSheet();return}if(YT.tab===x){if(x==='home'&&YT.sub==='home')more('feed');else if(x==='shorts')more('shorts');return}YT.tab=x;render()},
  sub(x){YT.sub=x;render()},
  load(x){more(x)},
- bell(){toast('没有新通知')},prem(){toast('这是模拟页面')},gear(){ytSettings()},acct(){acct()},
+ bell(){toast('沒有新通知')},prem(){toast('這是模擬頁面')},gear(){ytSettings()},acct(){acct()},
  search(){searchOv()},
  play(x){const v=find(x);if(v)watch(x)},
  ovx(){closeOv()},
  like(x,el){const v=find(x);if(!v)return;const on=tog('liked',v),sm=el.querySelector('small');el.classList.toggle('on',on);el.innerHTML=(on?I.likeF:I.like)+(sm?'<small>'+sm.textContent+'</small>':'')},
- sv(x,el){const v=find(x);if(!v)return;const on=tog('later',v);const sm=el.querySelector('small');el.innerHTML=(on?I.svF:I.sv)+(sm?'<small>保存</small>':'');toast(on?'已加入「稍后观看」':'已从「稍后观看」移除',1400)},
- likew(x,el){const v=find(x);if(!v)return;const on=tog('liked',v);el.innerHTML=(on?I.likeF:I.like)+'<span>喜欢</span>'},
- svw(x,el){const v=find(x);if(!v)return;const on=tog('later',v);el.innerHTML=(on?I.svF:I.sv)+'<span>稍后观看</span>';toast(on?'已加入「稍后观看」':'已移除',1400)},
+ sv(x,el){const v=find(x);if(!v)return;const on=tog('later',v);const sm=el.querySelector('small');el.innerHTML=(on?I.svF:I.sv)+(sm?'<small>儲存</small>':'');toast(on?'已加入「稍後觀看」':'已從「稍後觀看」移除',1400)},
+ likew(x,el){const v=find(x);if(!v)return;const on=tog('liked',v);el.innerHTML=(on?I.likeF:I.like)+'<span>喜歡</span>'},
+ svw(x,el){const v=find(x);if(!v)return;const on=tog('later',v);el.innerHTML=(on?I.svF:I.sv)+'<span>稍後觀看</span>';toast(on?'已加入「稍後觀看」':'已移除',1400)},
  cmt(x){cmOpen(x)},
  cmx(){const m=document.querySelector('#v-youtube .yt-mask');if(m)m.remove()},
- cmi(){toast('留言由模擬内容生成')},
+ cmi(){toast('留言由模擬內容生成')},
  cst(x){YT.cs.sort=x;cmRefresh()},
- cth(){toast('主题分类仅为擺设')},
+ cth(){toast('主題分類僅為擺設')},
  crt(x){YT.cs.open[x]=!YT.cs.open[x];cmRefresh()},
  crp(x){const i=$('#yt-ci');if(i){i.value='@'+x+' ';i.focus()}},
- cmo(x,el){const [id,key]=x.split('|');ymenu([{ic:I2.ban,label:'检举',run:()=>toast('已检举',1200)}])},
+ cmo(x,el){const [id,key]=x.split('|');ymenu([{ic:I2.ban,label:'檢舉',run:()=>toast('已檢舉',1200)}])},
  clk(x){const [id,key,t]=x.split('|'),d=yd(),k=id+'|'+key;if(d.cl[k]===t)delete d.cl[k];else d.cl[k]=t;save();cmRefresh()},
- csend(x){const i=$('#yt-ci');if(!i||!i.value.trim())return;const d=yd();(d.cm[x]=d.cm[x]||[]).unshift({id:uid(),n:myName(),t:i.value.trim().slice(0,300),lk:0,ago:'刚刚'});i.value='';save();YT.cs.sort='new';cmRefresh();const l=$('#yt-cl');if(l)l.scrollTop=0},
+ csend(x){const i=$('#yt-ci');if(!i||!i.value.trim())return;const d=yd();(d.cm[x]=d.cm[x]||[]).unshift({id:uid(),n:myName(),t:i.value.trim().slice(0,300),lk:0,ago:'剛剛'});i.value='';save();YT.cs.sort='new';cmRefresh();const l=$('#yt-cl');if(l)l.scrollTop=0},
  share(x){const v=find(x);if(v)shareChat(v)},
- rx(){toast('Remix 仅为擺设')},
- mo(x){const v=find(x);if(!v)return;const d=yd(),it=[{ic:has('later',x)?I.svF:I.sv,label:has('later',x)?'从「稍后观看」移除':'保存到「稍后观看」',run:()=>{tog('later',v);toast('已更新',1200);if(YT.tab==='me')render()}},{ic:I.share,label:'分享到聊天',run:()=>shareChat(v)}];if(!v.mine)it.push({ic:I2.ban,label:'不感兴趣',run:()=>{['feed','shorts','music','live'].forEach(k=>d[k]=d[k].filter(y=>y.id!==x));save();closeOv();render()}});else it.push({ic:I2.trash,label:'删除',red:1,run:()=>H.del(x)});ymenu(it)},
- del(x){if(!confirm('删除这个视频？'))return;const d=yd();d.mine=d.mine.filter(v=>v.id!==x);['hist','later','liked'].forEach(k=>d[k]=d[k].filter(v=>v.id!==x));ytDel(x);save();closeOv();render()},
- endlive(x){const d=yd();d.mine=d.mine.filter(v=>v.id!==x);save();closeOv();render();toast('直播已结束')},
- subc(x,el){const d=yd(),i=d.subs.indexOf(x);if(i>=0)d.subs.splice(i,1);else d.subs.push(x);save();$('#v-youtube').querySelectorAll('.yt-sb').forEach(b=>{if(b.dataset.a==='subc:'+x){b.classList.toggle('on',i<0);b.textContent=i<0?'已订阅':'订阅'}})},
- subw(x,el){const v=find(x);if(!v)return;H.subc(v.ch,el);const on=yd().subs.includes(v.ch);el.classList.toggle('on',on);el.textContent=on?'已订阅':'订阅'},
+ rx(){toast('Remix 僅為擺設')},
+ mo(x){const v=find(x);if(!v)return;const d=yd(),it=[{ic:has('later',x)?I.svF:I.sv,label:has('later',x)?'從「稍後觀看」移除':'儲存到「稍後觀看」',run:()=>{tog('later',v);toast('已更新',1200);if(YT.tab==='me')render()}},{ic:I.share,label:'分享到聊天',run:()=>shareChat(v)}];if(!v.mine)it.push({ic:I2.ban,label:'不感興趣',run:()=>{['feed','shorts','music','live'].forEach(k=>d[k]=d[k].filter(y=>y.id!==x));save();closeOv();render()}});else it.push({ic:I2.trash,label:'刪除',red:1,run:()=>H.del(x)});ymenu(it)},
+ del(x){if(!confirm('刪除這部影片？'))return;const d=yd();d.mine=d.mine.filter(v=>v.id!==x);['hist','later','liked'].forEach(k=>d[k]=d[k].filter(v=>v.id!==x));ytDel(x);save();closeOv();render()},
+ endlive(x){const d=yd();d.mine=d.mine.filter(v=>v.id!==x);save();closeOv();render();toast('直播已結束')},
+ subc(x,el){const d=yd(),i=d.subs.indexOf(x);if(i>=0)d.subs.splice(i,1);else d.subs.push(x);save();$('#v-youtube').querySelectorAll('.yt-sb').forEach(b=>{if(b.dataset.a==='subc:'+x){b.classList.toggle('on',i<0);b.textContent=i<0?'已訂閱':'訂閱'}})},
+ subw(x,el){const v=find(x);if(!v)return;H.subc(v.ch,el);const on=yd().subs.includes(v.ch);el.classList.toggle('on',on);el.textContent=on?'已訂閱':'訂閱'},
  pp(x,el){const p=$('#yt-pl');if(!p)return;const on=p.classList.toggle('run');el.innerHTML=on?I.pause:I.play},
- mr(x){if(x==='电影和电视节目'||x==='排行榜'||x==='游戏'||x==='Podcast'||x==='游戏角落'){toast('正在生成…');gen('feed',x,6).then(r=>{if(r)listOv(x,r)})}else toast('这是模拟页面')},
- br(x){if(x==='m'){YT.sub='music';render()}else toast('这是模拟页面')},
- chan(){const d=yd();sgPrompt(d.chan?'频道名称':'创建频道',d.chan||user().name||'','频道名称').then(v=>{if(v===null)return;v=v.trim();if(!v)return;d.chan=v.slice(0,24);save();render()})},
- histall(){listOv('观看记录',yd().hist)},
- lib(x){const d=yd();listOv(x==='later'?'Watch later':x==='liked'?'喜欢的视频':'我的视频',d[x])},
+ mr(x){if(x==='電影與電視節目'||x==='排行榜'||x==='遊戲'||x==='Podcast'||x==='遊戲角落'){toast('正在生成…');gen('feed',x,6).then(r=>{if(r)listOv(x,r)})}else toast('這是模擬頁面')},
+ br(x){if(x==='m'){YT.sub='music';render()}else toast('這是模擬頁面')},
+ chan(){const d=yd();sgPrompt(d.chan?'頻道名稱':'建立頻道',d.chan||user().name||'','頻道名稱').then(v=>{if(v===null)return;v=v.trim();if(!v)return;d.chan=v.slice(0,24);save();render()})},
+ histall(){listOv('觀看記錄',yd().hist)},
+ lib(x){const d=yd();listOv(x==='later'?'Watch later':x==='liked'?'喜歡的影片':'我的影片',d[x])},
  cr(x){const m=$('.yt-mask');if(m)m.remove();if(x==='cam')pick(true);else if(x==='up')pick(false);else goLive()},
 };
 const V0=()=>$('#v-youtube');
