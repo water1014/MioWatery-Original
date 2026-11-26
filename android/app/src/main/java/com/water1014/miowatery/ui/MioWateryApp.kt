@@ -504,19 +504,15 @@ private fun HomeScreen(
         "p4" to listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube"),
         "dock" to listOf("app", "worlds", "personas", "settings")
     )
-    fun idsInGroup(group: String): List<String> {
-        val saved = desktopOrder[group].orEmpty()
-        val ids = (if (saved.isNotEmpty()) saved else groupDefaults[group].orEmpty()).distinct()
-        return ids.filterNot { it in hiddenDesktopIds }
-            .filter { id -> appEntries.any { it.id == id } }
-    }
+    fun orderIdsFor(group: String): List<String> =
+        (desktopOrder[group].orEmpty().takeIf { it.isNotEmpty() } ?: groupDefaults[group].orEmpty()).toList()
     fun currentGroupFor(id: String): String? =
-        groupDefaults.keys.firstOrNull { id in idsInGroup(it) }
+        groupDefaults.keys.firstOrNull { id in orderIdsFor(it) }
     fun swapDesktopApps(first: String, second: String) {
         val firstGroup = currentGroupFor(first) ?: return
         val secondGroup = currentGroupFor(second) ?: return
         if (firstGroup == secondGroup) {
-            val ids = idsInGroup(firstGroup).toMutableList()
+            val ids = orderIdsFor(firstGroup).toMutableList()
             val a = ids.indexOf(first)
             val b = ids.indexOf(second)
             if (a < 0 || b < 0) return
@@ -526,8 +522,8 @@ private fun HomeScreen(
             onOrderChanged(updated)
             scope.launch(Dispatchers.IO) { runCatching { DesktopThemePackStore.save(context, updated) } }
         } else {
-            val firstIds = idsInGroup(firstGroup).toMutableList()
-            val secondIds = idsInGroup(secondGroup).toMutableList()
+            val firstIds = orderIdsFor(firstGroup).toMutableList()
+            val secondIds = orderIdsFor(secondGroup).toMutableList()
             val a = firstIds.indexOf(first)
             val b = secondIds.indexOf(second)
             if (a < 0 || b < 0) return
