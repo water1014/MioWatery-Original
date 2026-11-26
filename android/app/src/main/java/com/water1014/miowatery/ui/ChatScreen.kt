@@ -356,6 +356,37 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                 if (structuredReply.messages.isEmpty() && !structuredReply.recallLast) {
                     errorText = "模型返回了空内容，请检查模型配置或服务商响应。"
                 } else {
+                    // MioWatery upstream keeps an assistant's private thought attached to the reply.
+                    // If both the structured thought and provider reasoning are absent, make one
+                    // quiet, best-effort follow-up request to backfill it without blocking the chat.
+                    var assistantThought = result.reasoning.ifBlank { structuredReply.thought }.trim()
+                    if (assistantThought.isBlank() && !structuredReply.recallLast &&
+                        structuredReply.messages.any { !it.isNarration && it.text.isNotBlank() }
+                    ) {
+                        assistantThought = runCatching {
+                            withContext(Dispatchers.IO) {
+                                val sessions: ApiSessionStore = DataStoreApiSessionStore(context)
+                                val client = ChatCompletionClient(ApiHeaderResolver(sessions))
+                                client.complete(
+                                    ApiConnectionConfig(
+                                        baseUrl = apiConfig.baseUrl,
+                                        apiKey = apiConfig.apiKey,
+                                        customHeadersJson = apiConfig.customHeadersJson,
+                                        userProfileId = CHAT_PROFILE_ID,
+                                        conversationId = conversationId
+                                    ),
+                                    ChatCompletionRequest(
+                                        model = apiConfig.model,
+                                        messages = history.takeLast(12) + ChatMessagePayload.text(
+                                            "system",
+                                            "请根据刚才的对话，写出角色在发出最后一条回复时没有说出口的内心想法。用第一人称，一到两句，贴合角色人设与当时语气，只输出想法本身，不要引号、解释或 JSON。"
+                                        ),
+                                        stream = false
+                                    )
+                                ).content.trim().take(300)
+                            }
+                        }.getOrDefault("")
+                    }
                     val assistantNow = System.currentTimeMillis()
                     if (structuredReply.recallLast) {
                         val previousAssistant = dao.getMessagesForConversation(conversationId)
@@ -374,7 +405,7 @@ fun ChatScreen(onBack: () -> Unit, onOpenMemory: (String) -> Unit = {}, personaI
                     }
                     val assistantMessages = structuredReply.messages.mapIndexed { index, item ->
                         val thought = if (index == 0 && !item.isNarration) {
-                            result.reasoning.ifBlank { structuredReply.thought }.takeIf { it.isNotBlank() }
+                            assistantThought.takeIf { it.isNotBlank() }
                         } else null
                         MessageEntity(
                             id = UUID.randomUUID().toString(),
