@@ -511,14 +511,16 @@ private fun HomeScreen(
         "p4" to listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube"),
         "dock" to listOf("app", "worlds", "personas", "settings")
     )
-    fun orderIdsFor(group: String): List<String> {
-        val saved = desktopOrder[group].orEmpty()
-        val assignedElsewhere = desktopOrder.filterKeys { it != group }.values.flatten().toSet()
-        val missingDefaults = groupDefaults[group].orEmpty().filterNot { it in saved || it in assignedElsewhere }
-        return (saved + missingDefaults).distinct()
+    val resolvedDesktopOrder = remember(desktopOrder, groupDefaults) {
+        DesktopOrderResolver.resolve(
+            defaults = groupDefaults,
+            saved = desktopOrder,
+            validIds = appEntries.map { it.id }.toSet()
+        )
     }
+    fun orderIdsFor(group: String): List<String> = resolvedDesktopOrder[group].orEmpty()
     fun currentGroupFor(id: String): String? =
-        groupDefaults.keys.firstOrNull { id in orderIdsFor(it) }
+        resolvedDesktopOrder.entries.firstOrNull { id in it.value }?.key
     fun swapDesktopApps(first: String, second: String) {
         val firstGroup = currentGroupFor(first) ?: return
         val secondGroup = currentGroupFor(second) ?: return
