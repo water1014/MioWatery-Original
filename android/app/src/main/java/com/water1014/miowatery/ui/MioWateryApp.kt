@@ -873,45 +873,44 @@ private fun HomeScreen(
                         }
                         if (page == 3) {
                             Card(
-                                modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onOpen("music") },
-                                shape = RoundedCornerShape(22.dp),
+                                modifier = Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 4.dp),
+                                shape = RoundedCornerShape(10.dp),
                                 colors = CardDefaults.cardColors(containerColor = Color.White),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                             ) {
-                                Column(Modifier.fillMaxWidth().padding(14.dp)) {
+                                Column(Modifier.fillMaxWidth().padding(start = 28.dp, top = 20.dp, end = 28.dp, bottom = 16.dp)) {
                                     Box(
-                                        Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(15.dp))
-                                            .background(panel)
+                                        Modifier.fillMaxWidth().padding(horizontal = 14.dp).aspectRatio(16f / 9f)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color(0xFFF1F1F1))
                                             .clickable { imageSlot = 4; desktopImagePicker.launch(arrayOf("image/*")) },
                                         contentAlignment = Alignment.Center
                                     ) {
                                         if (!musicCover.isNullOrBlank()) {
                                             AsyncImage(model = musicCover, contentDescription = "音乐封面", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
                                         } else {
-                                            Text("♫", color = Color(0xFF8B8B90), fontSize = 54.sp)
+                                            Text("♫", color = Color(0xFF9A9EA6), fontSize = 34.sp)
                                         }
-                                        Text(
-                                            "更换封面",
-                                            Modifier.align(Alignment.BottomEnd).padding(8.dp)
-                                                .clip(RoundedCornerShape(8.dp))
-                                                .background(Color.Black.copy(alpha = 0.56f))
-                                                .padding(horizontal = 8.dp, vertical = 5.dp),
-                                            color = Color.White,
-                                            fontSize = 10.sp
-                                        )
                                     }
-                                    Row(Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        Text("0:00", color = sub, fontSize = 9.sp)
-                                        Box(Modifier.weight(1f).padding(horizontal = 8.dp).height(3.dp).background(Color(0xFFE5E7EA), CircleShape)) {
-                                            Box(Modifier.fillMaxWidth(0.36f).height(3.dp).background(Color(0xFF8B8B90), CircleShape))
-                                        }
-                                        Text("−5:20", color = sub, fontSize = 9.sp)
+                                    Box(Modifier.fillMaxWidth().padding(top = 12.dp).height(26.dp), contentAlignment = Alignment.CenterStart) {
+                                        Box(Modifier.fillMaxWidth().height(2.dp).background(Color(0xFFE8E8EA), RoundedCornerShape(2.dp)))
+                                        Box(Modifier.fillMaxWidth(0.0f).height(2.dp).background(Color(0xFFCFCFD3), RoundedCornerShape(2.dp)))
+                                        Box(Modifier.padding(start = 0.dp).size(10.dp).background(Color(0xFF7B7B80), CircleShape))
                                     }
-                                    Text(lyricLine1.ifBlank { "水循環｜下一秒接住的會是你上世紀的淚嗎" }, color = ink, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 12.dp))
-                                    Text(lyricLine2.ifBlank { "Were I your tear, I would glide down your cheek until I reached your lips, for I long to kiss you" }, color = sub, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 5.dp), lineHeight = 16.sp)
-                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                                        androidx.compose.material3.TextButton(onClick = { editLyrics = true }) { Text("编辑歌词与封面文案") }
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text("0:00", color = Color(0xFF9A9A9F), fontSize = 11.sp)
+                                        Text("−5:20", color = Color(0xFF9A9A9F), fontSize = 11.sp)
                                     }
+                                    Text(
+                                        lyricLine1.ifBlank { "水循環｜下一秒接住的 會是你上世紀的淚嗎" },
+                                        color = Color(0xFF222222), fontSize = 11.sp, lineHeight = 15.sp,
+                                        maxLines = 1, modifier = Modifier.padding(top = 12.dp)
+                                    )
+                                    Text(
+                                        lyricLine2.ifBlank { "Were I your tear, I would glide down your cheek until I reached your lips, for I long to kiss you" },
+                                        color = Color(0xFFAEAEB3), fontSize = 9.sp, lineHeight = 13.sp,
+                                        maxLines = 1, modifier = Modifier.padding(top = 6.dp)
+                                    )
                                 }
                             }
                         }                    }
