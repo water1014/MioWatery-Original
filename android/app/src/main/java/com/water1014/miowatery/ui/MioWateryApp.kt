@@ -511,8 +511,12 @@ private fun HomeScreen(
         "p4" to listOf("wallet", "mcp", "preset", "life", "iff", "xinji", "repo", "youtube"),
         "dock" to listOf("app", "worlds", "personas", "settings")
     )
-    fun orderIdsFor(group: String): List<String> =
-        (desktopOrder[group].orEmpty().takeIf { it.isNotEmpty() } ?: groupDefaults[group].orEmpty()).toList()
+    fun orderIdsFor(group: String): List<String> {
+        val saved = desktopOrder[group].orEmpty()
+        val assignedElsewhere = desktopOrder.filterKeys { it != group }.values.flatten().toSet()
+        val missingDefaults = groupDefaults[group].orEmpty().filterNot { it in saved || it in assignedElsewhere }
+        return (saved + missingDefaults).distinct()
+    }
     fun currentGroupFor(id: String): String? =
         groupDefaults.keys.firstOrNull { id in orderIdsFor(it) }
     fun swapDesktopApps(first: String, second: String) {
@@ -647,8 +651,7 @@ private fun HomeScreen(
     val sub = Color(0xFF6B7480)
     val panel = Color(0xFFF3F4F5)
     fun orderedDesktopApps(ids: List<String>, group: String): List<AppEntry> {
-        val saved = desktopOrder[group].orEmpty()
-        val source = if (saved.isNotEmpty()) saved else ids
+        val source = orderIdsFor(group).ifEmpty { ids }
         return source.distinct().filterNot { it in hiddenDesktopIds }
             .mapNotNull { id -> appEntries.firstOrNull { it.id == id } }
     }
