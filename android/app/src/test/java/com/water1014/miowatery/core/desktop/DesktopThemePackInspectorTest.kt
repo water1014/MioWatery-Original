@@ -102,4 +102,42 @@ class DesktopThemePackInspectorTest {
         assertTrue(failure is IllegalArgumentException)
         assertFalse(failure?.message.isNullOrBlank())
     }
+
+    @Test
+    fun serializesSupportedFieldsSoAnExportCanBeImportedAgain() {
+        val original = """
+            {
+              "app": "xsj-desktop-theme",
+              "v": 1,
+              "name": "Window garden",
+              "desktop": {
+                "wallpaper": "https://example.com/wallpaper.webp",
+                "icons": {"music": "https://example.com/music.png"},
+                "widgets": [
+                  {"id":"clock-main","kind":"clock","title":"Clock"},
+                  {"id":"note-main","kind":"text","title":"Note","text":"Remember the little things"},
+                  {"id":"photo-main","kind":"image","title":"Photo","image":"https://example.com/photo.webp"}
+                ],
+                "hidden": ["weather"],
+                "order": {
+                  "first": ["app","worlds"],
+                  "p3": ["couple","msgs"],
+                  "dock": ["settings","personas"]
+                },
+                "wlib": []
+              }
+            }
+        """.trimIndent()
+
+        val imported = DesktopThemePackInspector.inspect(original)
+        val exported = DesktopThemePackStore.serialize(imported)
+        val restored = DesktopThemePackInspector.inspect(exported)
+
+        assertEquals(imported.name, restored.name)
+        assertEquals(imported.wallpaper, restored.wallpaper)
+        assertEquals(imported.icons, restored.icons)
+        assertEquals(imported.widgets, restored.widgets)
+        assertEquals(imported.hiddenWidgetIds, restored.hiddenWidgetIds)
+        assertEquals(imported.placementGroups, restored.placementGroups)
+    }
 }
