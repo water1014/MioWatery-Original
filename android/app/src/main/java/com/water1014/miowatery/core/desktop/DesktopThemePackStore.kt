@@ -45,7 +45,7 @@ object DesktopThemePackStore {
         val desktop = root.optJSONObject("desktop") ?: JSONObject().also { root.put("desktop", it) }
         val order = desktop.optJSONObject("order") ?: JSONObject().also { desktop.put("order", it) }
         groups.forEach { (group, ids) ->
-            order.put(group, JSONArray(ids.distinct().filter { it.matches(Regex("[A-Za-z0-9_:.\\\\-]{1,80}")) }))
+            order.put(group, JSONArray(ids.distinct().filter { it.matches(Regex("[A-Za-z0-9_:.\\-]{1,80}")) }))
         }
         if (!root.has("app")) root.put("app", "xsj-desktop-theme")
         if (!root.has("v")) root.put("v", 1)
